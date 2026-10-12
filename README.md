@@ -147,6 +147,10 @@ El diseño de la base de datos elimina toda anomalía de inserción, borrado y a
 - **Herramientas:** Las categorías (`herramientas_categorias`), imágenes (`herramientas_imagenes`) y modalidades tarifarias (`tarifas_herramienta`) residen en tablas separadas.
 - **Devoluciones y Daños:** Los reportes de averías desacoplan la lista multivaluada de fotografías de prueba mediante `evidencias_dano` (`url_foto`, `descripcion_foto`, `fecha_subida`), permitiendo auditorías forenses precisas.
 - **Dataset de Calidad:** Más de **20 registros completos por entidad** en `database/data_20_records.sql`.
+- 📑 **[Justificación Teórica y Matemática de 4FN](database/JUSTIFICACION_4FN.md):** Demostración exhaustiva de dependencias multivaluadas y teoremas de descomposición de Fagin.
+- 📊 **[Diagrama Entidad-Relación (ERD) en Mermaid](database/DIAGRAMA_ERD_4FN.md):** Diagrama completo del esquema relacional en 4FN.
+- 🔨 **[Documentación de Compilación y Pruebas](docs/DOCUMENTACION_COMPILACION.md):** Guía de compilación Maven, perfiles de test y desglose de las 41 pruebas automatizadas.
+- 🚀 **[Documentación de Despliegue Integral](docs/DOCUMENTACION_DESPLIEGUE.md):** Opciones de despliegue JAR embebido, Docker Compose, WAR externo y frontend web.
 
 [Volver al inicio ↑](#-plataforma-de-renta-de-herramientas-y-equipos-de-construcción-)
 

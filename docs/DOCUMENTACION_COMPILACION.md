@@ -1,7 +1,8 @@
-# Documentación de compilación
+# Documentación de Compilación y Pruebas
 
 Plataforma de Renta de Herramientas y Equipos de Construcción
-Módulos de Identidad, Catálogo e Inventario — Camilo García
+- Daniel Osorio — DEV 2 (Reservas, Pagos, Facturación con IVA 19%, Devoluciones en 4FN, Reportes y Frontend)
+- Camilo García — DEV 1 (Identidad, Catálogo, Inventario, Seguridad JWT y Base de Datos)
 
 ---
 
@@ -141,27 +142,44 @@ openssl rand -base64 48
 mvn clean compile
 ```
 
-### Compilar y ejecutar las pruebas
+### Compilar y ejecutar las pruebas (41 pruebas automatizadas)
 
 ```bash
 mvn clean test
 ```
 
-### Construir el paquete completo
+En Windows con el Maven Wrapper:
 
-```bash
-mvn clean package
+```cmd
+.\mvnw.cmd clean test
 ```
 
-Esto genera `target/renta-herramientas-0.0.1-SNAPSHOT.jar`.
+El proyecto cuenta con **41 pruebas automatizadas** que se ejecutan sin requerir MySQL levantado gracias al perfil de pruebas H2 en memoria (`src/test/resources/application.properties`):
 
-### Saltar las pruebas
+| Clase de Prueba | Módulo / Bounded Context | Pruebas | Qué valida |
+|---|---|---|---|
+| `AuthApplicationServiceTest` | Identidad (DEV 1) | 11 | Login, registro cliente/proveedor, JWT, refresh y validación de contraseñas |
+| `HerramientaApplicationServiceTest` | Inventario (DEV 1) | 15 | CRUD maquinaria, categorías, tarifas, permisos de propietario y cambios de estado |
+| `ReservaApplicationServiceTest` | Reservas (DEV 2) | 4 | Aprobación, rechazo, cancelación, rango de fechas y depósito de garantía |
+| `PagoApplicationServiceTest` | Pagos (DEV 2) | 3 | Pasarela simulada, aprobación y cálculo del **19% de IVA** con base gravable |
+| `DevolucionApplicationServiceTest` | Devoluciones (DEV 2) | 4 | Check-in, recargo por días de mora, averías con fotos 4FN y actualización a taller |
+| `ReporteApplicationServiceTest` | Reportes (DEV 2) | 3 | Resumen financiero, ranking de maquinaria más alquilada y dashboard gerencial |
+| `RentaHerramientasApplicationTests` | Contexto Spring Boot | 1 | Arranque integral del contexto y escaneo de los 12 repositorios JPA |
 
-```bash
-mvn clean package -DskipTests
+```text
+[INFO] Results:
+[INFO] Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
 ```
 
-Útil cuando se quiere empaquetar rápido, pero no debería volverse costumbre: las pruebas son justamente las que avisan si algo se rompió.
+Para correr las pruebas de un módulo específico:
+
+```cmd
+.\mvnw.cmd test -Dtest=PagoApplicationServiceTest
+.\mvnw.cmd test -Dtest=DevolucionApplicationServiceTest
+.\mvnw.cmd test -Dtest=ReservaApplicationServiceTest
+.\mvnw.cmd test -Dtest=ReporteApplicationServiceTest
+```
 
 ### Qué hace cada fase
 

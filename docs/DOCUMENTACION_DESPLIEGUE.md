@@ -1,6 +1,8 @@
-# Documentación de despliegue
+# Documentación de Despliegue
 
 Plataforma de Renta de Herramientas y Equipos de Construcción
+- Daniel Osorio — DEV 2 (Reservas, Pagos, Facturación con IVA 19%, Devoluciones en 4FN, Reportes y Frontend)
+- Camilo García — DEV 1 (Identidad, Catálogo, Inventario, Seguridad JWT y Base de Datos)
 
 ---
 
@@ -314,7 +316,15 @@ Spring Boot 3 usa `jakarta.servlet`, no `javax.servlet`. Eso exige **Tomcat 10.1
 
 ## Despliegue del frontend
 
-El frontend es estático: no necesita compilación ni servidor de aplicaciones. Basta copiarlo a cualquier servidor web.
+El frontend es una Single Page / Multi-page Application estática basada en HTML5, CSS3 y Vanilla JavaScript puro con arquitectura modular. No requiere compilación (Node.js/npm) ni servidor de aplicaciones para correr:
+- `index.html`: Portal principal con catálogo público, filtros por categoría y modal de reserva directa.
+- `login.html` / `registro.html`: Formularios de autenticación y registro para clientes y proveedores con JWT.
+- `reservas.html`: Portal de reservas para clientes con calculadora de tarifas en tiempo real y depósitos.
+- `gestion_reservas.html`: Consola operativa para supervisores con flujo de aprobación, pasarela de pago, facturación electrónica y check-in de devoluciones con evidencias fotográficas.
+- `dashboard.html`: Tablero analítico y gerencial con KPIs financieros, recaudación de IVA, ranking de maquinaria más solicitada y métricas operativas.
+- `js/api.js`: Cliente HTTP centralizado con interceptores Bearer JWT y manejo estandarizado de excepciones.
+
+Basta con servir la carpeta `frontend/` desde cualquier servidor web HTTP o CDN estático.
 
 ### Con Nginx
 
@@ -367,10 +377,12 @@ Al quedar frontend y backend bajo el mismo origen, CORS deja de ser un problema 
 ## Lista de verificación antes de desplegar
 
 ```
-[ ] Las pruebas pasan:            mvn clean test
+[ ] Las pruebas pasan:            .\mvnw.cmd clean test (41 tests)
 [ ] El artefacto se genera:       mvn clean package
-[ ] Java del servidor es 17+:     java -version
-[ ] La base de datos existe y tiene los 4 scripts ejecutados
+[ ] Java del servidor es 21 (o 17+): java -version
+[ ] La base de datos existe y tiene ejecutados los scripts de 4FN:
+    - database/schema_4fn.sql (DDL completo con tablas descompuestas en 4FN)
+    - database/data_20_records.sql (DML con 20+ registros consistentes por entidad)
 [ ] JPA_DDL_AUTO está en validate (no en update ni create)
 [ ] JWT_SECRET es una clave nueva, de 32+ bytes, NO la de desarrollo
 [ ] DB_PASSWORD viene de variable de entorno, no del properties
