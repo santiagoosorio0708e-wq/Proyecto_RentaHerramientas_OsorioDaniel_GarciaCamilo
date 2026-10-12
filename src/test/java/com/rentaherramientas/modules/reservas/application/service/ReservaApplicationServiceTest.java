@@ -137,4 +137,33 @@ class ReservaApplicationServiceTest {
         assertEquals("Falta de seguro de obra", resultado.getMotivoRechazo());
         verify(auditoriaReservaPort).registrarCambioEstado(eq(2L), eq("SOLICITADA"), eq("RECHAZADA"), eq(1L), anyString());
     }
+
+    @Test
+    @DisplayName("Debe cancelar una reserva en estado SOLICITADA y registrar auditoría")
+    void cancelarReserva_Exito() {
+        Reserva existente = Reserva.builder()
+                .idReserva(3L)
+                .estado(EstadoReserva.SOLICITADA)
+                .rangoFechas(new RangoFechas(LocalDate.now().plusDays(2), LocalDate.now().plusDays(5)))
+                .build();
+
+        when(reservaRepositoryPort.buscarPorId(3L)).thenReturn(Optional.of(existente));
+        when(reservaRepositoryPort.guardar(any(Reserva.class))).thenReturn(existente);
+
+        Reserva resultado = reservaService.cancelarReserva(3L, 8L);
+
+        assertEquals(EstadoReserva.CANCELADA, resultado.getEstado());
+        verify(auditoriaReservaPort).registrarCambioEstado(eq(3L), eq("SOLICITADA"), eq("CANCELADA"), eq(8L), anyString());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepcion si se intenta aprobar una reserva no existente")
+    void aprobarReserva_NoEncontrada_LanzaExcepcion() {
+        when(reservaRepositoryPort.buscarPorId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () ->
+                reservaService.aprobarReserva(999L, 1L)
+        );
+        verify(reservaRepositoryPort, never()).guardar(any());
+    }
 }
