@@ -36,6 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Adaptador de Entrada Web: Controlador REST para el ciclo de Devoluciones e Inspección Técnica.
+ * Gestiona la recepción de maquinaria, liquidación de mora por días de retraso y reporte de averías con evidencias en 4FN.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @RestController
 @RequestMapping("/devoluciones")
 @RequiredArgsConstructor
