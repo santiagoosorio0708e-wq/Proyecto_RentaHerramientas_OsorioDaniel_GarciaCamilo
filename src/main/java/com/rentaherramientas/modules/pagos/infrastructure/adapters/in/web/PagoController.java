@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Adaptador de Entrada Web: Controlador REST para el procesamiento de Pagos en Línea.
+ * Orquesta la simulación de pasarelas de pago y la generación síncrona de facturas electrónicas.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @RestController
 @RequestMapping("/pagos")
 @RequiredArgsConstructor
