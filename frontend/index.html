@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogo de Herramientas | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ===================== Barra superior ===================== -->
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion">
+            <!-- Lo arma comun.js segun haya sesion o no -->
+        </nav>
+    </div>
+</header>
+
+<!-- ===================== Contenido ===================== -->
+<main class="contenedor seccion">
+
+    <h1>Catalogo de herramientas y equipos</h1>
+    <p class="subtitulo">
+        Explore la maquinaria disponible para alquiler. No necesita cuenta para consultar.
+    </p>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <!-- Filtros de busqueda -->
+    <section class="tarjeta" style="margin-bottom:22px;">
+        <h2>Filtrar busqueda</h2>
+        <form id="form-filtros">
+            <div class="filtros">
+                <div class="grupo-campo">
+                    <label for="texto">Buscar</label>
+                    <input type="text" id="texto" name="texto" placeholder="Nombre, marca o modelo">
+                </div>
+                <div class="grupo-campo">
+                    <label for="idCategoria">Categoria</label>
+                    <select id="idCategoria" name="idCategoria">
+                        <option value="">Todas las categorias</option>
+                    </select>
+                </div>
+                <div class="grupo-campo">
+                    <label for="precioMinimo">Precio minimo por dia</label>
+                    <input type="number" id="precioMinimo" name="precioMinimo" min="0" step="1000" placeholder="0">
+                </div>
+                <div class="grupo-campo">
+                    <label for="precioMaximo">Precio maximo por dia</label>
+                    <input type="number" id="precioMaximo" name="precioMaximo" min="0" step="1000" placeholder="500000">
+                </div>
+                <div class="grupo-campo">
+                    <label for="ubicacion">Ciudad</label>
+                    <input type="text" id="ubicacion" name="ubicacion" placeholder="Bucaramanga">
+                </div>
+                <div class="grupo-campo">
+                    <label for="soloDisponibles">Disponibilidad</label>
+                    <select id="soloDisponibles" name="soloDisponibles">
+                        <option value="true">Solo disponibles</option>
+                        <option value="false">Mostrar todas</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+                <button type="submit" class="boton">Buscar</button>
+                <button type="button" class="boton boton-secundario" id="btn-limpiar">Limpiar filtros</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Resultados -->
+    <section>
+        <div class="fila-encabezado">
+            <h2 id="titulo-resultados">Resultados</h2>
+        </div>
+        <div id="resultados" class="rejilla-tarjetas"></div>
+    </section>
+
+</main>
+
+<!-- ===================== Modal de detalle ===================== -->
+<div class="fondo-modal" id="modal-detalle">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2 id="detalle-titulo">Detalle de la herramienta</h2>
+            <button class="cerrar-modal" data-cerrar="modal-detalle">&times;</button>
+        </div>
+        <div class="cuerpo-modal" id="detalle-cuerpo"></div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-detalle">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/catalogo.js"></script>
+</body>
+</html>

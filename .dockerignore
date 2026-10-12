@@ -1,0 +1,11 @@
+target/
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+frontend/
+postman/
+docs/
+README.md
+*.md

@@ -1,0 +1,1043 @@
+{
+  "info": {
+    "_postman_id": "8f2a1c90-4b3d-4a21-9c77-1d5e6f0a2b31",
+    "name": "RentaHerramientas - Identidad e Inventario",
+    "description": "Pruebas de los endpoints de Autenticacion, Usuarios, Catalogo, Inventario y Categorias.\n\nAutor: Camilo Garcia\n\nCOMO USARLA\n1. Importe tambien el archivo de environment `RentaHerramientas.postman_environment.json` y selecciónelo arriba a la derecha.\n2. Ejecute primero **Auth > Login Administrador**. El token se guarda solo en la variable `tokenAdmin` gracias al script de la pestana Tests.\n3. Haga lo mismo con **Login Proveedor** y **Login Cliente**.\n4. Los demas endpoints ya usan el token correcto automaticamente.\n\nRequisito: haber ejecutado `database/data_identidad_inventario.sql`, que deja a todos los usuarios con la contrasena `Password123`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login Administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Devuelve accessToken', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('accessToken');",
+                  "});",
+                  "",
+                  "pm.test('El usuario tiene rol ADMIN', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.roles).to.include('ROLE_ADMIN');",
+                  "});",
+                  "",
+                  "// Guarda el token en el environment para los demas requests",
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set('tokenAdmin', json.data.accessToken);",
+                  "    pm.environment.set('refreshTokenAdmin', json.data.refreshToken);",
+                  "    console.log('Token de administrador guardado');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin.perez@rentatool.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Inicia sesion como administrador y guarda el token en {{tokenAdmin}}."
+          }
+        },
+        {
+          "name": "Login Proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set('tokenProveedor', json.data.accessToken);",
+                  "    console.log('Token de proveedor guardado');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ventas@maquiantioquia.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set('tokenCliente', json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"camilo.garcia@gmail.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login con credenciales invalidas (debe fallar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza la contrasena incorrecta', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 422]);",
+                  "});",
+                  "",
+                  "pm.test('No revela si el correo existe', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('Credenciales invalidas');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin.perez@rentatool.com\",\n  \"password\": \"claveEquivocada1\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Registro de Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+                  "",
+                  "pm.test('Queda con rol CLIENTE', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.roles).to.include('ROLE_CLIENTE');",
+                  "});",
+                  "",
+                  "pm.test('No expone la contrasena', function () {",
+                  "    pm.expect(pm.response.text()).to.not.include('password');",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Correo y documento aleatorios para poder repetir la prueba",
+                  "var n = Date.now().toString().slice(-8);",
+                  "pm.environment.set('emailAleatorio', 'cliente.prueba' + n + '@correo.com');",
+                  "pm.environment.set('documentoAleatorio', '10' + n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Cliente de Prueba Postman\",\n  \"email\": \"{{emailAleatorio}}\",\n  \"password\": \"Password123\",\n  \"telefono\": \"3185550199\",\n  \"direccion\": \"Carrera 33 # 48-19, Bucaramanga\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDocumento\": \"{{documentoAleatorio}}\",\n  \"tipoCliente\": \"PARTICULAR\",\n  \"ciudadResidencia\": \"Bucaramanga\",\n  \"cupoCredito\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro/cliente",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registro", "cliente"]
+            }
+          }
+        },
+        {
+          "name": "Registro de Proveedor",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var n = Date.now().toString().slice(-8);",
+                  "pm.environment.set('emailProvAleatorio', 'proveedor.prueba' + n + '@empresa.com');",
+                  "pm.environment.set('nitAleatorio', '90' + n + '-1');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+                  "",
+                  "pm.test('Nace SIN verificar', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.perfilProveedor.verificado).to.eql(false);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data) { pm.environment.set('idProveedorNuevo', json.data.idUsuario); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Proveedor de Prueba Postman\",\n  \"email\": \"{{emailProvAleatorio}}\",\n  \"password\": \"Password123\",\n  \"telefono\": \"3135550199\",\n  \"direccion\": \"Calle 50 # 45-30, Medellin\",\n  \"tipoDocumento\": \"NIT\",\n  \"numeroDocumento\": \"{{nitAleatorio}}\",\n  \"razonSocial\": \"Proveedor de Prueba S.A.S.\",\n  \"nombreComercial\": \"ProPrueba\",\n  \"ciudadOperacion\": \"Medellin\",\n  \"sitioWeb\": \"https://www.proprueba.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro/proveedor",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registro", "proveedor"]
+            }
+          }
+        },
+        {
+          "name": "Registro con correo duplicado (debe fallar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza el correo repetido', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([409, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Duplicado de Prueba\",\n  \"email\": \"camilo.garcia@gmail.com\",\n  \"password\": \"Password123\",\n  \"telefono\": \"3185550109\",\n  \"direccion\": \"Carrera 33 # 48-19\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDocumento\": \"9999999999\",\n  \"tipoCliente\": \"PARTICULAR\",\n  \"ciudadResidencia\": \"Bucaramanga\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro/cliente",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registro", "cliente"]
+            }
+          }
+        },
+        {
+          "name": "Registro con datos invalidos (debe fallar 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+                  "",
+                  "pm.test('Informa los campos con error', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.success).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"A\",\n  \"email\": \"esto-no-es-un-correo\",\n  \"password\": \"123\",\n  \"telefono\": \"xyz\",\n  \"direccion\": \"\",\n  \"tipoDocumento\": \"XX\",\n  \"numeroDocumento\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro/cliente",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registro", "cliente"]
+            }
+          }
+        },
+        {
+          "name": "Refrescar token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "    pm.environment.set('tokenAdmin', json.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshTokenAdmin}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Usuarios",
+      "item": [
+        {
+          "name": "Mi perfil (token de cliente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('No devuelve el hash de la contrasena', function () {",
+                  "    pm.expect(pm.response.text()).to.not.include('passwordHash');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenCliente}}" }],
+            "url": { "raw": "{{baseUrl}}/usuarios/me", "host": ["{{baseUrl}}"], "path": ["usuarios", "me"] }
+          }
+        },
+        {
+          "name": "Mi perfil SIN token (debe fallar 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/usuarios/me", "host": ["{{baseUrl}}"], "path": ["usuarios", "me"] }
+          }
+        },
+        {
+          "name": "Listar usuarios (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Devuelve una lista', function () {",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          }
+        },
+        {
+          "name": "Listar usuarios con token de CLIENTE (debe fallar 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 403 Forbidden', function () { pm.response.to.have.status(403); });",
+                  "pm.test('El mensaje explica la falta de permisos', function () {",
+                  "    pm.expect(pm.response.json().message.toLowerCase()).to.include('denegado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenCliente}}" }],
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          }
+        },
+        {
+          "name": "Filtrar usuarios por rol PROVEEDOR",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios?rol=PROVEEDOR",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"],
+              "query": [{ "key": "rol", "value": "PROVEEDOR" }]
+            }
+          }
+        },
+        {
+          "name": "Verificar proveedor (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Queda verificado', function () {",
+                  "    pm.expect(pm.response.json().data.perfilProveedor.verificado).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idProveedorNuevo}}/verificar-proveedor",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "{{idProveedorNuevo}}", "verificar-proveedor"]
+            },
+            "description": "Usa el id del proveedor creado en 'Registro de Proveedor'."
+          }
+        },
+        {
+          "name": "Bloquear usuario (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/13/bloquear",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "13", "bloquear"]
+            }
+          }
+        },
+        {
+          "name": "Activar usuario (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/13/activar",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "13", "activar"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar mi perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenCliente}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Juan Camilo Garcia Rueda\",\n  \"telefono\": \"3185550110\",\n  \"direccion\": \"Carrera 33 # 48-19 Apto 302, Bucaramanga\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/usuarios/me", "host": ["{{baseUrl}}"], "path": ["usuarios", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Catalogo publico",
+      "item": [
+        {
+          "name": "Listar catalogo (sin token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 sin autenticacion', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Devuelve herramientas', function () {",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/catalogo", "host": ["{{baseUrl}}"], "path": ["catalogo"] }
+          }
+        },
+        {
+          "name": "Buscar por texto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalogo?texto=martillo",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogo"],
+              "query": [{ "key": "texto", "value": "martillo" }]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por categoria y rango de precio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalogo?idCategoria=2&precioMinimo=40000&precioMaximo=200000",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogo"],
+              "query": [
+                { "key": "idCategoria", "value": "2" },
+                { "key": "precioMinimo", "value": "40000" },
+                { "key": "precioMaximo", "value": "200000" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por ubicacion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalogo?ubicacion=Bucaramanga",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogo"],
+              "query": [{ "key": "ubicacion", "value": "Bucaramanga" }]
+            }
+          }
+        },
+        {
+          "name": "Detalle de una herramienta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Trae ficha tecnica y tarifas', function () {",
+                  "    var d = pm.response.json().data;",
+                  "    pm.expect(d).to.have.property('especificaciones');",
+                  "    pm.expect(d).to.have.property('tarifas');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/catalogo/1", "host": ["{{baseUrl}}"], "path": ["catalogo", "1"] }
+          }
+        },
+        {
+          "name": "Herramienta inexistente (debe fallar 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/catalogo/99999", "host": ["{{baseUrl}}"], "path": ["catalogo", "99999"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Inventario del proveedor",
+      "item": [
+        {
+          "name": "Crear herramienta (PROVEEDOR)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('serieAleatoria', 'SN-TEST-' + Date.now().toString().slice(-8));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+                  "",
+                  "pm.test('Nace DISPONIBLE', function () {",
+                  "    pm.expect(pm.response.json().data.estadoOperativo).to.eql('DISPONIBLE');",
+                  "});",
+                  "",
+                  "pm.test('Se creo la tarifa DIARIA automaticamente', function () {",
+                  "    var tarifas = pm.response.json().data.tarifas;",
+                  "    var tiene = tarifas.some(function (t) { return t.tipoTarifa === 'DIARIA'; });",
+                  "    pm.expect(tiene).to.eql(true);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data) { pm.environment.set('idHerramientaNueva', json.data.idHerramienta); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCategoriaPrincipal\": 2,\n  \"nombre\": \"Rotomartillo de prueba Postman\",\n  \"descripcion\": \"Equipo registrado desde la coleccion de pruebas\",\n  \"marca\": \"Bosch\",\n  \"modelo\": \"GBH 2-26\",\n  \"numeroSerie\": \"{{serieAleatoria}}\",\n  \"tarifaDiaria\": 48000,\n  \"valorReposicion\": 2400000,\n  \"ubicacionBodega\": \"Pasillo A - Estante 2\",\n  \"categoriasAdicionales\": [19],\n  \"imagenes\": [\n    {\n      \"urlFoto\": \"https://cdn.rentatool.com/herramientas/rotomartillo-prueba.jpg\",\n      \"descripcion\": \"Vista frontal\",\n      \"principal\": true,\n      \"orden\": 1\n    }\n  ],\n  \"especificaciones\": [\n    { \"atributo\": \"Potencia\", \"valor\": \"830\", \"unidadMedida\": \"W\" },\n    { \"atributo\": \"Peso\", \"valor\": \"2.9\", \"unidadMedida\": \"kg\" }\n  ],\n  \"tarifasAdicionales\": [\n    { \"tipoTarifa\": \"SEMANAL\", \"valor\": 288000 }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/herramientas", "host": ["{{baseUrl}}"], "path": ["herramientas"] }
+          }
+        },
+        {
+          "name": "Crear herramienta con token de CLIENTE (debe fallar 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenCliente}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCategoriaPrincipal\": 2,\n  \"nombre\": \"Intento no autorizado\",\n  \"descripcion\": \"Un cliente no deberia poder publicar\",\n  \"marca\": \"X\",\n  \"modelo\": \"Y\",\n  \"numeroSerie\": \"SN-NO-AUTORIZADO\",\n  \"tarifaDiaria\": 10000,\n  \"valorReposicion\": 100000\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/herramientas", "host": ["{{baseUrl}}"], "path": ["herramientas"] }
+          }
+        },
+        {
+          "name": "Mi inventario (PROVEEDOR)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenProveedor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/mi-inventario",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "mi-inventario"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar herramienta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Rotomartillo de prueba Postman (actualizado)\",\n  \"tarifaDiaria\": 52000,\n  \"ubicacionBodega\": \"Pasillo C - Estante 1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar estado a EN_MANTENIMIENTO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Quedo en mantenimiento', function () {",
+                  "    pm.expect(pm.response.json().data.estadoOperativo).to.eql('EN_MANTENIMIENTO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nuevoEstado\": \"EN_MANTENIMIENTO\",\n  \"motivo\": \"Revision preventiva de 500 horas\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}", "estado"]
+            }
+          }
+        },
+        {
+          "name": "Transicion de estado invalida (debe fallar 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza la transicion', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nuevoEstado\": \"EN_MANTENIMIENTO\",\n  \"motivo\": \"Ya esta en ese mismo estado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}", "estado"]
+            }
+          }
+        },
+        {
+          "name": "Agregar imagen a la galeria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urlFoto\": \"https://cdn.rentatool.com/herramientas/rotomartillo-detalle.jpg\",\n  \"descripcion\": \"Detalle del mandril\",\n  \"principal\": false,\n  \"orden\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}/imagenes",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}", "imagenes"]
+            }
+          }
+        },
+        {
+          "name": "Agregar especificacion tecnica",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"atributo\": \"Voltaje\",\n  \"valor\": \"110\",\n  \"unidadMedida\": \"V\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}/especificaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}", "especificaciones"]
+            }
+          }
+        },
+        {
+          "name": "Agregar tarifa de fin de semana",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoTarifa\": \"FIN_DE_SEMANA\",\n  \"valor\": 86000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}/tarifas",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}", "tarifas"]
+            }
+          }
+        },
+        {
+          "name": "Listar herramientas en mantenimiento",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenProveedor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/estado/EN_MANTENIMIENTO",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "estado", "EN_MANTENIMIENTO"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar herramienta de prueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenProveedor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/herramientas/{{idHerramientaNueva}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["herramientas", "{{idHerramientaNueva}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Categorias",
+      "item": [
+        {
+          "name": "Listar categorias (publico)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 sin token', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Crear categoria (ADMIN)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set('nombreCategoria', 'Categoria Prueba ' + Date.now().toString().slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json.data) { pm.environment.set('idCategoriaNueva', json.data.idCategoria); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{nombreCategoria}}\",\n  \"descripcion\": \"Categoria creada desde la coleccion de pruebas\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Crear categoria con token de PROVEEDOR (debe fallar 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenProveedor}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"No autorizada\",\n  \"descripcion\": \"Un proveedor no puede crear categorias\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Actualizar categoria (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAdmin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{nombreCategoria}} (editada)\",\n  \"descripcion\": \"Descripcion actualizada desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{idCategoriaNueva}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "{{idCategoriaNueva}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar categoria con herramientas (debe fallar 422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No permite borrar una categoria en uso', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": { "raw": "{{baseUrl}}/categorias/1", "host": ["{{baseUrl}}"], "path": ["categorias", "1"] }
+          }
+        },
+        {
+          "name": "Eliminar categoria de prueba (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{idCategoriaNueva}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", "{{idCategoriaNueva}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" }
+  ]
+}
