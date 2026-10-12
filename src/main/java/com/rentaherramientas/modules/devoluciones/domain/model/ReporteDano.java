@@ -11,6 +11,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entidad de Dominio: Reporte de Daño e Incidencia Física.
+ * Registra los desperfectos técnicos o mecánicos identificados durante la inspección de recepción.
+ * Permite deslindar la responsabilidad civil (Cliente vs Proveedor) y calcular el coste de indemnización.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Getter
 @Setter
 @Builder
@@ -35,4 +42,14 @@ public class ReporteDano {
         }
         this.evidencias.add(evidencia);
     }
+
+    /**
+     * Verifica si la responsabilidad del daño corresponde al cliente.
+     *
+     * @return true si responsableAsume == ResponsableDano.CLIENTE.
+     */
+    public boolean asumeCliente() {
+        return this.responsableAsume == ResponsableDano.CLIENTE;
+    }
 }
+
