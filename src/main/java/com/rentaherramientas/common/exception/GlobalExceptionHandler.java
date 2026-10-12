@@ -26,6 +26,18 @@ public class GlobalExceptionHandler {
                 .body(ApiResponseDto.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponseDto<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponseDto.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponseDto<Void>> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponseDto.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponseDto<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
