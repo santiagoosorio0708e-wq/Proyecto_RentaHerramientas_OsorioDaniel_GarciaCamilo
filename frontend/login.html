@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesion | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu"><a href="index.html">Catalogo</a></nav>
+    </div>
+</header>
+
+<main class="pagina-centrada">
+    <div class="caja-acceso">
+        <div class="tarjeta">
+            <h1>Iniciar sesion</h1>
+            <p class="subtitulo">Ingrese con el correo con el que se registro.</p>
+
+            <div id="mensaje" class="mensaje"></div>
+
+            <form id="form-login" class="formulario">
+                <div class="grupo-campo">
+                    <label for="email">Correo electronico</label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="usuario@correo.com" autocomplete="username">
+                </div>
+                <div class="grupo-campo">
+                    <label for="password">Contrasena</label>
+                    <input type="password" id="password" name="password" required
+                           placeholder="Su contrasena" autocomplete="current-password">
+                </div>
+                <button type="submit" class="boton" id="btn-entrar">Entrar</button>
+            </form>
+
+            <p class="pie-acceso">
+                No tiene cuenta? <a href="registro.html">Registrese aqui</a>
+            </p>
+        </div>
+
+        <div class="tarjeta" style="margin-top:16px;">
+            <h3>Usuarios de prueba</h3>
+            <p class="ayuda-campo" style="margin-bottom:10px;">
+                Todos usan la contrasena <strong>Password123</strong> despues de ejecutar
+                el script <code>data_identidad_inventario.sql</code>.
+            </p>
+            <div class="lista-datos">
+                <div class="dato">
+                    <div class="etiqueta">Administrador</div>
+                    <div class="valor" style="font-size:.82rem;">admin.perez@rentatool.com</div>
+                </div>
+                <div class="dato">
+                    <div class="etiqueta">Proveedor</div>
+                    <div class="valor" style="font-size:.82rem;">ventas@maquiantioquia.com</div>
+                </div>
+                <div class="dato">
+                    <div class="etiqueta">Cliente</div>
+                    <div class="valor" style="font-size:.82rem;">camilo.garcia@gmail.com</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

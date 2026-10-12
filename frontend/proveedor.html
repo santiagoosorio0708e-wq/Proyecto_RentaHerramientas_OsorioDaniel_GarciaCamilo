@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi inventario | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion"></nav>
+    </div>
+</header>
+
+<main class="contenedor seccion">
+
+    <div class="fila-encabezado">
+        <div>
+            <h1>Mi inventario</h1>
+            <p class="subtitulo" style="margin:0;">
+                Administre sus herramientas, fotos, ficha tecnica y tarifas.
+            </p>
+        </div>
+        <button class="boton" id="btn-nueva">+ Registrar herramienta</button>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <div class="envoltura-tabla">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Herramienta</th>
+                    <th>Marca / Modelo</th>
+                    <th>Categoria</th>
+                    <th>Estado</th>
+                    <th>Tarifa dia</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-inventario">
+                <tr><td colspan="7" class="cargando">Cargando inventario...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+<!-- ============ Modal: nueva / editar herramienta ============ -->
+<div class="fondo-modal" id="modal-herramienta">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2 id="titulo-modal-herramienta">Registrar herramienta</h2>
+            <button class="cerrar-modal" data-cerrar="modal-herramienta">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <div id="mensaje-modal" class="mensaje"></div>
+
+            <form id="form-herramienta" class="formulario">
+                <input type="hidden" id="h-id">
+
+                <div class="grupo-campo">
+                    <label for="h-nombre">Nombre *</label>
+                    <input type="text" id="h-nombre" name="nombre" required maxlength="120">
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="h-descripcion">Descripcion *</label>
+                    <textarea id="h-descripcion" name="descripcion" required></textarea>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="h-marca">Marca *</label>
+                        <input type="text" id="h-marca" name="marca" required maxlength="60">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="h-modelo">Modelo *</label>
+                        <input type="text" id="h-modelo" name="modelo" required maxlength="60">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo" id="campo-serie">
+                        <label for="h-serie">Numero de serie *</label>
+                        <input type="text" id="h-serie" name="numeroSerie" maxlength="80">
+                        <span class="ayuda-campo">Unico en el sistema. No se puede cambiar despues.</span>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="h-categoria">Categoria principal *</label>
+                        <select id="h-categoria" name="idCategoriaPrincipal" required></select>
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="h-tarifa">Tarifa diaria *</label>
+                        <input type="number" id="h-tarifa" name="tarifaDiaria" required min="1" step="1000">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="h-reposicion">Valor de reposicion *</label>
+                        <input type="number" id="h-reposicion" name="valorReposicion" required min="1" step="10000">
+                    </div>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="h-ubicacion">Ubicacion en bodega</label>
+                    <input type="text" id="h-ubicacion" name="ubicacionBodega" maxlength="120"
+                           placeholder="Pasillo B - Estante 4">
+                </div>
+
+                <!-- Carga de fotos y ficha tecnica, solo al crear -->
+                <div id="bloque-alta">
+                    <div class="grupo-campo">
+                        <label for="h-foto">URL de la foto principal</label>
+                        <input type="url" id="h-foto" maxlength="255"
+                               placeholder="https://cdn.ejemplo.com/foto.jpg">
+                        <span class="ayuda-campo">Se guarda como portada de la herramienta.</span>
+                    </div>
+
+                    <div class="fila-campos">
+                        <div class="grupo-campo">
+                            <label for="h-atributo">Especificacion: atributo</label>
+                            <input type="text" id="h-atributo" maxlength="80" placeholder="Potencia">
+                        </div>
+                        <div class="grupo-campo">
+                            <label for="h-valor">Valor</label>
+                            <input type="text" id="h-valor" maxlength="120" placeholder="1500">
+                        </div>
+                        <div class="grupo-campo">
+                            <label for="h-unidad">Unidad</label>
+                            <input type="text" id="h-unidad" maxlength="20" placeholder="W">
+                        </div>
+                    </div>
+
+                    <div class="fila-campos">
+                        <div class="grupo-campo">
+                            <label for="h-tipoTarifa">Tarifa adicional</label>
+                            <select id="h-tipoTarifa">
+                                <option value="">Ninguna</option>
+                                <option value="FIN_DE_SEMANA">Fin de semana</option>
+                                <option value="SEMANAL">Semanal</option>
+                                <option value="MENSUAL">Mensual</option>
+                            </select>
+                        </div>
+                        <div class="grupo-campo">
+                            <label for="h-valorTarifa">Valor de esa tarifa</label>
+                            <input type="number" id="h-valorTarifa" min="1" step="1000">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-herramienta">Cancelar</button>
+            <button class="boton" id="btn-guardar-herramienta">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ Modal: cambio de estado ============ -->
+<div class="fondo-modal" id="modal-estado">
+    <div class="modal" style="max-width:460px;">
+        <div class="cabecera-modal">
+            <h2>Cambiar estado</h2>
+            <button class="cerrar-modal" data-cerrar="modal-estado">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <div id="mensaje-estado" class="mensaje"></div>
+            <p class="ayuda-campo" style="margin-bottom:14px;" id="estado-actual-texto"></p>
+            <form id="form-estado" class="formulario">
+                <input type="hidden" id="e-id">
+                <div class="grupo-campo">
+                    <label for="e-estado">Nuevo estado *</label>
+                    <select id="e-estado" required>
+                        <option value="DISPONIBLE">Disponible</option>
+                        <option value="ALQUILADA">Alquilada</option>
+                        <option value="EN_MANTENIMIENTO">En mantenimiento</option>
+                        <option value="FUERA_DE_SERVICIO">Fuera de servicio</option>
+                    </select>
+                </div>
+                <div class="grupo-campo">
+                    <label for="e-motivo">Motivo</label>
+                    <input type="text" id="e-motivo" maxlength="255"
+                           placeholder="Revision preventiva de 500 horas">
+                </div>
+            </form>
+        </div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-estado">Cancelar</button>
+            <button class="boton" id="btn-guardar-estado">Aplicar</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/proveedor.js"></script>
+</body>
+</html>
