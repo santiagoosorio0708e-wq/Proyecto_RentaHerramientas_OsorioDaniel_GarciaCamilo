@@ -38,9 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     inputFechaReal.addEventListener('change', evaluarRetrasoVisual);
 
-    // Cierre de modales
+    // Cierre de modales con boton o tecla Escape
     document.querySelectorAll('[data-cerrar]').forEach(b => {
         b.addEventListener('click', () => UI.cerrarModal(b.dataset.cerrar));
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.visible').forEach(m => m.classList.remove('visible'));
+        }
     });
 
     async function cargarTodo() {
