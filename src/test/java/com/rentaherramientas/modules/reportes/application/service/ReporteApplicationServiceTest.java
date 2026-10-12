@@ -109,4 +109,48 @@ class ReporteApplicationServiceTest {
         assertEquals(new BigDecimal("5000000.00"), dashboard.getResumenFinanciero().getTotalRecaudado());
         assertEquals(25L, dashboard.getMetricasOperativas().getTotalHerramientas());
     }
+
+    @Test
+    @DisplayName("Debe consultar ranking de clientes frecuentes")
+    void testObtenerTopClientesFrecuentes() {
+        ClienteFrecuente cliente = ClienteFrecuente.builder()
+                .idCliente(8L)
+                .nombreCompleto("Constructora Los Andes S.A.S.")
+                .email("compras@constructora-andes.com")
+                .totalReservas(12L)
+                .totalGastado(new BigDecimal("4800000.00"))
+                .build();
+
+        when(reporteRepository.consultarTopClientesFrecuentes(5)).thenReturn(List.of(cliente));
+
+        List<ClienteFrecuente> resultado = reporteService.obtenerTopClientesFrecuentes(5);
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("Constructora Los Andes S.A.S.", resultado.get(0).getNombreCompleto());
+        verify(reporteRepository).consultarTopClientesFrecuentes(5);
+    }
+
+    @Test
+    @DisplayName("Debe consultar ingresos agrupados por proveedor")
+    void testObtenerIngresosPorProveedor() {
+        IngresoPorProveedor proveedor = IngresoPorProveedor.builder()
+                .idProveedor(2L)
+                .nombreProveedor("Maquinaria Antioquia S.A.S.")
+                .totalHerramientasRegistradas(10L)
+                .totalAlquileres(30L)
+                .ingresosGenerados(new BigDecimal("9500000.00"))
+                .build();
+
+        when(reporteRepository.consultarIngresosPorProveedor()).thenReturn(List.of(proveedor));
+
+        List<IngresoPorProveedor> resultado = reporteService.obtenerIngresosPorProveedor();
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("Maquinaria Antioquia S.A.S.", resultado.get(0).getNombreProveedor());
+        verify(reporteRepository).consultarIngresosPorProveedor();
+    }
 }
+
+
