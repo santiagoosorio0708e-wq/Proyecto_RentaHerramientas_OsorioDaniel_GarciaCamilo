@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/reportes")
+@RequestMapping("/reportes")
 @RequiredArgsConstructor
 @Tag(name = "Reportes y Métricas", description = "Endpoints analíticos para dashboards gerenciales, métricas financieras, herramientas populares y estadísticas operativas")
 @SecurityRequirement(name = "Bearer Authentication")

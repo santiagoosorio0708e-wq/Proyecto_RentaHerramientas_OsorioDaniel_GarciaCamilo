@@ -90,6 +90,61 @@
         <div class="cuerpo-modal" id="detalle-cuerpo"></div>
         <div class="pie-modal">
             <button class="boton boton-secundario" data-cerrar="modal-detalle">Cerrar</button>
+            <button class="boton" id="btn-abrir-reserva">Alquilar / Reservar Ahora</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== Modal de Reservar Maquinaria ===================== -->
+<div class="fondo-modal" id="modal-crear-reserva">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2>Solicitud de Alquiler de Maquinaria</h2>
+            <button class="cerrar-modal" data-cerrar="modal-crear-reserva">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <p class="subtitulo" id="reserva-modal-subtitulo">Configure el periodo de alquiler para su obra o proyecto.</p>
+            <div id="reserva-mensaje" class="mensaje"></div>
+
+            <form id="form-crear-reserva">
+                <input type="hidden" id="reserva-id-herramienta">
+                <input type="hidden" id="reserva-tarifa-diaria">
+
+                <div class="grupo-campo">
+                    <label for="reserva-fecha-inicio">Fecha de Inicio del Alquiler</label>
+                    <input type="date" id="reserva-fecha-inicio" required>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="reserva-fecha-fin">Fecha de Retorno / Fin</label>
+                    <input type="date" id="reserva-fecha-fin" required>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="reserva-notas">Notas / Dirección de obra (Opcional)</label>
+                    <textarea id="reserva-notas" rows="2" placeholder="Indique la ubicación del proyecto o requerimientos especiales"></textarea>
+                </div>
+
+                <div class="caja-factura" style="margin-top:12px;">
+                    <div class="factura-header">
+                        <h4>Presupuesto Estimado</h4>
+                        <span class="insignia insignia-en_curso" id="reserva-dias-calculados">1 día</span>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>Alquiler estimado:</span>
+                        <strong id="reserva-monto-calculado">$ 0</strong>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>Depósito garantía (retornable):</span>
+                        <strong id="reserva-deposito-calculado">$ 100,000</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+                    <button type="button" class="boton boton-secundario" data-cerrar="modal-crear-reserva">Cancelar</button>
+                    <button type="submit" class="boton" id="btn-confirmar-reserva">Confirmar Solicitud de Reserva</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

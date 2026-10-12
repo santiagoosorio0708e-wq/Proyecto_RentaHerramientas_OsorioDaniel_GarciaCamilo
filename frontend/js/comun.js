@@ -90,16 +90,25 @@ const UI = (() => {
             return;
         }
 
-        let enlaces = '';
-        if (API.esProveedor()) {
-            enlaces += '<a href="proveedor.html"' +
-                (paginaActual === 'proveedor' ? ' class="activo"' : '') + '>Mi inventario</a>';
+        let enlaces = '<a href="index.html"' + (paginaActual === 'catalogo' ? ' class="activo"' : '') + '>Catálogo</a>';
+
+        if (API.haySesion()) {
+            enlaces += '<a href="reservas.html"' +
+                (paginaActual === 'reservas' ? ' class="activo"' : '') + '>Mis Reservas</a>';
         }
+
+        if (API.esProveedor() || API.esAdmin()) {
+            enlaces += '<a href="proveedor.html"' +
+                (paginaActual === 'proveedor' ? ' class="activo"' : '') + '>Inventario</a>';
+            enlaces += '<a href="gestion_reservas.html"' +
+                (paginaActual === 'gestion_reservas' ? ' class="activo"' : '') + '>Devoluciones y Despacho</a>';
+            enlaces += '<a href="dashboard.html"' +
+                (paginaActual === 'dashboard' ? ' class="activo"' : '') + '>Dashboard</a>';
+        }
+
         if (API.esAdmin()) {
             enlaces += '<a href="admin.html"' +
                 (paginaActual === 'admin' ? ' class="activo"' : '') + '>Usuarios</a>';
-            enlaces += '<a href="proveedor.html"' +
-                (paginaActual === 'proveedor' ? ' class="activo"' : '') + '>Inventario</a>';
         }
 
         contenedor.innerHTML =

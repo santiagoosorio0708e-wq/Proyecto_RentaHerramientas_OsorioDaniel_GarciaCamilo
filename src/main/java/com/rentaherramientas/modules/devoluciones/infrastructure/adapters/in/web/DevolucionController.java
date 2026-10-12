@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/devoluciones")
+@RequestMapping("/devoluciones")
 @RequiredArgsConstructor
 @Tag(name = "Devoluciones", description = "Endpoints para check-in de retorno de herramientas, reportes de daños, evidencias fotográficas (4FN) y cargos adicionales")
 @SecurityRequirement(name = "Bearer Authentication")

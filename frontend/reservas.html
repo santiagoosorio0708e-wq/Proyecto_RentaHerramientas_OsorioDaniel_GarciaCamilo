@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reservas y Pagos | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Barra superior -->
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion"></nav>
+    </div>
+</header>
+
+<!-- Contenido principal -->
+<main class="contenedor seccion">
+
+    <div class="fila-encabezado">
+        <div>
+            <h1>Mis Reservas y Alquileres</h1>
+            <p class="subtitulo">Consulte el estado de sus reservas, gestione pagos con pasarela y descargue facturas electrónicas con IVA desglosado.</p>
+        </div>
+        <div>
+            <a href="index.html" class="boton">+ Alquilar otra herramienta</a>
+        </div>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <!-- Lista de Reservas -->
+    <section class="tarjeta">
+        <div class="fila-encabezado">
+            <h2>Historial de Alquileres</h2>
+            <button class="boton boton-secundario boton-pequeno" id="btn-refrescar">Actualizar</button>
+        </div>
+        <div class="envoltura-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Fechas (Inicio - Fin)</th>
+                        <th>Estado</th>
+                        <th>Monto Estimado</th>
+                        <th>Depósito Garantía</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-reservas">
+                    <!-- Dinámico vía reservas.js -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<!-- Modal de Pago / Pasarela de Pago -->
+<div class="fondo-modal" id="modal-pago">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2>Pasarela de Pago Electrónico</h2>
+            <button class="cerrar-modal" data-cerrar="modal-pago">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <p class="subtitulo" id="pago-subtitulo">Liquide el valor de su reserva de forma segura.</p>
+            <div id="pago-mensaje" class="mensaje"></div>
+
+            <form id="form-pago">
+                <input type="hidden" id="pago-id-reserva">
+
+                <div class="grupo-campo">
+                    <label for="pago-metodo">Método de pago</label>
+                    <select id="pago-metodo" required>
+                        <option value="1">Tarjeta de Crédito / Débito (Visa, Mastercard)</option>
+                        <option value="2">PSE (Transferencia Bancaria en Línea)</option>
+                        <option value="3">Efectivo / Contraentrega</option>
+                        <option value="4">Transferencia Bancolombia / Nequi</option>
+                    </select>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="pago-tipo">Tipo de concepto</label>
+                    <select id="pago-tipo" required>
+                        <option value="TOTALIDAD">Pago de la Totalidad del Alquiler</option>
+                        <option value="ANTICIPO">Anticipo del 50%</option>
+                        <option value="DEPOSITO_GARANTIA">Depósito de Garantía Retornable</option>
+                    </select>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="pago-monto">Monto a pagar (COP)</label>
+                    <input type="number" id="pago-monto" min="1000" step="100" required readonly>
+                    <span class="ayuda-campo">Incluye automáticamente el 19% de IVA y costos operativos.</span>
+                </div>
+
+                <div class="caja-factura" style="margin-top:12px;">
+                    <div class="factura-header">
+                        <h4>Previsualización de Liquidación</h4>
+                        <span class="insignia insignia-aprobada">Tarifa Oficial 2026</span>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>Subtotal Base:</span>
+                        <strong id="prev-subtotal">$ 0</strong>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>IVA (19%):</span>
+                        <strong id="prev-iva">$ 0</strong>
+                    </div>
+                    <div class="factura-fila-total gran-total">
+                        <span>Total a Facturar:</span>
+                        <strong id="prev-total">$ 0</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+                    <button type="button" class="boton boton-secundario" data-cerrar="modal-pago">Cancelar</button>
+                    <button type="submit" class="boton" id="btn-confirmar-pago">Confirmar y Pagar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Factura Electrónica -->
+<div class="fondo-modal" id="modal-factura">
+    <div class="modal" style="max-width: 650px;">
+        <div class="cabecera-modal">
+            <h2>Factura Electrónica de Alquiler</h2>
+            <button class="cerrar-modal" data-cerrar="modal-factura">&times;</button>
+        </div>
+        <div class="cuerpo-modal" id="factura-cuerpo">
+            <!-- Dinámico vía reservas.js -->
+        </div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-factura">Cerrar</button>
+            <button class="boton" onclick="window.print()">Imprimir / Guardar PDF</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/reservas.js"></script>
+</body>
+</html>

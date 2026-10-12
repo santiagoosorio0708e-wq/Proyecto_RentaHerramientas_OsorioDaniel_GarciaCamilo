@@ -270,12 +270,63 @@ const API = (() => {
         eliminar:   (id)        => borrar('/categorias/' + id)
     };
 
+    // ------------------------------------------------------------------
+    // MODULOS DEV 2: Reservas, Pagos, Facturas, Devoluciones y Reportes
+    // ------------------------------------------------------------------
+
+    const reservas = {
+        crear:           (cuerpo)   => post('/reservas', cuerpo),
+        misReservas:     ()         => get('/reservas/mis-reservas'),
+        listar:          ()         => get('/reservas'),
+        obtener:         (id)       => get('/reservas/' + id),
+        aprobar:         (id)       => patch('/reservas/' + id + '/aprobar'),
+        rechazar:        (id, mot)  => patch('/reservas/' + id + '/rechazar?motivo=' + encodeURIComponent(mot || 'Rechazada por proveedor')),
+        iniciar:         (id)       => patch('/reservas/' + id + '/iniciar'),
+        cancelar:        (id)       => patch('/reservas/' + id + '/cancelar'),
+        finalizar:       (id)       => patch('/reservas/' + id + '/finalizar')
+    };
+
+    const pagos = {
+        procesar:        (cuerpo)   => post('/pagos/procesar', cuerpo),
+        obtener:         (id)       => get('/pagos/' + id),
+        porReserva:      (idReserva)=> get('/pagos/reserva/' + idReserva),
+        metodos:         ()         => get('/pagos/metodos')
+    };
+
+    const facturas = {
+        obtener:         (id)       => get('/facturas/' + id),
+        porPago:         (idPago)   => get('/facturas/pago/' + idPago),
+        misFacturas:     ()         => get('/facturas/mis-facturas')
+    };
+
+    const devoluciones = {
+        registrar:       (cuerpo)   => post('/devoluciones', cuerpo),
+        obtener:         (id)       => get('/devoluciones/' + id),
+        porReserva:      (idReserva)=> get('/devoluciones/reserva/' + idReserva),
+        listar:          ()         => get('/devoluciones'),
+        agregarDano:     (id, cuerpo)=> post('/devoluciones/' + id + '/danos', cuerpo),
+        listarDanos:     (id)       => get('/devoluciones/' + id + '/danos'),
+        listarCargos:    (id)       => get('/devoluciones/' + id + '/cargos'),
+        pagarCargo:      (idCargo)  => post('/devoluciones/cargos/' + idCargo + '/pagar', {})
+    };
+
+    const reportes = {
+        dashboard:       ()         => get('/reportes/dashboard'),
+        financiero:      ()         => get('/reportes/financiero'),
+        populares:       (limite=10)=> get('/reportes/herramientas-populares?limite=' + limite),
+        clientes:        (limite=10)=> get('/reportes/clientes-frecuentes?limite=' + limite),
+        metricas:        ()         => get('/reportes/metricas-operativas'),
+        proveedores:     ()         => get('/reportes/proveedores')
+    };
+
     return {
         URL_BASE,
         ErrorApi,
         haySesion, obtenerUsuario, obtenerToken, borrarSesion,
         tieneRol, esAdmin, esProveedor, esCliente, rolPrincipal,
-        auth, usuarios, catalogo, herramientas, categorias
+        auth, usuarios, catalogo, herramientas, categorias,
+        reservas, pagos, facturas, devoluciones, reportes
     };
 
 })();
+

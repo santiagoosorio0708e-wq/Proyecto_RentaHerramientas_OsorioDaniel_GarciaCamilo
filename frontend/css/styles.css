@@ -526,7 +526,142 @@ tbody tr:hover { background: rgba(255, 255, 255, .025); }
 .dato .etiqueta { font-size: .74rem; color: var(--color-texto-suave); text-transform: uppercase; letter-spacing: .4px; }
 .dato .valor    { font-size: .95rem; font-weight: 600; margin-top: 2px; }
 
-/* --------------------------------------------------------------- Responsive */
+/* ------------------------------------------------------------ DEV 2: KPIs & Facturas */
+
+.rejilla-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.tarjeta-kpi {
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+    position: relative;
+    overflow: hidden;
+}
+
+.tarjeta-kpi::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--color-acento);
+}
+
+.tarjeta-kpi.kpi-exito::before { background: var(--color-exito); }
+.tarjeta-kpi.kpi-error::before { background: var(--color-error); }
+.tarjeta-kpi.kpi-info::before  { background: var(--color-info); }
+.tarjeta-kpi.kpi-aviso::before { background: var(--color-aviso); }
+
+.tarjeta-kpi .kpi-titulo {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--color-texto-suave);
+    margin-bottom: 6px;
+}
+
+.tarjeta-kpi .kpi-valor {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-texto);
+    line-height: 1.2;
+}
+
+.tarjeta-kpi .kpi-subtexto {
+    font-size: .78rem;
+    color: var(--color-texto-suave);
+    margin-top: 5px;
+}
+
+/* Factura electronica simulada */
+.caja-factura {
+    background: var(--color-superficie-2);
+    border: 1px dashed var(--color-acento);
+    border-radius: var(--radio);
+    padding: 24px;
+    margin: 16px 0;
+}
+
+.factura-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--color-borde);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+}
+
+.factura-totales {
+    margin-top: 18px;
+    border-top: 1px solid var(--color-borde);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.factura-fila-total {
+    display: flex;
+    justify-content: space-between;
+    width: 260px;
+    font-size: .95rem;
+}
+
+.factura-fila-total.gran-total {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-acento);
+    border-top: 1px solid var(--color-borde);
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
+/* Evidencias fotograficas 4FN */
+.galeria-evidencias {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.tarjeta-evidencia {
+    background: var(--color-superficie-2);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-sm);
+    overflow: hidden;
+    font-size: .76rem;
+}
+
+.tarjeta-evidencia img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+
+.tarjeta-evidencia p {
+    padding: 6px 8px;
+    color: var(--color-texto-suave);
+}
+
+/* Insignias de estado extendidas */
+.insignia-solicitada   { background: rgba(240, 192, 74, .18); color: var(--color-aviso); border-color: rgba(240, 192, 74, .35); }
+.insignia-aprobada     { background: rgba(74, 163, 240, .18); color: var(--color-info); border-color: rgba(74, 163, 240, .35); }
+.insignia-en_curso     { background: rgba(53, 196, 127, .18); color: var(--color-exito); border-color: rgba(53, 196, 127, .35); }
+.insignia-finalizada   { background: rgba(154, 166, 181, .18); color: var(--color-texto-suave); border-color: rgba(154, 166, 181, .35); }
+.insignia-rechazada    { background: rgba(239, 91, 91, .18); color: var(--color-error); border-color: rgba(239, 91, 91, .35); }
+.insignia-cancelada    { background: rgba(239, 91, 91, .18); color: var(--color-error); border-color: rgba(239, 91, 91, .35); }
+.insignia-buen_estado  { background: rgba(53, 196, 127, .18); color: var(--color-exito); }
+.insignia-dano_leve    { background: rgba(240, 192, 74, .18); color: var(--color-aviso); }
+.insignia-dano_grave   { background: rgba(239, 91, 91, .18); color: var(--color-error); }
+.insignia-perdida_total{ background: #300a0a; color: #ff8585; border: 1px solid #751515; }
 
 @media (max-width: 680px) {
     .barra-superior .contenedor { min-height: auto; padding-top: 10px; padding-bottom: 10px; }
@@ -536,4 +671,6 @@ tbody tr:hover { background: rgba(255, 255, 255, .025); }
     .boton { width: 100%; }
     .acciones-celda .boton { width: auto; }
     .pie-modal { flex-direction: column-reverse; }
+    .factura-fila-total { width: 100%; }
 }
+

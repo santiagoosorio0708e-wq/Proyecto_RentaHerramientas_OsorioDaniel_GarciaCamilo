@@ -150,8 +150,107 @@ document.addEventListener('DOMContentLoaded', () => {
                     </table>
                 </div>
             `;
+
+            herramientaActual = h;
         } catch (error) {
             cuerpo.innerHTML = `<div class="mensaje mensaje-error visible">${UI.esc(error.message)}</div>`;
         }
     }
+
+    // ------------------------------------------------------------------
+    // Logica de Reserva desde el Catalogo
+    // ------------------------------------------------------------------
+
+    let herramientaActual = null;
+    const btnAbrirReserva = document.getElementById('btn-abrir-reserva');
+    const formCrearReserva = document.getElementById('form-crear-reserva');
+    const inputInicio = document.getElementById('reserva-fecha-inicio');
+    const inputFin = document.getElementById('reserva-fecha-fin');
+
+    btnAbrirReserva.addEventListener('click', () => {
+        if (!API.haySesion()) {
+            alert('Para reservar y alquilar maquinaria, debe iniciar sesión con su cuenta de Cliente.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (!herramientaActual) return;
+
+        UI.cerrarModal('modal-detalle');
+
+        document.getElementById('reserva-id-herramienta').value = herramientaActual.idHerramienta;
+        document.getElementById('reserva-tarifa-diaria').value  = herramientaActual.tarifaDiaria;
+        document.getElementById('reserva-modal-subtitulo').textContent = `Alquilar: ${herramientaActual.nombre} (${herramientaActual.marca})`;
+
+        const hoy = new Date();
+        const manana = new Date();
+        manana.setDate(hoy.getDate() + 3);
+
+        inputInicio.value = hoy.toISOString().split('T')[0];
+        inputFin.value    = manana.toISOString().split('T')[0];
+
+        recalcularPresupuesto();
+        UI.ocultarMensaje('reserva-mensaje');
+        UI.abrirModal('modal-crear-reserva');
+    });
+
+    inputInicio.addEventListener('change', recalcularPresupuesto);
+    inputFin.addEventListener('change', recalcularPresupuesto);
+
+    function recalcularPresupuesto() {
+        if (!inputInicio.value || !inputFin.value) return;
+
+        const f1 = new Date(inputInicio.value);
+        const f2 = new Date(inputFin.value);
+        const tarifa = Number(document.getElementById('reserva-tarifa-diaria').value) || 0;
+
+        let dias = Math.ceil((f2 - f1) / (1000 * 60 * 60 * 24));
+        if (dias <= 0) dias = 1;
+
+        const subtotal = tarifa * dias;
+        const deposito = Math.max(100000, Math.round(subtotal * 0.2));
+
+        document.getElementById('reserva-dias-calculados').textContent = `${dias} ${dias === 1 ? 'día' : 'días'}`;
+        document.getElementById('reserva-monto-calculado').textContent = UI.pesos(subtotal);
+        document.getElementById('reserva-deposito-calculado').textContent = UI.pesos(deposito);
+    }
+
+    formCrearReserva.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        UI.ocultarMensaje('reserva-mensaje');
+
+        const btn = document.getElementById('btn-confirmar-reserva');
+        btn.disabled = true;
+        btn.textContent = 'Enviando solicitud...';
+
+        try {
+            const usuario = API.obtenerUsuario();
+            const idHerramienta = Number(document.getElementById('reserva-id-herramienta').value);
+            const fechaInicio = inputInicio.value;
+            const fechaFin = inputFin.value;
+            const notas = document.getElementById('reserva-notas').value;
+
+            const comando = {
+                idCliente: usuario ? usuario.idUsuario : 1,
+                fechaInicio,
+                fechaFin,
+                notasCliente: notas,
+                items: [
+                    {
+                        idHerramienta,
+                        cantidad: 1
+                    }
+                ]
+            };
+
+            const reserva = await API.reservas.crear(comando);
+            UI.cerrarModal('modal-crear-reserva');
+            UI.mensaje('mensaje', `¡Reserva #${reserva.codigoReserva} solicitada con éxito! Diríjase a 'Mis Reservas' para gestionarla y pagar.`, 'exito');
+        } catch (error) {
+            UI.mensaje('reserva-mensaje', 'Error al solicitar reserva: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Confirmar Solicitud de Reserva';
+        }
+    });
 });
