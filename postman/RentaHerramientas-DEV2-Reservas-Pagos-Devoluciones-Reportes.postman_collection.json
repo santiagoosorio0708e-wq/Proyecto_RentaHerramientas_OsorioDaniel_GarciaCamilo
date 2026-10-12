@@ -1,0 +1,440 @@
+{
+	"info": {
+		"_postman_id": "b8109d13-6429-4b21-9310-f70356c9a3b2",
+		"name": "RentaHerramientas - DEV 2 (Reservas, Pagos, Devoluciones, Reportes)",
+		"description": "Colección completa de pruebas para los Bounded Contexts de Reservas, Pagos y Facturación Electrónica (IVA 19%), Devoluciones (Daños con Evidencias 4FN y Cargos) y Dashboard de Reportes.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Reservas",
+			"item": [
+				{
+					"name": "Solicitar Reserva",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idCliente\": 2,\n  \"fechaInicio\": \"2026-10-15\",\n  \"fechaFin\": \"2026-10-20\",\n  \"notasCliente\": \"Requerido para obra en proyecto residencial\",\n  \"items\": [\n    {\n      \"idHerramienta\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/reservas",
+							"host": ["{{base_url}}"],
+							"path": ["reservas"]
+						}
+					}
+				},
+				{
+					"name": "Listar Todas las Reservas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas",
+							"host": ["{{base_url}}"],
+							"path": ["reservas"]
+						}
+					}
+				},
+				{
+					"name": "Consultar Mis Reservas (Cliente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/mis-reservas",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "mis-reservas"]
+						}
+					}
+				},
+				{
+					"name": "Obtener Reserva por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/1",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Aprobar Reserva",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/1/aprobar",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "1", "aprobar"]
+						}
+					}
+				},
+				{
+					"name": "Iniciar Alquiler (Despacho)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/1/iniciar",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "1", "iniciar"]
+						}
+					}
+				},
+				{
+					"name": "Rechazar Reserva",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/1/rechazar?motivo=Sin+disponibilidad+inmediata",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "1", "rechazar"],
+							"query": [{"key": "motivo", "value": "Sin+disponibilidad+inmediata"}]
+						}
+					}
+				},
+				{
+					"name": "Cancelar Reserva",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reservas/1/cancelar",
+							"host": ["{{base_url}}"],
+							"path": ["reservas", "1", "cancelar"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Pagos y Facturación",
+			"item": [
+				{
+					"name": "Procesar Pago (Pasarela)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idReserva\": 1,\n  \"idMetodoPago\": 1,\n  \"monto\": 250000.00,\n  \"tipoPago\": \"TOTALIDAD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/pagos/procesar",
+							"host": ["{{base_url}}"],
+							"path": ["pagos", "procesar"]
+						}
+					}
+				},
+				{
+					"name": "Consultar Pago por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/pagos/1",
+							"host": ["{{base_url}}"],
+							"path": ["pagos", "1"]
+						}
+					}
+				},
+				{
+					"name": "Consultar Pagos de una Reserva",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/pagos/reserva/1",
+							"host": ["{{base_url}}"],
+							"path": ["pagos", "reserva", "1"]
+						}
+					}
+				},
+				{
+					"name": "Listar Métodos de Pago Habilitados",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/pagos/metodos",
+							"host": ["{{base_url}}"],
+							"path": ["pagos", "metodos"]
+						}
+					}
+				},
+				{
+					"name": "Consultar Factura por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/facturas/1",
+							"host": ["{{base_url}}"],
+							"path": ["facturas", "1"]
+						}
+					}
+				},
+				{
+					"name": "Consultar Factura por ID de Pago",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/facturas/pago/1",
+							"host": ["{{base_url}}"],
+							"path": ["facturas", "pago", "1"]
+						}
+					}
+				},
+				{
+					"name": "Listar Mis Facturas (Cliente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/facturas/mis-facturas",
+							"host": ["{{base_url}}"],
+							"path": ["facturas", "mis-facturas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Devoluciones, Daños y Cargos",
+			"item": [
+				{
+					"name": "Registrar Check-In de Devolución",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idReserva\": 1,\n  \"fechaDevolucionReal\": \"2026-10-22\",\n  \"recibidoPor\": 4,\n  \"estadoEquipoGeneral\": \"DANO_LEVE\",\n  \"observaciones\": \"Entrega con retraso y recalentamiento en taladro\",\n  \"tarifaDiariaMora\": 25000.00,\n  \"reportesDano\": [\n    {\n      \"idHerramienta\": 1,\n      \"tipoDano\": \"ELECTRICO\",\n      \"descripcionDano\": \"Switch de encendido quemado\",\n      \"costoEstimadoReparacion\": 65000.00,\n      \"responsableAsume\": \"CLIENTE\",\n      \"evidencias\": [\n        {\n          \"urlFoto\": \"https://cloudinary.com/foto-switch-danado.jpg\",\n          \"descripcionFoto\": \"Evidencia 4FN del switch chamuscado\"\n        }\n      ]\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/devoluciones",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones"]
+						}
+					}
+				},
+				{
+					"name": "Obtener Devolución por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones/1",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones", "1"]
+						}
+					}
+				},
+				{
+					"name": "Obtener Devolución por Reserva",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones/reserva/1",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones", "reserva", "1"]
+						}
+					}
+				},
+				{
+					"name": "Listar Todas las Devoluciones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones"]
+						}
+					}
+				},
+				{
+					"name": "Listar Daños y Evidencias 4FN de una Devolución",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones/1/danos",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones", "1", "danos"]
+						}
+					}
+				},
+				{
+					"name": "Listar Cargos Adicionales de una Devolución",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones/1/cargos",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones", "1", "cargos"]
+						}
+					}
+				},
+				{
+					"name": "Marcar Cargo Adicional como Pagado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/devoluciones/cargos/1/pagar",
+							"host": ["{{base_url}}"],
+							"path": ["devoluciones", "cargos", "1", "pagar"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Reportes y Métricas",
+			"item": [
+				{
+					"name": "Dashboard Ejecutivo Consolidado",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Resumen Financiero (IVA 19%, Recaudo, Mora)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/financiero",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "financiero"]
+						}
+					}
+				},
+				{
+					"name": "Top Herramientas Más Alquiladas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/herramientas-populares?limite=10",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "herramientas-populares"],
+							"query": [{"key": "limite", "value": "10"}]
+						}
+					}
+				},
+				{
+					"name": "Top Clientes Frecuentes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/clientes-frecuentes?limite=10",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "clientes-frecuentes"],
+							"query": [{"key": "limite", "value": "10"}]
+						}
+					}
+				},
+				{
+					"name": "Métricas Operativas y Siniestralidad",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/metricas-operativas",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "metricas-operativas"]
+						}
+					}
+				},
+				{
+					"name": "Ingresos por Proveedor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{access_token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/reportes/proveedores",
+							"host": ["{{base_url}}"],
+							"path": ["reportes", "proveedores"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
