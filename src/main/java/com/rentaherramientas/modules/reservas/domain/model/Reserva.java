@@ -11,6 +11,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entidad de Dominio: Reserva.
+ * Representa el contrato de alquiler temporal de herramientas entre un cliente y el sistema.
+ * Aplica invariantes de negocio DDD para transiciones de estado, cálculo de depósitos y totales.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Getter
 @Builder
 @NoArgsConstructor
@@ -29,6 +36,26 @@ public class Reserva {
     private BigDecimal depositoGarantia;
     private String notasCliente;
     private String motivoRechazo;
+
+    /**
+     * Indica si la reserva se encuentra en una fase activa que compromete inventario.
+     *
+     * @return true si el estado es SOLICITADA, APROBADA o EN_CURSO.
+     */
+    public boolean estaActiva() {
+        return this.estado == EstadoReserva.SOLICITADA
+                || this.estado == EstadoReserva.APROBADA
+                || this.estado == EstadoReserva.EN_CURSO;
+    }
+
+    /**
+     * Determina si la reserva requiere cobro de depósito de garantía (mayor a cero).
+     *
+     * @return true si el depósito es mayor a 0.
+     */
+    public boolean requiereDeposito() {
+        return this.depositoGarantia != null && this.depositoGarantia.compareTo(BigDecimal.ZERO) > 0;
+    }
 
     public void agregarDetalle(DetalleReserva detalle) {
         if (this.detalles == null) {
