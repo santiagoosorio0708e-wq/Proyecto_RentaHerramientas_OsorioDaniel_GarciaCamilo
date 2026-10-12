@@ -149,4 +149,27 @@ class PagoApplicationServiceTest {
         assertNotNull(resultado);
         assertEquals("FAC-2026-0001", resultado.getNumeroFactura());
     }
+
+    @Test
+    @DisplayName("Debe lanzar excepcion si el metodo de pago solicitado no existe")
+    void procesarPago_MetodoNoExistente_LanzaExcepcion() {
+        when(metodoPagoRepositoryPort.buscarPorId(999L)).thenReturn(Optional.empty());
+        command.setIdMetodoPago(999L);
+
+        assertThrows(RuntimeException.class, () ->
+                pagoService.procesarPago(command)
+        );
+        verify(pagoRepositoryPort, never()).guardar(any());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepcion si se consulta una factura inexistente")
+    void obtenerFacturaPorNumero_NoExiste_LanzaExcepcion() {
+        when(facturaRepositoryPort.buscarPorNumero("FAC-INEXISTENTE")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () ->
+                pagoService.obtenerFacturaPorNumero("FAC-INEXISTENTE")
+        );
+    }
 }
+
