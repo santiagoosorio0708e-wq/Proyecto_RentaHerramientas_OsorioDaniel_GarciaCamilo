@@ -156,10 +156,38 @@ const UI = (() => {
         return datos;
     }
 
+    /** Muestra una notificacion flotante tipo Toast. */
+    function toast(texto, tipo = 'info') {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
+            document.body.appendChild(toastContainer);
+        }
+        const item = document.createElement('div');
+        item.className = 'mensaje mensaje-' + tipo + ' visible';
+        item.style.cssText = 'margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease;';
+        item.textContent = texto;
+        toastContainer.appendChild(item);
+        setTimeout(() => {
+            item.style.opacity = '0';
+            item.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => item.remove(), 400);
+        }, 3500);
+    }
+
+    function fechaConHora(valor) {
+        if (!valor) return '-';
+        const d = new Date(valor);
+        if (isNaN(d.getTime())) return valor;
+        return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
     return {
-        mensaje, ocultarMensaje, pesos, fecha, esc, insignia,
+        mensaje, ocultarMensaje, pesos, fecha, fechaConHora, esc, insignia,
         cargando, vacio, pintarBarra, exigirSesion,
-        abrirModal, cerrarModal, leerFormulario
+        abrirModal, cerrarModal, leerFormulario, toast
     };
 
 })();
