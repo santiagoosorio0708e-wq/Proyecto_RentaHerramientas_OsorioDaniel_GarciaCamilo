@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Adaptador de Entrada Web: Controlador REST para la consulta de Facturas Electrónicas.
+ * Gestiona la visualización del desglose de IVA (19%) y descarga simulada de comprobantes fiscales.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @RestController
 @RequestMapping("/facturas")
 @RequiredArgsConstructor
