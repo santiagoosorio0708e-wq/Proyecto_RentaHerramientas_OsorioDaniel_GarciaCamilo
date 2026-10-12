@@ -183,10 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('reserva-modal-subtitulo').textContent = `Alquilar: ${herramientaActual.nombre} (${herramientaActual.marca})`;
 
         const hoy = new Date();
+        const hoyStr = hoy.toISOString().split('T')[0];
         const manana = new Date();
         manana.setDate(hoy.getDate() + 3);
 
-        inputInicio.value = hoy.toISOString().split('T')[0];
+        inputInicio.min   = hoyStr;
+        inputFin.min      = hoyStr;
+        inputInicio.value = hoyStr;
         inputFin.value    = manana.toISOString().split('T')[0];
 
         recalcularPresupuesto();
