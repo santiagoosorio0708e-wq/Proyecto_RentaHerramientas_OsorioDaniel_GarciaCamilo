@@ -21,6 +21,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Adaptador de Entrada Web: Controlador REST para el Bounded Context de Reservas.
+ * Expone operaciones seguras para solicitar, aprobar, rechazar, cancelar y auditar reservas.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @RestController
 @RequestMapping("/reservas")
 @RequiredArgsConstructor
