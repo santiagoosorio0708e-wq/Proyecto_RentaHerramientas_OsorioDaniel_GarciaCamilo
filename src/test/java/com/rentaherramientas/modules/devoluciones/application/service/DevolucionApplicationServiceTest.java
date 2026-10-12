@@ -1,5 +1,6 @@
 package com.rentaherramientas.modules.devoluciones.application.service;
 
+import com.rentaherramientas.common.exception.ResourceNotFoundException;
 import com.rentaherramientas.modules.devoluciones.application.dto.EvidenciaDanoDto;
 import com.rentaherramientas.modules.devoluciones.application.dto.RegistrarDevolucionCommand;
 import com.rentaherramientas.modules.devoluciones.application.dto.ReporteDanoRequestDto;
@@ -191,4 +192,15 @@ class DevolucionApplicationServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> devolucionService.registrarDevolucion(command));
     }
+
+    @Test
+    @DisplayName("Debe lanzar ResourceNotFoundException si se intenta registrar daño para devolución inexistente")
+    void testRegistrarDanoDevolucionNoEncontradaLanzaExcepcion() {
+        when(devolucionRepository.buscarDevolucionPorId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                devolucionService.registrarDano(999L, com.rentaherramientas.modules.devoluciones.domain.model.ReporteDano.builder().build())
+        );
+    }
 }
+
