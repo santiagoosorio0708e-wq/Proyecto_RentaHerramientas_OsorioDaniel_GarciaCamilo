@@ -12,6 +12,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entidad de Dominio: Devolución e Inspección Física de Maquinaria.
+ * Modela el proceso de recepción física, cálculo de mora por días de retraso,
+ * inventario de daños en 4FN y cargos adicionales aplicables a la fianza.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Getter
 @Setter
 @Builder
@@ -76,4 +83,14 @@ public class Devolucion {
     public boolean tieneDanos() {
         return reportesDano != null && !reportesDano.isEmpty();
     }
+
+    /**
+     * Determina si la devolución fue efectuada a tiempo y sin ninguna novedad de avería.
+     *
+     * @return true si no hay días de retraso ni reportes de daño.
+     */
+    public boolean esDevolucionImpecable() {
+        return !tieneRetraso() && !tieneDanos();
+    }
 }
+
