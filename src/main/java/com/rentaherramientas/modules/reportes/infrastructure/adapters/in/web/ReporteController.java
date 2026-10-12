@@ -24,6 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Adaptador de Entrada Web: Controlador REST para Business Intelligence y Reportes Gerenciales.
+ * Provee métricas agregadas de facturación, recaudación fiscal, tasa de rotación de flota y fidelidad de clientes.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @RestController
 @RequestMapping("/reportes")
 @RequiredArgsConstructor
