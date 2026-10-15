@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de usuarios | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion"></nav>
+    </div>
+</header>
+
+<main class="contenedor seccion">
+
+    <div class="fila-encabezado">
+        <div>
+            <h1>Control de usuarios</h1>
+            <p class="subtitulo" style="margin:0;">
+                Active o bloquee cuentas y verifique la documentacion de los proveedores.
+            </p>
+        </div>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <div class="pestanas">
+        <button class="pestana activa" data-rol="" type="button">Todos</button>
+        <button class="pestana" data-rol="CLIENTE" type="button">Clientes</button>
+        <button class="pestana" data-rol="PROVEEDOR" type="button">Proveedores</button>
+        <button class="pestana" data-rol="ADMIN" type="button">Administradores</button>
+    </div>
+
+    <div class="envoltura-tabla">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Documento</th>
+                    <th>Roles</th>
+                    <th>Cuenta</th>
+                    <th>Verificacion</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-usuarios">
+                <tr><td colspan="8" class="cargando">Cargando usuarios...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

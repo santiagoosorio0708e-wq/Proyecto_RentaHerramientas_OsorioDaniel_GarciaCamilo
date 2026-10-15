@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despachos y Devoluciones | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion"></nav>
+    </div>
+</header>
+
+<main class="contenedor seccion">
+
+    <div class="fila-encabezado">
+        <div>
+            <h1>Control de Despachos, Devoluciones y Averías</h1>
+            <p class="subtitulo">Gestione aprobaciones de alquiler, check-in de retorno de maquinaria, reportes de daños con evidencias 4FN y cargos por mora.</p>
+        </div>
+        <div>
+            <button class="boton boton-secundario" id="btn-refrescar-todo">Actualizar Todo</button>
+        </div>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <!-- SECCIÓN 1: RESERVAS Y DESPACHO -->
+    <section class="tarjeta" style="margin-bottom:24px;">
+        <div class="fila-encabezado">
+            <h2>Flujo de Reservas y Alquileres Activos</h2>
+            <div style="display:flex; gap:10px;">
+                <select id="filtro-estado-reserva" style="padding:6px 10px; border-radius:var(--radio-sm); background:var(--color-superficie-2); color:var(--color-texto); border:1px solid var(--color-borde);">
+                    <option value="">Todos los estados</option>
+                    <option value="SOLICITADA">Solicitadas</option>
+                    <option value="APROBADA">Aprobadas</option>
+                    <option value="EN_CURSO">En curso (En obra)</option>
+                    <option value="FINALIZADA">Finalizadas</option>
+                </select>
+            </div>
+        </div>
+        <div class="envoltura-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Fechas</th>
+                        <th>Estado</th>
+                        <th>Monto Total</th>
+                        <th>Acciones Operativas</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-gestion-reservas">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: HISTORIAL DE DEVOLUCIONES Y AVERÍAS -->
+    <section class="tarjeta">
+        <div class="fila-encabezado">
+            <h2>Historial de Devoluciones Físicas e Inspecciones</h2>
+        </div>
+        <div class="envoltura-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Devolución</th>
+                        <th>Reserva Asociada</th>
+                        <th>Fecha Retorno Real</th>
+                        <th>Días Retraso</th>
+                        <th>Estado General</th>
+                        <th>Cargos Adicionales</th>
+                        <th>Inspección / Daños</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-devoluciones">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<!-- Modal: Check-In de Devolución Físico -->
+<div class="fondo-modal" id="modal-checkin">
+    <div class="modal" style="max-width: 680px;">
+        <div class="cabecera-modal">
+            <h2>Check-in de Retorno de Maquinaria</h2>
+            <button class="cerrar-modal" data-cerrar="modal-checkin">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <p class="subtitulo" id="checkin-subtitulo">Inspeccione el equipo y registre novedades en la entrega.</p>
+            <div id="checkin-mensaje" class="mensaje"></div>
+
+            <form id="form-checkin">
+                <input type="hidden" id="checkin-id-reserva">
+
+                <div class="lista-datos" style="margin-bottom:14px;">
+                    <div class="dato">
+                        <div class="etiqueta">Fecha Pactada de Entrega</div>
+                        <div class="valor" id="checkin-fecha-pactada">-</div>
+                    </div>
+                    <div class="dato">
+                        <div class="etiqueta">Herramientas en Alquiler</div>
+                        <div class="valor" id="checkin-herramientas-ids">-</div>
+                    </div>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="checkin-fecha-real">Fecha real de devolución física</label>
+                    <input type="date" id="checkin-fecha-real" required>
+                    <span class="ayuda-campo" id="checkin-alerta-retraso"></span>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="checkin-estado-general">Estado físico general del equipo</label>
+                    <select id="checkin-estado-general" required>
+                        <option value="BUEN_ESTADO">BUEN ESTADO (Operativo, limpio, sin novedades)</option>
+                        <option value="DANO_LEVE">DAÑO LEVE (Rayones, desgaste superior al normal)</option>
+                        <option value="DANO_GRAVE">DAÑO GRAVE (Falla de motor, rotura de piezas estructurales)</option>
+                        <option value="PERDIDA_TOTAL">PÉRDIDA TOTAL / EXTRAVÍO</option>
+                    </select>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="checkin-observaciones">Observaciones de la inspección</label>
+                    <textarea id="checkin-observaciones" rows="2" placeholder="Detalles de la entrega física..."></textarea>
+                </div>
+
+                <!-- Checkbox para registrar averías -->
+                <div style="margin: 14px 0;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="checkin-tiene-dano" style="width:18px; height:18px;">
+                        <strong>¿El equipo presenta averías o daños que requieran cobro?</strong>
+                    </label>
+                </div>
+
+                <!-- Formulario de daño (condicional) -->
+                <div id="seccion-dano" style="display:none; background:var(--color-superficie-2); padding:16px; border-radius:var(--radio); margin-bottom:14px; border:1px solid var(--color-borde);">
+                    <h4 style="color:var(--color-acento); margin-bottom:10px;">Reporte de Daño y Evidencias Fotográficas (4FN)</h4>
+
+                    <div class="grupo-campo">
+                        <label for="dano-id-herramienta">ID de la herramienta dañada</label>
+                        <input type="number" id="dano-id-herramienta" placeholder="Ej: 1">
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-tipo">Tipo de Avería</label>
+                        <select id="dano-tipo">
+                            <option value="MECANICO">MECÁNICO (Motor, caja, engranajes)</option>
+                            <option value="ELECTRICO">ELÉCTRICO (Bobinado, cable quemado, switch)</option>
+                            <option value="ESTETICO">ESTÉTICO (Carcasa rota, abolladuras)</option>
+                            <option value="FALTANTE_PIEZA">FALTANTE DE PIEZA (Accesorios no devueltos)</option>
+                            <option value="IRREPARABLE">IRREPARABLE (Pérdida total del equipo)</option>
+                        </select>
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-descripcion">Descripción técnica de la falla</label>
+                        <input type="text" id="dano-descripcion" placeholder="Indique claramente la falla encontrada">
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-costo">Costo estimado de reparación / reposición (COP)</label>
+                        <input type="number" id="dano-costo" min="0" step="1000" placeholder="50000">
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-responsable">Responsable que asume</label>
+                        <select id="dano-responsable">
+                            <option value="CLIENTE">CLIENTE (Se genera cargo adicional automático)</option>
+                            <option value="PROVEEDOR">PROVEEDOR (Desgaste natural)</option>
+                            <option value="POLIZA_GARANTIA">PÓLIZA DE GARANTÍA</option>
+                        </select>
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-foto-url">URL de Evidencia Fotográfica (4FN)</label>
+                        <input type="url" id="dano-foto-url" placeholder="https://ejemplo.com/foto-averia.jpg">
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="dano-foto-desc">Descripción de la fotografía</label>
+                        <input type="text" id="dano-foto-desc" placeholder="Foto del inducido quemado">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+                    <button type="button" class="boton boton-secundario" data-cerrar="modal-checkin">Cancelar</button>
+                    <button type="submit" class="boton" id="btn-guardar-checkin">Completar Check-In y Liquidar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ver Detalle de Inspección y Daños -->
+<div class="fondo-modal" id="modal-detalle-devolucion">
+    <div class="modal" style="max-width: 650px;">
+        <div class="cabecera-modal">
+            <h2>Detalle de Inspección y Cargos Adicionales</h2>
+            <button class="cerrar-modal" data-cerrar="modal-detalle-devolucion">&times;</button>
+        </div>
+        <div class="cuerpo-modal" id="cuerpo-detalle-devolucion">
+            <!-- Dinámico -->
+        </div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-detalle-devolucion">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/gestion_reservas.js"></script>
+</body>
+</html>

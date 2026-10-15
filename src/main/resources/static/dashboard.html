@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gerencial y Reportes | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu" id="menu-sesion"></nav>
+    </div>
+</header>
+
+<main class="contenedor seccion">
+
+    <div class="fila-encabezado">
+        <div>
+            <h1>Dashboard Gerencial y Analítica de Negocio</h1>
+            <p class="subtitulo">Métricas financieras consolidadas, KPIs de inventario, tasa de incidencias y popularidad de maquinaria.</p>
+        </div>
+        <div>
+            <button class="boton boton-secundario" id="btn-refrescar-dashboard">Actualizar Indicadores</button>
+        </div>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <!-- 1. KPIs FINANCIEROS -->
+    <h2>Indicadores Financieros y Tributarios</h2>
+    <div class="rejilla-kpis">
+        <div class="tarjeta-kpi kpi-exito">
+            <div class="kpi-titulo">Total Recaudado (Pasarela)</div>
+            <div class="kpi-valor" id="kpi-total-recaudado">$ 0</div>
+            <div class="kpi-subtexto" id="kpi-pagos-exitosos">0 pagos aprobados</div>
+        </div>
+        <div class="tarjeta-kpi kpi-info">
+            <div class="kpi-titulo">Subtotal Facturado (Sin IVA)</div>
+            <div class="kpi-valor" id="kpi-subtotal">$ 0</div>
+            <div class="kpi-subtexto">Ingreso neto base</div>
+        </div>
+        <div class="tarjeta-kpi kpi-aviso">
+            <div class="kpi-titulo">IVA Acumulado (19% Legal)</div>
+            <div class="kpi-valor" id="kpi-iva">$ 0</div>
+            <div class="kpi-subtexto" id="kpi-facturas-emitidas">0 facturas electrónicas</div>
+        </div>
+        <div class="tarjeta-kpi kpi-error">
+            <div class="kpi-titulo">Recaudos por Mora y Daños</div>
+            <div class="kpi-valor" id="kpi-cargos-adicionales">$ 0</div>
+            <div class="kpi-subtexto" id="kpi-detalle-cargos">Retrasos y reparaciones</div>
+        </div>
+    </div>
+
+    <!-- 2. MÉTRICAS OPERATIVAS DE MAQUINARIA -->
+    <h2>Estado Operativo de Maquinaria e Incidencias</h2>
+    <div class="rejilla-kpis">
+        <div class="tarjeta-kpi">
+            <div class="kpi-titulo">Flota Total Registrada</div>
+            <div class="kpi-valor" id="kpi-total-herramientas">0</div>
+            <div class="kpi-subtexto">Equipos de construcción</div>
+        </div>
+        <div class="tarjeta-kpi kpi-exito">
+            <div class="kpi-titulo">Disponibles para Alquiler</div>
+            <div class="kpi-valor" id="kpi-disponibles">0</div>
+            <div class="kpi-subtexto" id="kpi-porc-disponibles">En bodega listos</div>
+        </div>
+        <div class="tarjeta-kpi kpi-info">
+            <div class="kpi-titulo">Alquiladas en Obra</div>
+            <div class="kpi-valor" id="kpi-alquiladas">0</div>
+            <div class="kpi-subtexto" id="kpi-porc-alquiladas">Activas con clientes</div>
+        </div>
+        <div class="tarjeta-kpi kpi-aviso">
+            <div class="kpi-titulo">En Taller / Mantenimiento</div>
+            <div class="kpi-valor" id="kpi-mantenimiento">0</div>
+            <div class="kpi-subtexto">Reparación preventiva/correctiva</div>
+        </div>
+        <div class="tarjeta-kpi kpi-error">
+            <div class="kpi-titulo">Tasa de Siniestralidad / Averías</div>
+            <div class="kpi-valor" id="kpi-tasa-dano">0.0%</div>
+            <div class="kpi-subtexto" id="kpi-total-danos">0 daños en devoluciones</div>
+        </div>
+    </div>
+
+    <!-- 3. TOP RANKINGS Y PROVEEDORES (GRID 2 COLUMNAS) -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(480px, 1fr)); gap:20px; margin-top:14px;">
+
+        <!-- Top Herramientas Populares -->
+        <section class="tarjeta">
+            <h2>Herramientas Más Alquiladas (Top 5)</h2>
+            <div class="envoltura-tabla">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Herramienta</th>
+                            <th>Categoría</th>
+                            <th>Alquileres</th>
+                            <th>Ingresos Generados</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-top-herramientas">
+                        <!-- Dinámico -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Top Clientes Frecuentes -->
+        <section class="tarjeta">
+            <h2>Clientes con Mayor Frecuencia (Top 5)</h2>
+            <div class="envoltura-tabla">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Email</th>
+                            <th>Reservas</th>
+                            <th>Gasto Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-top-clientes">
+                        <!-- Dinámico -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- 4. PARTICIPACIÓN POR PROVEEDOR -->
+    <section class="tarjeta" style="margin-top:20px;">
+        <h2>Distribución de Ingresos por Proveedor</h2>
+        <div class="envoltura-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Proveedor</th>
+                        <th>Equipos Registrados</th>
+                        <th>Total Alquileres</th>
+                        <th>Ingresos Brutos Generados</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-proveedores">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

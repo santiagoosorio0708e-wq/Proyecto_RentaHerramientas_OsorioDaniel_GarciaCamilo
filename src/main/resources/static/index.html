@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Maquinaria y Equipos | RentaTools Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Barra de Sesión / Navegación Principal -->
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">
+            <div class="marca-icono">🏗️</div>
+            <div>RENTA<span>TOOLS</span> <small style="font-size:0.65rem; color:#94a3b8; font-weight:600; display:block; letter-spacing:1px;">EQUIPOS DE CONSTRUCCIÓN</small></div>
+        </a>
+        <nav class="menu" id="menu-sesion">
+            <!-- Construido dinámicamente por comun.js -->
+        </nav>
+    </div>
+</header>
+
+<!-- Contenido Principal -->
+<main class="contenedor seccion">
+
+    <!-- HERO BANNER PREMIUM -->
+    <section class="hero-catalogo">
+        <div class="hero-fondo"></div>
+        <div class="hero-contenido">
+            <div class="hero-tag">🚜 Flota Industrial Certificada 2026</div>
+            <h1 class="hero-titulo">Potencia y Maquinaria para <span>Grandes Obras</span></h1>
+            <p class="hero-descripcion">
+                Solución integral en alquiler de maquinaria pesada, herramientas de demolición, plantas eléctricas y equipos de elevación. Despacho inmediato y facturación electrónica DIAN con IVA del 19%.
+            </p>
+            <div class="hero-estadisticas">
+                <div class="stat-item">
+                    <h4>150+</h4>
+                    <p>Equipos en Flota</p>
+                </div>
+                <div class="stat-item">
+                    <h4>99.4%</h4>
+                    <p>Disponibilidad</p>
+                </div>
+                <div class="stat-item">
+                    <h4>100%</h4>
+                    <p>Facturación DIAN</p>
+                </div>
+                <div class="stat-item">
+                    <h4>8</h4>
+                    <p>Ciudades de Cobertura</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PÍLDORAS DE CATEGORÍA RÁPIDAS -->
+    <div class="pildoras-categorias" id="contenedor-pildoras">
+        <button class="pildora-cat activa" data-cat="">⚡ Todas las Máquinas</button>
+        <button class="pildora-cat" data-cat="1">🦺 Compactación</button>
+        <button class="pildora-cat" data-cat="2">🔨 Demolición</button>
+        <button class="pildora-cat" data-cat="3">✂️ Corte & Concreto</button>
+        <button class="pildora-cat" data-cat="4">🌀 Mezclado</button>
+        <button class="pildora-cat" data-cat="5">🏗️ Alturas & Andamios</button>
+        <button class="pildora-cat" data-cat="6">🔋 Plantas Diésel</button>
+        <button class="pildora-cat" data-cat="7">💧 Bombeo</button>
+        <button class="pildora-cat" data-cat="8">⚡ Soldadura</button>
+        <button class="pildora-cat" data-cat="9">📐 Topografía Láser</button>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <!-- FILTROS AVANZADOS -->
+    <section class="tarjeta" style="margin-bottom:28px;">
+        <h2>🔍 Filtrar Inventario Especializado</h2>
+        <form id="form-filtros">
+            <div class="filtros">
+                <div class="grupo-campo">
+                    <label for="texto">Búsqueda rápida</label>
+                    <input type="text" id="texto" name="texto" placeholder="Ej: Rana, Caterpillar, Demoledor...">
+                </div>
+                <div class="grupo-campo">
+                    <label for="idCategoria">Categoría Oficial</label>
+                    <select id="idCategoria" name="idCategoria">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="grupo-campo">
+                    <label for="precioMinimo">Tarifa Mínima / Día</label>
+                    <input type="number" id="precioMinimo" name="precioMinimo" min="0" step="5000" placeholder="$ 0">
+                </div>
+                <div class="grupo-campo">
+                    <label for="precioMaximo">Tarifa Máxima / Día</label>
+                    <input type="number" id="precioMaximo" name="precioMaximo" min="0" step="10000" placeholder="$ 500,000">
+                </div>
+                <div class="grupo-campo">
+                    <label for="ubicacion">Sede / Ciudad</label>
+                    <input type="text" id="ubicacion" name="ubicacion" placeholder="Bogotá, Medellín, Cali...">
+                </div>
+                <div class="grupo-campo">
+                    <label for="soloDisponibles">Disponibilidad</label>
+                    <select id="soloDisponibles" name="soloDisponibles">
+                        <option value="true">Solo listas para entrega</option>
+                        <option value="false">Mostrar toda la flota</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:18px; flex-wrap:wrap;">
+                <button type="submit" class="boton">Filtrar Catálogo</button>
+                <button type="button" class="boton boton-secundario" id="btn-limpiar">Restablecer Filtros</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- LISTADO DE HERRAMIENTAS -->
+    <section>
+        <div class="fila-encabezado">
+            <div>
+                <h2 id="titulo-resultados">Equipos Disponibles</h2>
+                <p class="subtitulo" style="font-size:0.9rem; margin:0;">Maquinaria disponible para entrega en obra con inspección técnica certificada.</p>
+            </div>
+        </div>
+        <div id="resultados" class="rejilla-tarjetas"></div>
+    </section>
+
+</main>
+
+<!-- MODAL FICHA TÉCNICA -->
+<div class="fondo-modal" id="modal-detalle">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2 id="detalle-titulo">Especificaciones del Equipo</h2>
+            <button class="cerrar-modal" data-cerrar="modal-detalle">&times;</button>
+        </div>
+        <div class="cuerpo-modal" id="detalle-cuerpo"></div>
+        <div class="pie-modal">
+            <button class="boton boton-secundario" data-cerrar="modal-detalle">Cerrar</button>
+            <button class="boton" id="btn-abrir-reserva">Alquilar / Reservar Ahora</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE SOLICITUD DE ALQUILER / RESERVA -->
+<div class="fondo-modal" id="modal-crear-reserva">
+    <div class="modal">
+        <div class="cabecera-modal">
+            <h2>Solicitud de Alquiler de Maquinaria</h2>
+            <button class="cerrar-modal" data-cerrar="modal-crear-reserva">&times;</button>
+        </div>
+        <div class="cuerpo-modal">
+            <p class="subtitulo" id="reserva-modal-subtitulo">Configure el periodo de alquiler para su obra o proyecto.</p>
+            <div id="reserva-mensaje" class="mensaje"></div>
+
+            <form id="form-crear-reserva">
+                <input type="hidden" id="reserva-id-herramienta">
+                <input type="hidden" id="reserva-tarifa-diaria">
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="reserva-fecha-inicio">Fecha de Inicio en Obra *</label>
+                        <input type="date" id="reserva-fecha-inicio" required>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="reserva-fecha-fin">Fecha de Retorno Programada *</label>
+                        <input type="date" id="reserva-fecha-fin" required>
+                    </div>
+                </div>
+
+                <div class="grupo-campo" style="margin-top:14px;">
+                    <label for="reserva-notas">Dirección de Despacho y Requerimientos de Obra</label>
+                    <textarea id="reserva-notas" rows="2" placeholder="Indique dirección de la obra, contacto en terreno o si requiere transporte especial"></textarea>
+                </div>
+
+                <div class="caja-factura" style="margin-top:16px;">
+                    <div class="factura-header">
+                        <h4 style="color:#ffffff;">Cotización Estimada de Alquiler</h4>
+                        <span class="insignia insignia-en_curso" id="reserva-dias-calculados">1 día</span>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>Valor alquiler estimado:</span>
+                        <strong id="reserva-monto-calculado">$ 0</strong>
+                    </div>
+                    <div class="factura-fila-total">
+                        <span>Depósito de garantía (retornable):</span>
+                        <strong id="reserva-deposito-calculado">$ 100,000</strong>
+                    </div>
+                    <div class="factura-fila-total gran-total">
+                        <span>Total Compromiso:</span>
+                        <strong id="reserva-total-compromiso">$ 0</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+                    <button type="button" class="boton boton-secundario" data-cerrar="modal-crear-reserva">Cancelar</button>
+                    <button type="submit" class="boton" id="btn-confirmar-reserva">Confirmar Solicitud de Reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS EN ORDEN DE DEPENDENCIA -->
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/catalogo.js"></script>
+</body>
+</html>

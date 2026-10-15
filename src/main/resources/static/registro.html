@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | RentaTools</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
+        <nav class="menu">
+            <a href="index.html">Catalogo</a>
+            <a href="login.html">Iniciar sesion</a>
+        </nav>
+    </div>
+</header>
+
+<main class="pagina-centrada">
+    <div class="caja-acceso ancha">
+        <div class="tarjeta">
+            <h1>Crear una cuenta</h1>
+            <p class="subtitulo">Elija el tipo de cuenta que necesita.</p>
+
+            <!-- Registro diferenciado: cada pestana envia a un endpoint distinto -->
+            <div class="pestanas">
+                <button class="pestana activa" data-tipo="cliente" type="button">Soy cliente</button>
+                <button class="pestana" data-tipo="proveedor" type="button">Soy proveedor</button>
+            </div>
+
+            <div id="mensaje" class="mensaje"></div>
+
+            <!-- ============ Formulario CLIENTE ============ -->
+            <form id="form-cliente" class="formulario">
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="c-nombre">Nombre completo *</label>
+                        <input type="text" id="c-nombre" name="nombreCompleto" required minlength="3" maxlength="120">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="c-email">Correo electronico *</label>
+                        <input type="email" id="c-email" name="email" required maxlength="100">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="c-password">Contrasena *</label>
+                        <input type="password" id="c-password" name="password" required minlength="8" maxlength="72">
+                        <span class="ayuda-campo">Minimo 8 caracteres, con letras y numeros.</span>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="c-telefono">Telefono *</label>
+                        <input type="tel" id="c-telefono" name="telefono" required placeholder="3185550109">
+                    </div>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="c-direccion">Direccion *</label>
+                    <input type="text" id="c-direccion" name="direccion" required maxlength="180">
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="c-tipoDoc">Tipo de documento *</label>
+                        <select id="c-tipoDoc" name="tipoDocumento" required>
+                            <option value="CC">Cedula de ciudadania</option>
+                            <option value="CE">Cedula de extranjeria</option>
+                            <option value="PASAPORTE">Pasaporte</option>
+                            <option value="NIT">NIT</option>
+                        </select>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="c-numDoc">Numero de documento *</label>
+                        <input type="text" id="c-numDoc" name="numeroDocumento" required maxlength="30">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="c-tipoCliente">Tipo de cliente</label>
+                        <select id="c-tipoCliente" name="tipoCliente">
+                            <option value="PARTICULAR">Particular</option>
+                            <option value="EMPRESARIAL">Empresarial</option>
+                        </select>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="c-ciudad">Ciudad de residencia</label>
+                        <input type="text" id="c-ciudad" name="ciudadResidencia" maxlength="80">
+                    </div>
+                </div>
+
+                <button type="submit" class="boton">Crear cuenta de cliente</button>
+            </form>
+
+            <!-- ============ Formulario PROVEEDOR ============ -->
+            <form id="form-proveedor" class="formulario oculto">
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="p-nombre">Nombre o representante *</label>
+                        <input type="text" id="p-nombre" name="nombreCompleto" required minlength="3" maxlength="120">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="p-email">Correo corporativo *</label>
+                        <input type="email" id="p-email" name="email" required maxlength="100">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="p-password">Contrasena *</label>
+                        <input type="password" id="p-password" name="password" required minlength="8" maxlength="72">
+                        <span class="ayuda-campo">Minimo 8 caracteres, con letras y numeros.</span>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="p-telefono">Telefono *</label>
+                        <input type="tel" id="p-telefono" name="telefono" required placeholder="3135550104">
+                    </div>
+                </div>
+
+                <div class="grupo-campo">
+                    <label for="p-direccion">Direccion de la bodega *</label>
+                    <input type="text" id="p-direccion" name="direccion" required maxlength="180">
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="p-tipoDoc">Tipo de documento *</label>
+                        <select id="p-tipoDoc" name="tipoDocumento" required>
+                            <option value="NIT">NIT</option>
+                            <option value="CC">Cedula de ciudadania</option>
+                            <option value="CE">Cedula de extranjeria</option>
+                            <option value="PASAPORTE">Pasaporte</option>
+                        </select>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="p-numDoc">Numero de documento / NIT *</label>
+                        <input type="text" id="p-numDoc" name="numeroDocumento" required maxlength="30"
+                               placeholder="900123456-1">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="p-razon">Razon social *</label>
+                        <input type="text" id="p-razon" name="razonSocial" required maxlength="150">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="p-comercial">Nombre comercial</label>
+                        <input type="text" id="p-comercial" name="nombreComercial" maxlength="120">
+                    </div>
+                </div>
+
+                <div class="fila-campos">
+                    <div class="grupo-campo">
+                        <label for="p-ciudad">Ciudad de operacion *</label>
+                        <input type="text" id="p-ciudad" name="ciudadOperacion" required maxlength="80">
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="p-web">Sitio web</label>
+                        <input type="url" id="p-web" name="sitioWeb" maxlength="150" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div class="mensaje mensaje-info visible" style="margin-bottom:0;">
+                    Su cuenta quedara pendiente de verificacion. El administrador debe validar
+                    su documentacion antes de que pueda publicar herramientas.
+                </div>
+
+                <button type="submit" class="boton">Crear cuenta de proveedor</button>
+            </form>
+        </div>
+
+        <p class="pie-acceso">
+            Ya tiene cuenta? <a href="login.html">Inicie sesion</a>
+        </p>
+    </div>
+</main>
+
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/registro.js"></script>
+</body>
+</html>
