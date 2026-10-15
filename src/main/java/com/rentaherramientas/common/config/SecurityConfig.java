@@ -67,6 +67,17 @@ public class SecurityConfig {
                         // --- Preflight de CORS: debe pasar siempre ---
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // --- Recursos estaticos del frontend web ---
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/*.html",
+                                "/css/**",
+                                "/js/**",
+                                "/img/**",
+                                "/favicon.ico"
+                        ).permitAll()
+
                         // --- Documentacion publica ---
                         .requestMatchers(
                                 "/swagger-ui/**",
