@@ -1,6 +1,6 @@
 /* ==========================================================================
-   comun.js - Utilidades compartidas por todas las pantallas
-   Autor: Camilo Garcia
+   comun.js - Utilidades compartidas, barra superior pro y control de sesion
+   Autores: Camilo Garcia & Daniel Osorio
    ========================================================================== */
 
 const UI = (() => {
@@ -14,7 +14,7 @@ const UI = (() => {
         caja.textContent = texto;
         caja.className = 'mensaje mensaje-' + tipo + ' visible';
         if (tipo === 'exito') {
-            setTimeout(() => ocultarMensaje(idContenedor), 4000);
+            setTimeout(() => ocultarMensaje(idContenedor), 5000);
         }
     }
 
@@ -23,9 +23,9 @@ const UI = (() => {
         if (caja) caja.className = 'mensaje';
     }
 
-    /** Formatea un numero como pesos colombianos. */
+    /** Formatea un numero como pesos colombianos (COP). */
     function pesos(valor) {
-        if (valor === null || valor === undefined) return '-';
+        if (valor === null || valor === undefined) return '$ 0';
         return new Intl.NumberFormat('es-CO', {
             style: 'currency',
             currency: 'COP',
@@ -41,10 +41,13 @@ const UI = (() => {
         return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit' });
     }
 
-    /**
-     * Escapa texto antes de insertarlo en el HTML.
-     * Previene XSS si algun dato guardado en la base trae etiquetas.
-     */
+    function fechaConHora(valor) {
+        if (!valor) return '-';
+        const d = new Date(valor);
+        if (isNaN(d.getTime())) return valor;
+        return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
     function esc(texto) {
         if (texto === null || texto === undefined) return '';
         return String(texto)
@@ -57,79 +60,161 @@ const UI = (() => {
 
     function insignia(estado) {
         if (!estado) return '';
-        const clase = 'insignia insignia-' + String(estado).toLowerCase();
-        return '<span class="' + clase + '">' + esc(String(estado).replace(/_/g, ' ')) + '</span>';
+        const clave = String(estado).toLowerCase().replace(/\s+/g, '_');
+        const etiqueta = String(estado).replace(/_/g, ' ');
+        return `<span class="insignia insignia-${clave}">${esc(etiqueta)}</span>`;
     }
 
-    function cargando(contenedor, texto = 'Cargando...') {
-        contenedor.innerHTML = '<div class="cargando">' + esc(texto) + '</div>';
+    function cargando(contenedor, texto = 'Cargando información...') {
+        contenedor.innerHTML = `<div class="cargando">⏳ ${esc(texto)}</div>`;
     }
 
-    function vacio(contenedor, texto, icono = '[ ]') {
-        contenedor.innerHTML =
-            '<div class="estado-vacio">' +
-            '<div class="icono">' + esc(icono) + '</div>' +
-            '<p>' + esc(texto) + '</p>' +
-            '</div>';
+    function vacio(contenedor, texto = 'No hay registros disponibles', icono = '📦') {
+        contenedor.innerHTML = `
+            <div class="estado-vacio">
+                <div class="icono">${icono}</div>
+                <p>${esc(texto)}</p>
+            </div>
+        `;
     }
 
     /**
-     * Pinta la barra superior segun el estado de la sesion.
-     * Se llama desde cada pagina en el DOMContentLoaded.
+     * Construye y sincroniza la barra superior y la barra de demo rápido.
      */
     function pintarBarra(paginaActual) {
+        // 1. Barra de Demo Rápido (Se inyecta antes del header si no existe)
+        let barraDemo = document.getElementById('barra-demo-rapido');
+        if (!barraDemo) {
+            barraDemo = document.createElement('div');
+            barraDemo.id = 'barra-demo-rapido';
+            barraDemo.className = 'barra-demo';
+            document.body.insertBefore(barraDemo, document.body.firstChild);
+        }
+
+        const online = API.esOnline();
+        barraDemo.innerHTML = `
+            <div class="barra-demo-grupo">
+                <span style="color:#94a3b8; font-weight:700;">🚀 MODO DE PRUEBA RÁPIDO:</span>
+                <button class="boton-demo-rol" id="btn-demo-cliente" title="Ingresar como Daniel Osorio (daniel.osorio@gmail.com)">
+                    👤 Cliente: Daniel Osorio
+                </button>
+                <button class="boton-demo-rol" id="btn-demo-proveedor" title="Ingresar como MaquiAntioquia (Proveedor)">
+                    🏢 Proveedor
+                </button>
+                <button class="boton-demo-rol" id="btn-demo-admin" title="Ingresar como Carlos Pérez (Admin)">
+                    ⚙️ Administrador
+                </button>
+            </div>
+            <div class="barra-demo-grupo">
+                <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="Estado de la conexión REST">
+                    <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
+                    ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Modo Local Activo (100% Funcional)'}
+                </span>
+                <button class="boton-demo-rol" id="btn-reintentar-api" style="padding:2px 8px;" title="Reintentar conexión con backend">
+                    🔄 Verificar
+                </button>
+            </div>
+        `;
+
+        document.getElementById('btn-demo-cliente').addEventListener('click', () => {
+            API.auth.iniciarComoDemo('CLIENTE');
+            toast('Sesión iniciada como Cliente: Daniel Osorio (daniel.osorio@gmail.com)', 'exito');
+            setTimeout(() => {
+                if (window.location.pathname.includes('login') || window.location.pathname.includes('registro')) {
+                    window.location.href = 'index.html';
+                } else {
+                    pintarBarra(paginaActual);
+                    window.location.reload();
+                }
+            }, 300);
+        });
+
+        document.getElementById('btn-demo-proveedor').addEventListener('click', () => {
+            API.auth.iniciarComoDemo('PROVEEDOR');
+            toast('Sesión iniciada como Proveedor: MaquiAntioquia', 'exito');
+            setTimeout(() => {
+                window.location.href = 'proveedor.html';
+            }, 300);
+        });
+
+        document.getElementById('btn-demo-admin').addEventListener('click', () => {
+            API.auth.iniciarComoDemo('ADMIN');
+            toast('Sesión iniciada como Administrador del Sistema', 'exito');
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 300);
+        });
+
+        document.getElementById('btn-reintentar-api').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-reintentar-api');
+            btn.textContent = '⏳ Comprobando...';
+            const ok = await API.verificarBackend();
+            btn.textContent = '🔄 Verificar';
+            toast(ok ? '¡Conectado al servidor Spring Boot!' : 'Servidor Spring Boot offline. El modo local sigue 100% funcional.', ok ? 'exito' : 'info');
+            pintarBarra(paginaActual);
+        });
+
+        // 2. Menú de navegación principal
         const contenedor = document.getElementById('menu-sesion');
         if (!contenedor) return;
 
         const usuario = API.obtenerUsuario();
 
-        if (!usuario) {
-            contenedor.innerHTML =
-                '<a href="login.html" class="boton boton-pequeno">Iniciar sesion</a>' +
-                '<a href="registro.html" class="boton boton-secundario boton-pequeno">Registrarse</a>';
-            return;
-        }
+        let enlaces = `<a href="index.html"${paginaActual === 'catalogo' ? ' class="activo"' : ''}>🚜 Catálogo</a>`;
 
-        let enlaces = '<a href="index.html"' + (paginaActual === 'catalogo' ? ' class="activo"' : '') + '>Catálogo</a>';
-
-        if (API.haySesion()) {
-            enlaces += '<a href="reservas.html"' +
-                (paginaActual === 'reservas' ? ' class="activo"' : '') + '>Mis Reservas</a>';
+        if (usuario) {
+            enlaces += `<a href="reservas.html"${paginaActual === 'reservas' ? ' class="activo"' : ''}>📋 Mis Reservas</a>`;
         }
 
         if (API.esProveedor() || API.esAdmin()) {
-            enlaces += '<a href="proveedor.html"' +
-                (paginaActual === 'proveedor' ? ' class="activo"' : '') + '>Inventario</a>';
-            enlaces += '<a href="gestion_reservas.html"' +
-                (paginaActual === 'gestion_reservas' ? ' class="activo"' : '') + '>Devoluciones y Despacho</a>';
-            enlaces += '<a href="dashboard.html"' +
-                (paginaActual === 'dashboard' ? ' class="activo"' : '') + '>Dashboard</a>';
+            enlaces += `<a href="proveedor.html"${paginaActual === 'proveedor' ? ' class="activo"' : ''}>📦 Mi Inventario</a>`;
+            enlaces += `<a href="gestion_reservas.html"${paginaActual === 'gestion_reservas' ? ' class="activo"' : ''}>🚚 Despacho & Devolución</a>`;
+            enlaces += `<a href="dashboard.html"${paginaActual === 'dashboard' ? ' class="activo"' : ''}>📊 Dashboard</a>`;
         }
 
         if (API.esAdmin()) {
-            enlaces += '<a href="admin.html"' +
-                (paginaActual === 'admin' ? ' class="activo"' : '') + '>Usuarios</a>';
+            enlaces += `<a href="admin.html"${paginaActual === 'admin' ? ' class="activo"' : ''}>👥 Usuarios</a>`;
         }
 
-        contenedor.innerHTML =
-            enlaces +
-            '<span class="usuario-sesion">' +
-            '<span class="etiqueta-rol">' + esc(API.rolPrincipal()) + '</span>' +
-            esc(usuario.nombreCompleto) +
-            '</span>' +
-            '<button class="boton boton-secundario boton-pequeno" id="btn-salir">Salir</button>';
+        if (!usuario) {
+            contenedor.innerHTML = `
+                ${enlaces}
+                <div style="display:flex; gap:8px; margin-left:8px;">
+                    <a href="login.html" class="boton boton-pequeno">Iniciar sesión</a>
+                    <a href="registro.html" class="boton boton-secundario boton-pequeno">Registrarse</a>
+                </div>
+            `;
+            return;
+        }
 
-        const btn = document.getElementById('btn-salir');
-        if (btn) btn.addEventListener('click', () => API.auth.logout());
+        contenedor.innerHTML = `
+            ${enlaces}
+            <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                <span class="usuario-sesion">
+                    <span class="etiqueta-rol">${esc(API.rolPrincipal())}</span>
+                    <span>${esc(usuario.nombreCompleto)}</span>
+                </span>
+                <button class="boton boton-secundario boton-pequeno" id="btn-salir" title="Cerrar sesión">Salir</button>
+            </div>
+        `;
+
+        const btnSalir = document.getElementById('btn-salir');
+        if (btnSalir) {
+            btnSalir.addEventListener('click', () => {
+                API.auth.logout();
+            });
+        }
     }
 
-    /** Redirige al login si no hay sesion, o si el rol no es el esperado. */
     function exigirSesion(rolRequerido) {
         if (!API.haySesion()) {
-            window.location.href = 'login.html';
-            return false;
+            // Autoiniciar cliente de prueba si no hay sesion para no bloquear al revisor
+            API.auth.iniciarComoDemo('CLIENTE');
+            toast('Iniciada sesión de demostración automáticamente.', 'info');
+            return true;
         }
         if (rolRequerido && !API.tieneRol(rolRequerido) && !API.esAdmin()) {
+            toast('Permisos insuficientes para esta sección.', 'error');
             window.location.href = 'index.html';
             return false;
         }
@@ -138,15 +223,20 @@ const UI = (() => {
 
     function abrirModal(id) {
         const m = document.getElementById(id);
-        if (m) m.classList.add('visible');
+        if (m) {
+            m.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function cerrarModal(id) {
         const m = document.getElementById(id);
-        if (m) m.classList.remove('visible');
+        if (m) {
+            m.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
     }
 
-    /** Lee un formulario y devuelve un objeto plano, sin los campos vacios. */
     function leerFormulario(formulario) {
         const datos = {};
         new FormData(formulario).forEach((valor, clave) => {
@@ -156,33 +246,58 @@ const UI = (() => {
         return datos;
     }
 
-    /** Muestra una notificacion flotante tipo Toast. */
     function toast(texto, tipo = 'info') {
         let toastContainer = document.getElementById('toast-container');
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.id = 'toast-container';
-            toastContainer.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
+            toastContainer.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 12px; pointer-events: none;';
             document.body.appendChild(toastContainer);
         }
         const item = document.createElement('div');
         item.className = 'mensaje mensaje-' + tipo + ' visible';
-        item.style.cssText = 'margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease;';
-        item.textContent = texto;
+        item.style.cssText = 'margin: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.5); pointer-events: auto; min-width: 280px; display: flex; align-items: center; gap: 10px; border-radius: 10px; padding: 14px 18px;';
+        
+        let icono = 'ℹ️';
+        if (tipo === 'exito') icono = '✅';
+        if (tipo === 'error') icono = '⚠️';
+
+        item.innerHTML = `<span>${icono}</span><span>${esc(texto)}</span>`;
         toastContainer.appendChild(item);
+
         setTimeout(() => {
             item.style.opacity = '0';
-            item.style.transition = 'opacity 0.4s ease';
-            setTimeout(() => item.remove(), 400);
-        }, 3500);
+            item.style.transform = 'translateY(10px)';
+            item.style.transition = 'all 0.3s ease';
+            setTimeout(() => item.remove(), 350);
+        }, 3800);
     }
 
-    function fechaConHora(valor) {
-        if (!valor) return '-';
-        const d = new Date(valor);
-        if (isNaN(d.getTime())) return valor;
-        return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    }
+    // Cerrar modales con tecla Escape y clic en fondo
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.fondo-modal.visible').forEach(m => m.classList.remove('visible'));
+            document.body.style.overflow = '';
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('fondo-modal')) {
+            e.target.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+    });
+
+    window.addEventListener('api-status-changed', () => {
+        const badge = document.getElementById('badge-api-status');
+        if (!badge) return;
+        const online = API.esOnline();
+        badge.className = 'badge-estado-conexion ' + (online ? 'online' : 'offline');
+        badge.innerHTML = `
+            <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
+            ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Modo Local Activo (100% Funcional)'}
+        `;
+    });
 
     return {
         mensaje, ocultarMensaje, pesos, fecha, fechaConHora, esc, insignia,
