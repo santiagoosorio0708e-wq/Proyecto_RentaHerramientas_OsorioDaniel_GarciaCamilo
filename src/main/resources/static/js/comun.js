@@ -78,6 +78,43 @@ const UI = (() => {
         `;
     }
 
+    // ------------------------------------------------------------------
+    // Gestión de Tema: Modo Día / Modo Noche
+    // ------------------------------------------------------------------
+
+    function obtenerTemaActual() {
+        return localStorage.getItem('rh_tema') || 'dark';
+    }
+
+    function aplicarTema(tema) {
+        document.documentElement.setAttribute('data-theme', tema);
+        localStorage.setItem('rh_tema', tema);
+        actualizarBotonesTema(tema);
+    }
+
+    function alternarTema() {
+        const actual = obtenerTemaActual();
+        const nuevo = actual === 'dark' ? 'light' : 'dark';
+        aplicarTema(nuevo);
+        toast(nuevo === 'light' ? '☀️ Modo Día activado' : '🌙 Modo Noche activado', 'info');
+    }
+
+    function actualizarBotonesTema(tema) {
+        document.querySelectorAll('.boton-toggle-tema').forEach(btn => {
+            const esNav = btn.classList.contains('boton-toggle-nav');
+            if (tema === 'dark') {
+                btn.innerHTML = esNav ? '☀️ Día' : '☀️ Modo Día';
+                btn.setAttribute('title', 'Cambiar a Modo Día');
+            } else {
+                btn.innerHTML = esNav ? '🌙 Noche' : '🌙 Modo Noche';
+                btn.setAttribute('title', 'Cambiar a Modo Noche');
+            }
+        });
+    }
+
+    // Aplicar de inmediato el tema configurado
+    aplicarTema(obtenerTemaActual());
+
     /**
      * Construye y sincroniza la barra superior y la barra de demo rápido.
      */
@@ -92,9 +129,10 @@ const UI = (() => {
         }
 
         const online = API.esOnline();
+        const tema = obtenerTemaActual();
         barraDemo.innerHTML = `
             <div class="barra-demo-grupo">
-                <span style="color:#94a3b8; font-weight:700;">🚀 MODO DE PRUEBA RÁPIDO:</span>
+                <span style="color:var(--color-texto-suave); font-weight:700;">🚀 MODO DE PRUEBA RÁPIDO:</span>
                 <button class="boton-demo-rol" id="btn-demo-cliente" title="Ingresar como Daniel Osorio (daniel.osorio@gmail.com)">
                     👤 Cliente: Daniel Osorio
                 </button>
@@ -106,6 +144,9 @@ const UI = (() => {
                 </button>
             </div>
             <div class="barra-demo-grupo">
+                <button class="boton-demo-rol boton-toggle-tema" id="btn-toggle-tema-top" title="Cambiar tema Día / Noche">
+                    ${tema === 'dark' ? '☀️ Modo Día' : '🌙 Modo Noche'}
+                </button>
                 <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="Estado de la conexión REST">
                     <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
                     ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Modo Local Activo (100% Funcional)'}
@@ -115,6 +156,9 @@ const UI = (() => {
                 </button>
             </div>
         `;
+
+        const btnTemaTop = document.getElementById('btn-toggle-tema-top');
+        if (btnTemaTop) btnTemaTop.addEventListener('click', alternarTema);
 
         document.getElementById('btn-demo-cliente').addEventListener('click', () => {
             API.auth.iniciarComoDemo('CLIENTE');
@@ -176,27 +220,41 @@ const UI = (() => {
             enlaces += `<a href="admin.html"${paginaActual === 'admin' ? ' class="activo"' : ''}>👥 Usuarios</a>`;
         }
 
+        const temaActual = obtenerTemaActual();
+        const textoTemaNav = temaActual === 'dark' ? '☀️ Día' : '🌙 Noche';
+
         if (!usuario) {
             contenedor.innerHTML = `
                 ${enlaces}
-                <div style="display:flex; gap:8px; margin-left:8px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-left:8px;">
+                    <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
+                        ${textoTemaNav}
+                    </button>
                     <a href="login.html" class="boton boton-pequeno">Iniciar sesión</a>
                     <a href="registro.html" class="boton boton-secundario boton-pequeno">Registrarse</a>
                 </div>
             `;
+            const btnTemaNav = document.getElementById('btn-toggle-tema-nav');
+            if (btnTemaNav) btnTemaNav.addEventListener('click', alternarTema);
             return;
         }
 
         contenedor.innerHTML = `
             ${enlaces}
             <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
+                    ${textoTemaNav}
+                </button>
                 <span class="usuario-sesion">
                     <span class="etiqueta-rol">${esc(API.rolPrincipal())}</span>
                     <span>${esc(usuario.nombreCompleto)}</span>
                 </span>
-                <button class="boton boton-secundario boton-pequeno" id="btn-salir" title="Cerrar sesión">Salir</button>
+                <button class="boton-secundario boton-pequeno" id="btn-salir" title="Cerrar sesión">Salir</button>
             </div>
         `;
+
+        const btnTemaNav = document.getElementById('btn-toggle-tema-nav');
+        if (btnTemaNav) btnTemaNav.addEventListener('click', alternarTema);
 
         const btnSalir = document.getElementById('btn-salir');
         if (btnSalir) {
@@ -302,7 +360,8 @@ const UI = (() => {
     return {
         mensaje, ocultarMensaje, pesos, fecha, fechaConHora, esc, insignia,
         cargando, vacio, pintarBarra, exigirSesion,
-        abrirModal, cerrarModal, leerFormulario, toast
+        abrirModal, cerrarModal, leerFormulario, toast,
+        aplicarTema, alternarTema, obtenerTemaActual
     };
 
 })();
