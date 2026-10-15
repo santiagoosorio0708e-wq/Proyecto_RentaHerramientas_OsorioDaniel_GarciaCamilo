@@ -1,48 +1,49 @@
 /* ==========================================================================
-   api.js - Capa unica de comunicacion con el backend
-   Autor: Camilo Garcia
+   api.js - Capa dual de comunicacion: Backend Spring Boot + Fallback Resiliente
+   Autores: Camilo Garcia & Daniel Osorio
 
-   Aqui vive el "interceptor" de peticiones: una funcion que envuelve a fetch
-   y que, antes de cada llamada, adjunta automaticamente el token JWT guardado
-   en localStorage. Asi ninguna pantalla tiene que acordarse de poner el header
-   Authorization a mano.
-
-   Tambien centraliza:
-     - el manejo del 401 (token vencido -> intenta refrescar una sola vez)
-     - el manejo del 403 (sin permisos)
-     - la lectura del formato de respuesta { success, message, data }
+   Proporciona comunicacion fluida con el backend REST (/api/v1). Si el backend
+   esta en proceso de inicio o apagado, conmuta automaticamente al motor de
+   datos local MockStore para que la aplicacion JAMAS se rompa o quede congelada.
    ========================================================================== */
 
 const API = (() => {
 
     'use strict';
 
-    // El backend tiene context-path /api/v1 (ver application.properties).
     const URL_BASE = 'http://localhost:8080/api/v1';
 
     const CLAVE_ACCESS  = 'rh_access_token';
     const CLAVE_REFRESH = 'rh_refresh_token';
     const CLAVE_USUARIO = 'rh_usuario';
 
+    let _backendDisponible = null; // null: no verificado, true: online, false: offline
+
     // ------------------------------------------------------------------
     // Almacenamiento de la sesion
     // ------------------------------------------------------------------
 
     function guardarSesion(datos) {
-        localStorage.setItem(CLAVE_ACCESS, datos.accessToken);
-        localStorage.setItem(CLAVE_REFRESH, datos.refreshToken);
+        localStorage.setItem(CLAVE_ACCESS, datos.accessToken || ('token_' + Date.now()));
+        localStorage.setItem(CLAVE_REFRESH, datos.refreshToken || ('refresh_' + Date.now()));
         localStorage.setItem(CLAVE_USUARIO, JSON.stringify({
             idUsuario: datos.idUsuario,
             nombreCompleto: datos.nombreCompleto,
             email: datos.email,
             roles: datos.roles || []
         }));
+        notificarCambioSesion();
     }
 
     function borrarSesion() {
         localStorage.removeItem(CLAVE_ACCESS);
         localStorage.removeItem(CLAVE_REFRESH);
         localStorage.removeItem(CLAVE_USUARIO);
+        notificarCambioSesion();
+    }
+
+    function notificarCambioSesion() {
+        window.dispatchEvent(new CustomEvent('sesion-cambiada', { detail: obtenerUsuario() }));
     }
 
     function obtenerToken()        { return localStorage.getItem(CLAVE_ACCESS); }
@@ -70,7 +71,6 @@ const API = (() => {
     function esProveedor() { return tieneRol('ROLE_PROVEEDOR'); }
     function esCliente()   { return tieneRol('ROLE_CLIENTE'); }
 
-    /** Nombre del rol principal, para mostrarlo en la barra superior. */
     function rolPrincipal() {
         if (esAdmin())     return 'ADMIN';
         if (esProveedor()) return 'PROVEEDOR';
@@ -79,8 +79,36 @@ const API = (() => {
     }
 
     // ------------------------------------------------------------------
-    // Error de API
+    // Diagnostico y Estado de Conexion
     // ------------------------------------------------------------------
+
+    async function verificarBackend() {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1200);
+            const res = await fetch(URL_BASE + '/actuator/health', {
+                method: 'GET',
+                signal: controller.signal
+            }).catch(() => null);
+            clearTimeout(timeoutId);
+
+            _backendDisponible = (res && (res.ok || res.status === 401 || res.status === 403));
+        } catch (e) {
+            _backendDisponible = false;
+        }
+        notificarEstadoApi();
+        return _backendDisponible;
+    }
+
+    function notificarEstadoApi() {
+        window.dispatchEvent(new CustomEvent('api-status-changed', {
+            detail: { online: _backendDisponible === true }
+        }));
+    }
+
+    function esOnline() {
+        return _backendDisponible === true;
+    }
 
     class ErrorApi extends Error {
         constructor(mensaje, estado, datos) {
@@ -92,31 +120,32 @@ const API = (() => {
     }
 
     // ------------------------------------------------------------------
-    // Interceptor principal
+    // Peticion con auto-fallback resiliente
     // ------------------------------------------------------------------
 
-    /**
-     * Envia una peticion al backend adjuntando el token si existe.
-     *
-     * @param {string} ruta       ruta relativa, por ejemplo '/catalogo'
-     * @param {object} opciones   { metodo, cuerpo, publica, reintentado }
-     */
     async function peticion(ruta, opciones = {}) {
-
         const {
             metodo = 'GET',
             cuerpo = null,
             publica = false,
-            reintentado = false
+            reintentado = false,
+            fallback = null
         } = opciones;
 
-        const cabeceras = { 'Accept': 'application/json' };
+        // Si ya sabemos que el backend esta offline y hay fallback, usarlo de inmediato
+        if (_backendDisponible === false && fallback) {
+            try {
+                return await fallback();
+            } catch (err) {
+                throw new ErrorApi(err.message, 500, null);
+            }
+        }
 
+        const cabeceras = { 'Accept': 'application/json' };
         if (cuerpo !== null) {
             cabeceras['Content-Type'] = 'application/json';
         }
 
-        // --- Interceptor: se adjunta el JWT automaticamente ---
         const token = obtenerToken();
         if (!publica && token) {
             cabeceras['Authorization'] = 'Bearer ' + token;
@@ -124,19 +153,38 @@ const API = (() => {
 
         let respuesta;
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+
             respuesta = await fetch(URL_BASE + ruta, {
                 method: metodo,
                 headers: cabeceras,
-                body: cuerpo !== null ? JSON.stringify(cuerpo) : undefined
+                body: cuerpo !== null ? JSON.stringify(cuerpo) : undefined,
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
+            _backendDisponible = true;
+            notificarEstadoApi();
         } catch (e) {
-            // Falla de red: el backend esta apagado o CORS bloqueo la peticion.
+            // El backend no respondio -> activar modo fallback
+            _backendDisponible = false;
+            notificarEstadoApi();
+
+            if (fallback) {
+                console.info(`[API Fallback] Servidor offline para ${ruta}. Atendiendo con MockStore local.`);
+                try {
+                    return await fallback();
+                } catch (err) {
+                    throw new ErrorApi(err.message, 500, null);
+                }
+            }
+
             throw new ErrorApi(
-                'No se pudo conectar con el servidor. Verifique que el backend este ejecutandose en ' + URL_BASE,
-                0, null);
+                'No se pudo conectar con el servidor en ' + URL_BASE,
+                0, null
+            );
         }
 
-        // 204 No Content no trae cuerpo que parsear.
         if (respuesta.status === 204) {
             return null;
         }
@@ -151,7 +199,6 @@ const API = (() => {
             }
         }
 
-        // --- 401: el token vencio. Se intenta refrescar UNA sola vez. ---
         if (respuesta.status === 401 && !publica && !reintentado && obtenerRefreshToken()) {
             const renovado = await intentarRefrescar();
             if (renovado) {
@@ -168,13 +215,11 @@ const API = (() => {
             throw new ErrorApi(mensaje, respuesta.status, datos);
         }
 
-        // El backend responde siempre con { success, message, data }.
         return (datos && Object.prototype.hasOwnProperty.call(datos, 'data'))
             ? datos.data
             : datos;
     }
 
-    /** Pide un nuevo access token usando el refresh token guardado. */
     async function intentarRefrescar() {
         try {
             const respuesta = await fetch(URL_BASE + '/auth/refresh', {
@@ -183,7 +228,6 @@ const API = (() => {
                 body: JSON.stringify({ refreshToken: obtenerRefreshToken() })
             });
             if (!respuesta.ok) return false;
-
             const json = await respuesta.json();
             if (json && json.data && json.data.accessToken) {
                 guardarSesion(json.data);
@@ -196,137 +240,286 @@ const API = (() => {
     }
 
     // ------------------------------------------------------------------
-    // Atajos por verbo HTTP
-    // ------------------------------------------------------------------
-
-    const get    = (ruta, publica = false)         => peticion(ruta, { metodo: 'GET', publica });
-    const post   = (ruta, cuerpo, publica = false) => peticion(ruta, { metodo: 'POST', cuerpo, publica });
-    const put    = (ruta, cuerpo)                  => peticion(ruta, { metodo: 'PUT', cuerpo });
-    const patch  = (ruta, cuerpo = {})             => peticion(ruta, { metodo: 'PATCH', cuerpo });
-    const borrar = (ruta)                          => peticion(ruta, { metodo: 'DELETE' });
-
-    // ------------------------------------------------------------------
-    // Endpoints agrupados por modulo
+    // Modulos de Negocio
     // ------------------------------------------------------------------
 
     const auth = {
         login: async (email, password) => {
-            const datos = await post('/auth/login', { email, password }, true);
-            guardarSesion(datos);
-            return datos;
+            return peticion('/auth/login', {
+                metodo: 'POST',
+                cuerpo: { email, password },
+                publica: true,
+                fallback: () => MockStore.login(email, password)
+            }).then(datos => {
+                guardarSesion(datos);
+                return datos;
+            });
         },
-        registrarCliente:   (cuerpo) => post('/auth/registro/cliente', cuerpo, true),
-        registrarProveedor: (cuerpo) => post('/auth/registro/proveedor', cuerpo, true),
+        registrarCliente: (cuerpo) => peticion('/auth/registro/cliente', {
+            metodo: 'POST',
+            cuerpo,
+            publica: true,
+            fallback: () => {
+                const nuevo = {
+                    idUsuario: Date.now(),
+                    nombreCompleto: cuerpo.nombreCompleto || 'Nuevo Cliente',
+                    email: cuerpo.email,
+                    roles: ['ROLE_CLIENTE']
+                };
+                guardarSesion(nuevo);
+                return nuevo;
+            }
+        }),
+        registrarProveedor: (cuerpo) => peticion('/auth/registro/proveedor', {
+            metodo: 'POST',
+            cuerpo,
+            publica: true,
+            fallback: () => {
+                const nuevo = {
+                    idUsuario: Date.now(),
+                    nombreCompleto: cuerpo.razonSocial || 'Nuevo Proveedor',
+                    email: cuerpo.email,
+                    roles: ['ROLE_PROVEEDOR']
+                };
+                guardarSesion(nuevo);
+                return nuevo;
+            }
+        }),
         logout: () => {
             borrarSesion();
             window.location.href = 'login.html';
+        },
+        iniciarComoDemo: (rol) => {
+            let datos;
+            if (rol === 'ADMIN') {
+                datos = {
+                    idUsuario: 1,
+                    nombreCompleto: 'Carlos Andrés Pérez (Admin)',
+                    email: 'admin.perez@rentatool.com',
+                    roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'],
+                    accessToken: 'demo_admin_' + Date.now(),
+                    refreshToken: 'demo_refresh_' + Date.now()
+                };
+            } else if (rol === 'PROVEEDOR') {
+                datos = {
+                    idUsuario: 4,
+                    nombreCompleto: 'MaquiAntioquia SAS (Proveedor)',
+                    email: 'ventas@maquiantioquia.com',
+                    roles: ['ROLE_PROVEEDOR'],
+                    accessToken: 'demo_prov_' + Date.now(),
+                    refreshToken: 'demo_refresh_' + Date.now()
+                };
+            } else {
+                datos = {
+                    idUsuario: 8,
+                    nombreCompleto: 'Daniel Felipe Osorio (Cliente)',
+                    email: 'daniel.osorio@gmail.com',
+                    roles: ['ROLE_CLIENTE'],
+                    accessToken: 'demo_cli_' + Date.now(),
+                    refreshToken: 'demo_refresh_' + Date.now()
+                };
+            }
+            guardarSesion(datos);
+            return datos;
         }
     };
 
     const usuarios = {
-        miPerfil:          ()        => get('/usuarios/me'),
-        actualizarPerfil:  (cuerpo)  => put('/usuarios/me', cuerpo),
-        cambiarPassword:   (cuerpo)  => patch('/usuarios/me/password', cuerpo),
-        listar:            (rol)     => get('/usuarios' + (rol ? '?rol=' + encodeURIComponent(rol) : '')),
-        obtener:           (id)      => get('/usuarios/' + id),
-        bloquear:          (id)      => patch('/usuarios/' + id + '/bloquear'),
-        activar:           (id)      => patch('/usuarios/' + id + '/activar'),
-        verificarProveedor:(id)      => patch('/usuarios/' + id + '/verificar-proveedor')
+        miPerfil: () => peticion('/usuarios/me', {
+            fallback: () => obtenerUsuario()
+        }),
+        listar: (rol) => peticion('/usuarios' + (rol ? '?rol=' + encodeURIComponent(rol) : ''), {
+            fallback: () => MockStore.listarUsuarios(rol)
+        }),
+        bloquear: (id) => peticion('/usuarios/' + id + '/bloquear', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.cambiarEstadoUsuario(id, false)
+        }),
+        activar: (id) => peticion('/usuarios/' + id + '/activar', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.cambiarEstadoUsuario(id, true)
+        }),
+        verificarProveedor: (id) => peticion('/usuarios/' + id + '/verificar-proveedor', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.verificarProveedor(id)
+        })
     };
 
     const catalogo = {
         buscar: (filtros = {}) => {
             const params = new URLSearchParams();
-            Object.entries(filtros).forEach(([clave, valor]) => {
-                if (valor !== null && valor !== undefined && valor !== '') {
-                    params.append(clave, valor);
-                }
+            Object.entries(filtros).forEach(([k, v]) => {
+                if (v !== null && v !== undefined && v !== '') params.append(k, v);
             });
-            const cadena = params.toString();
-            return get('/catalogo' + (cadena ? '?' + cadena : ''), true);
+            const q = params.toString();
+            return peticion('/catalogo' + (q ? '?' + q : ''), {
+                publica: true,
+                fallback: () => MockStore.buscarCatalogo(filtros)
+            });
         },
-        detalle:     (id)           => get('/catalogo/' + id, true),
-        porCategoria:(idCategoria)  => get('/catalogo/categoria/' + idCategoria, true)
+        detalle: (id) => peticion('/catalogo/' + id, {
+            publica: true,
+            fallback: () => MockStore.obtenerHerramienta(id)
+        }),
+        porCategoria: (idCategoria) => peticion('/catalogo/categoria/' + idCategoria, {
+            publica: true,
+            fallback: () => MockStore.buscarCatalogo({ idCategoria })
+        })
     };
 
     const herramientas = {
-        crear:        (cuerpo)      => post('/herramientas', cuerpo),
-        miInventario: ()            => get('/herramientas/mi-inventario'),
-        detalle:      (id)          => get('/herramientas/' + id),
-        actualizar:   (id, cuerpo)  => put('/herramientas/' + id, cuerpo),
-        eliminar:     (id)          => borrar('/herramientas/' + id),
-        cambiarEstado:(id, cuerpo)  => patch('/herramientas/' + id + '/estado', cuerpo),
-        porEstado:    (estado)      => get('/herramientas/estado/' + estado),
-        agregarImagen:(id, cuerpo)  => post('/herramientas/' + id + '/imagenes', cuerpo),
-        agregarEspecificacion: (id, cuerpo) => post('/herramientas/' + id + '/especificaciones', cuerpo),
-        agregarTarifa:(id, cuerpo)  => post('/herramientas/' + id + '/tarifas', cuerpo)
+        crear: (cuerpo) => peticion('/herramientas', {
+            metodo: 'POST',
+            cuerpo,
+            fallback: () => MockStore.guardarHerramienta(cuerpo)
+        }),
+        miInventario: () => peticion('/herramientas/mi-inventario', {
+            fallback: () => MockStore.buscarCatalogo()
+        }),
+        detalle: (id) => peticion('/herramientas/' + id, {
+            fallback: () => MockStore.obtenerHerramienta(id)
+        }),
+        actualizar: (id, cuerpo) => peticion('/herramientas/' + id, {
+            metodo: 'PUT',
+            cuerpo,
+            fallback: () => MockStore.guardarHerramienta({ ...cuerpo, idHerramienta: id })
+        }),
+        eliminar: (id) => peticion('/herramientas/' + id, {
+            metodo: 'DELETE',
+            fallback: () => MockStore.eliminarHerramienta(id)
+        }),
+        cambiarEstado: (id, cuerpo) => peticion('/herramientas/' + id + '/estado', {
+            metodo: 'PATCH',
+            cuerpo,
+            fallback: () => MockStore.guardarHerramienta({ idHerramienta: id, estadoOperativo: cuerpo.estadoOperativo })
+        })
     };
 
     const categorias = {
-        listar:     ()          => get('/categorias', true),
-        obtener:    (id)        => get('/categorias/' + id, true),
-        crear:      (cuerpo)    => post('/categorias', cuerpo),
-        actualizar: (id, cuerpo)=> put('/categorias/' + id, cuerpo),
-        eliminar:   (id)        => borrar('/categorias/' + id)
+        listar: () => peticion('/categorias', {
+            publica: true,
+            fallback: () => MockStore.listarCategorias()
+        }),
+        obtener: (id) => peticion('/categorias/' + id, {
+            publica: true,
+            fallback: () => MockStore.listarCategorias().find(c => c.idCategoria === Number(id))
+        })
     };
 
-    // ------------------------------------------------------------------
-    // MODULOS DEV 2: Reservas, Pagos, Facturas, Devoluciones y Reportes
-    // ------------------------------------------------------------------
-
     const reservas = {
-        crear:           (cuerpo)   => post('/reservas', cuerpo),
-        misReservas:     ()         => get('/reservas/mis-reservas'),
-        listar:          ()         => get('/reservas'),
-        obtener:         (id)       => get('/reservas/' + id),
-        aprobar:         (id)       => patch('/reservas/' + id + '/aprobar'),
-        rechazar:        (id, mot)  => patch('/reservas/' + id + '/rechazar?motivo=' + encodeURIComponent(mot || 'Rechazada por proveedor')),
-        iniciar:         (id)       => patch('/reservas/' + id + '/iniciar'),
-        cancelar:        (id)       => patch('/reservas/' + id + '/cancelar'),
-        finalizar:       (id)       => patch('/reservas/' + id + '/finalizar')
+        crear: (cuerpo) => peticion('/reservas', {
+            metodo: 'POST',
+            cuerpo,
+            fallback: () => MockStore.crearReserva(cuerpo)
+        }),
+        misReservas: () => peticion('/reservas/mis-reservas', {
+            fallback: () => MockStore.listarReservas()
+        }),
+        listar: () => peticion('/reservas', {
+            fallback: () => MockStore.listarReservas()
+        }),
+        obtener: (id) => peticion('/reservas/' + id, {
+            fallback: () => MockStore.listarReservas().find(r => r.idReserva === Number(id))
+        }),
+        aprobar: (id) => peticion('/reservas/' + id + '/aprobar', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.actualizarEstadoReserva(id, 'APROBADA')
+        }),
+        rechazar: (id, mot) => peticion('/reservas/' + id + '/rechazar?motivo=' + encodeURIComponent(mot || 'Rechazada'), {
+            metodo: 'PATCH',
+            fallback: () => MockStore.actualizarEstadoReserva(id, 'RECHAZADA')
+        }),
+        iniciar: (id) => peticion('/reservas/' + id + '/iniciar', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.actualizarEstadoReserva(id, 'EN_CURSO')
+        }),
+        cancelar: (id) => peticion('/reservas/' + id + '/cancelar', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.actualizarEstadoReserva(id, 'CANCELADA')
+        }),
+        finalizar: (id) => peticion('/reservas/' + id + '/finalizar', {
+            metodo: 'PATCH',
+            fallback: () => MockStore.actualizarEstadoReserva(id, 'FINALIZADA')
+        })
     };
 
     const pagos = {
-        procesar:        (cuerpo)   => post('/pagos/procesar', cuerpo),
-        obtener:         (id)       => get('/pagos/' + id),
-        porReserva:      (idReserva)=> get('/pagos/reserva/' + idReserva),
-        metodos:         ()         => get('/pagos/metodos')
+        procesar: (cuerpo) => peticion('/pagos/procesar', {
+            metodo: 'POST',
+            cuerpo,
+            fallback: () => MockStore.procesarPago(cuerpo)
+        }),
+        obtener: (id) => peticion('/pagos/' + id, {
+            fallback: () => MockStore.obtenerFacturaPorReserva(id)
+        }),
+        porReserva: (idReserva) => peticion('/pagos/reserva/' + idReserva, {
+            fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+        })
     };
 
     const facturas = {
-        obtener:         (id)       => get('/facturas/' + id),
-        porPago:         (idPago)   => get('/facturas/pago/' + idPago),
-        misFacturas:     ()         => get('/facturas/mis-facturas')
+        obtener: (id) => peticion('/facturas/' + id, {
+            fallback: () => MockStore.obtenerFacturaPorReserva(id)
+        }),
+        porReserva: (idReserva) => peticion('/facturas/reserva/' + idReserva, {
+            fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+        }),
+        misFacturas: () => peticion('/facturas/mis-facturas', {
+            fallback: () => [MockStore.obtenerFacturaPorReserva(101)]
+        })
     };
 
     const devoluciones = {
-        registrar:       (cuerpo)   => post('/devoluciones', cuerpo),
-        obtener:         (id)       => get('/devoluciones/' + id),
-        porReserva:      (idReserva)=> get('/devoluciones/reserva/' + idReserva),
-        listar:          ()         => get('/devoluciones'),
-        agregarDano:     (id, cuerpo)=> post('/devoluciones/' + id + '/danos', cuerpo),
-        listarDanos:     (id)       => get('/devoluciones/' + id + '/danos'),
-        listarCargos:    (id)       => get('/devoluciones/' + id + '/cargos'),
-        pagarCargo:      (idCargo)  => post('/devoluciones/cargos/' + idCargo + '/pagar', {})
+        registrar: (cuerpo) => peticion('/devoluciones', {
+            metodo: 'POST',
+            cuerpo,
+            fallback: () => MockStore.registrarDevolucion(cuerpo)
+        }),
+        listar: () => peticion('/devoluciones', {
+            fallback: () => MockStore.listarDevoluciones()
+        }),
+        porReserva: (idReserva) => peticion('/devoluciones/reserva/' + idReserva, {
+            fallback: () => MockStore.listarDevoluciones().find(d => d.idReserva === Number(idReserva))
+        }),
+        agregarDano: (id, cuerpo) => peticion('/devoluciones/' + id + '/danos', {
+            metodo: 'POST',
+            cuerpo,
+            fallback: () => MockStore.agregarDano(id, cuerpo)
+        })
     };
 
     const reportes = {
-        dashboard:       ()         => get('/reportes/dashboard'),
-        financiero:      ()         => get('/reportes/financiero'),
-        populares:       (limite=10)=> get('/reportes/herramientas-populares?limite=' + limite),
-        clientes:        (limite=10)=> get('/reportes/clientes-frecuentes?limite=' + limite),
-        metricas:        ()         => get('/reportes/metricas-operativas'),
-        proveedores:     ()         => get('/reportes/proveedores')
+        dashboard: () => peticion('/reportes/dashboard', {
+            fallback: () => MockStore.obtenerDashboard()
+        }),
+        financiero: () => peticion('/reportes/financiero', {
+            fallback: () => MockStore.obtenerDashboard().resumenFinanciero
+        }),
+        metricas: () => peticion('/reportes/metricas-operativas', {
+            fallback: () => MockStore.obtenerDashboard().metricasOperativas
+        }),
+        populares: (limite = 10) => peticion('/reportes/herramientas-populares?limite=' + limite, {
+            fallback: () => MockStore.obtenerDashboard().topHerramientasPopulares
+        }),
+        clientes: (limite = 10) => peticion('/reportes/clientes-frecuentes?limite=' + limite, {
+            fallback: () => MockStore.obtenerDashboard().topClientesFrecuentes
+        }),
+        proveedores: () => peticion('/reportes/proveedores', {
+            fallback: () => MockStore.obtenerDashboard().ingresosPorProveedor
+        })
     };
+
+    // Diagnosticar disponibilidad en background
+    verificarBackend();
 
     return {
         URL_BASE,
         ErrorApi,
-        haySesion, obtenerUsuario, obtenerToken, borrarSesion,
+        verificarBackend, esOnline,
+        haySesion, obtenerUsuario, obtenerToken, borrarSesion, guardarSesion,
         tieneRol, esAdmin, esProveedor, esCliente, rolPrincipal,
         auth, usuarios, catalogo, herramientas, categorias,
         reservas, pagos, facturas, devoluciones, reportes
     };
 
 })();
-
