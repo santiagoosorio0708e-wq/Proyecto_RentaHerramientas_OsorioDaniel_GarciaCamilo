@@ -3,69 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesion | RentaTools</title>
+    <title>Iniciar Sesión | RentaTools Pro</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <header class="barra-superior">
     <div class="contenedor">
-        <a href="index.html" class="marca">RENTA<span>TOOLS</span></a>
-        <nav class="menu"><a href="index.html">Catalogo</a></nav>
+        <a href="index.html" class="marca">
+            <div class="marca-icono">🏗️</div>
+            <div>RENTA<span>TOOLS</span></div>
+        </a>
+        <nav class="menu">
+            <a href="index.html">🚜 Volver al Catálogo</a>
+        </nav>
     </div>
 </header>
 
 <main class="pagina-centrada">
     <div class="caja-acceso">
         <div class="tarjeta">
-            <h1>Iniciar sesion</h1>
-            <p class="subtitulo">Ingrese con el correo con el que se registro.</p>
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="font-size:2.4rem; margin-bottom:8px;">🔐</div>
+                <h1>Acceso a la Plataforma</h1>
+                <p class="subtitulo" style="font-size:0.92rem;">Ingrese con sus credenciales de Cliente, Proveedor o Administrador.</p>
+            </div>
 
             <div id="mensaje" class="mensaje"></div>
 
             <form id="form-login" class="formulario">
-                <div class="grupo-campo">
-                    <label for="email">Correo electronico</label>
+                <div class="grupo-campo" style="margin-bottom:14px;">
+                    <label for="email">Correo electrónico corporativo</label>
                     <input type="email" id="email" name="email" required
-                           placeholder="usuario@correo.com" autocomplete="username">
+                           placeholder="ejemplo@rentatool.com" autocomplete="username">
                 </div>
-                <div class="grupo-campo">
-                    <label for="password">Contrasena</label>
+                <div class="grupo-campo" style="margin-bottom:18px;">
+                    <label for="password">Contraseña de acceso</label>
                     <input type="password" id="password" name="password" required
-                           placeholder="Su contrasena" autocomplete="current-password">
+                           placeholder="••••••••••••" autocomplete="current-password">
                 </div>
-                <button type="submit" class="boton" id="btn-entrar">Entrar</button>
+                <button type="submit" class="boton" id="btn-entrar" style="width:100%;">
+                    Iniciar Sesión
+                </button>
             </form>
 
             <p class="pie-acceso">
-                No tiene cuenta? <a href="registro.html">Registrese aqui</a>
+                ¿Aún no tiene cuenta? <a href="registro.html">Registrarse como Cliente o Proveedor</a>
             </p>
         </div>
 
-        <div class="tarjeta" style="margin-top:16px;">
-            <h3>Usuarios de prueba</h3>
-            <p class="ayuda-campo" style="margin-bottom:10px;">
-                Todos usan la contrasena <strong>Password123</strong> despues de ejecutar
-                el script <code>data_identidad_inventario.sql</code>.
+        <!-- ACCESO RÁPIDO PARA EVALUACIÓN -->
+        <div class="tarjeta" style="margin-top:20px;">
+            <h3>⚡ Acceso Rápido de Prueba (1 Clic)</h3>
+            <p class="ayuda-campo" style="margin-bottom:14px;">
+                Haga clic en cualquiera de los perfiles preconfigurados para iniciar sesión de inmediato:
             </p>
-            <div class="lista-datos">
-                <div class="dato">
-                    <div class="etiqueta">Administrador</div>
-                    <div class="valor" style="font-size:.82rem;">admin.perez@rentatool.com</div>
-                </div>
-                <div class="dato">
-                    <div class="etiqueta">Proveedor</div>
-                    <div class="valor" style="font-size:.82rem;">ventas@maquiantioquia.com</div>
-                </div>
-                <div class="dato">
-                    <div class="etiqueta">Cliente</div>
-                    <div class="valor" style="font-size:.82rem;">camilo.garcia@gmail.com</div>
-                </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="boton boton-secundario" id="btn-rapido-cliente" style="justify-content:flex-start; text-align:left;">
+                    <span>👤</span>
+                    <div>
+                        <strong>Cliente: Daniel Felipe Osorio</strong>
+                        <div style="font-size:0.75rem; color:#94a3b8;">daniel.osorio@gmail.com</div>
+                    </div>
+                </button>
+                <button type="button" class="boton boton-secundario" id="btn-rapido-proveedor" style="justify-content:flex-start; text-align:left;">
+                    <span>🏢</span>
+                    <div>
+                        <strong>Proveedor: MaquiAntioquia SAS</strong>
+                        <div style="font-size:0.75rem; color:#94a3b8;">ventas@maquiantioquia.com</div>
+                    </div>
+                </button>
+                <button type="button" class="boton boton-secundario" id="btn-rapido-admin" style="justify-content:flex-start; text-align:left;">
+                    <span>⚙️</span>
+                    <div>
+                        <strong>Administrador: Carlos Pérez</strong>
+                        <div style="font-size:0.75rem; color:#94a3b8;">admin.perez@rentatool.com</div>
+                    </div>
+                </button>
             </div>
         </div>
     </div>
 </main>
 
+<script src="js/mock_data.js"></script>
 <script src="js/api.js"></script>
 <script src="js/comun.js"></script>
 <script src="js/login.js"></script>
