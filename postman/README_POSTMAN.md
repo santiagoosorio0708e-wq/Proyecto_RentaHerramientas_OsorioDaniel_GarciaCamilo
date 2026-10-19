@@ -48,3 +48,19 @@
          ▼
 6. [Reportes] Dashboard Gerencial y KPIs
 ```
+
+---
+
+## 4. Credenciales de Prueba Rápidas para Autenticación
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| **Administrador** | `admin.perez@rentatool.com` | `Password123` |
+| **Proveedor** | `ventas@maquiantioquia.com` | `Password123` |
+| **Cliente** | `camilo.garcia@gmail.com` | `Password123` |
+
+Todas las solicitudes protegidas requieren el encabezado:
+```http
+Authorization: Bearer {{token}}
+```
+
