@@ -10,6 +10,13 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuración de OpenAPI 3.0 (Swagger UI).
+ * Registra los metadatos de la API, datos de contacto del equipo de desarrollo,
+ * licencias y el esquema de seguridad global Bearer JWT para pruebas interactivas.
+ *
+ * @author Daniel Osorio & Camilo García
+ */
 @Configuration
 public class OpenApiConfig {
 
