@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manejador Global de Excepciones: Intercepta errores de validación, reglas de negocio
+ * y recursos no encontrados para retornar respuestas estandarizadas {@link ApiResponseDto}.
+ * Garantiza contratos JSON consistentes frente a cualquier falla en la API REST.
+ *
+ * @author Daniel Osorio & Camilo García
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
