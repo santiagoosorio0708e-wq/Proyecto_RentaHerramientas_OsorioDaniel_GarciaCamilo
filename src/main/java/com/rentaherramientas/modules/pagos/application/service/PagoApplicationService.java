@@ -21,6 +21,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Servicio de Aplicación: Orquestación de Pagos y Facturación Electrónica.
+ * Implementa los casos de uso para procesar transacciones transaccionales,
+ * validar el estado activo del método de pago, generar referencias únicas de pasarela
+ * y emitir la factura electrónica correspondiente con desglose del 19% de IVA.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Service
 @RequiredArgsConstructor
 public class PagoApplicationService implements ProcesarPagoUseCase, ConsultarPagoUseCase, ConsultarFacturaUseCase {
