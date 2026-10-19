@@ -14,6 +14,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Comando de Aplicación (DTO): Solicitud de Check-In Físico de Retorno de Maquinaria.
+ * Encapsula la fecha de devolución real para la liquidación de mora por retraso,
+ * el estado físico global del lote y la lista opcional de reportes de daños
+ * con soporte de evidencias fotográficas en Cuarta Forma Normal (4FN).
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Getter
 @Setter
 @Builder
