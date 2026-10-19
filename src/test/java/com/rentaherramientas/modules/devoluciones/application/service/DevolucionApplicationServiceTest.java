@@ -202,5 +202,37 @@ class DevolucionApplicationServiceTest {
                 devolucionService.registrarDano(999L, com.rentaherramientas.modules.devoluciones.domain.model.ReporteDano.builder().build())
         );
     }
+
+    @Test
+    @DisplayName("Debe liquidar 0 días de retraso si la devolución ocurre con anticipación a la fecha pactada")
+    void testRegistrarDevolucionAnticipada_RetornaCeroDiasRetraso() {
+        LocalDate fechaPactada = LocalDate.of(2026, 10, 20);
+        LocalDate fechaReal = LocalDate.of(2026, 10, 18); // 2 días antes
+
+        when(devolucionRepository.buscarDevolucionPorReserva(idReserva)).thenReturn(Optional.empty());
+        when(devolucionReservaPort.obtenerInfoReserva(idReserva)).thenReturn(Optional.of(
+                new DevolucionReservaPort.InfoReservaDevolucion(idReserva, "RES-2026-003", fechaPactada, "EN_CURSO", List.of(10L))
+        ));
+        when(devolucionRepository.guardarDevolucion(any(Devolucion.class))).thenAnswer(i -> {
+            Devolucion d = i.getArgument(0);
+            d.setId(2L);
+            return d;
+        });
+
+        RegistrarDevolucionCommand command = RegistrarDevolucionCommand.builder()
+                .idReserva(idReserva)
+                .fechaDevolucionReal(fechaReal)
+                .recibidoPor(idUsuario)
+                .estadoEquipoGeneral(EstadoEquipoGeneral.BUEN_ESTADO)
+                .observaciones("Retorno anticipado")
+                .reportesDano(List.of())
+                .build();
+
+        Devolucion resultado = devolucionService.registrarDevolucion(command);
+
+        assertNotNull(resultado);
+        assertEquals(0, resultado.getDiasRetraso());
+        assertTrue(resultado.getCargosAdicionales().isEmpty());
+    }
 }
 
