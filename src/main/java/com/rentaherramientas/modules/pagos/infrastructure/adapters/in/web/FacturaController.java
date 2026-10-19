@@ -94,7 +94,7 @@ public class FacturaController {
         );
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
+        headers.setContentType(new MediaType(MediaType.TEXT_PLAIN, java.nio.charset.StandardCharsets.UTF_8));
         headers.setContentDispositionFormData("attachment", factura.getNumeroFactura() + ".txt");
 
         return ResponseEntity.ok().headers(headers).body(reciboText);
