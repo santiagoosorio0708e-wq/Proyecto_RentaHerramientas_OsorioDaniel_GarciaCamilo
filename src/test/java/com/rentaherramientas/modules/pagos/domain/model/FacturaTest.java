@@ -32,4 +32,17 @@ class FacturaTest {
         assertTrue(fPagada.estaPagada());
         assertFalse(fEmitida.estaPagada());
     }
+
+    @Test
+    @DisplayName("Debe garantizar que subtotal + iva coincide con total incluso con decimales impares")
+    void calcularValoresFiscales_ConDecimalesImpares_MantieneExactitud() {
+        Factura factura = new Factura();
+        BigDecimal total = new BigDecimal("250355.50");
+
+        factura.calcularValoresFiscales(total);
+
+        assertEquals(total, factura.getSubtotal().add(factura.getIva()));
+        assertNotNull(factura.getSubtotal());
+        assertNotNull(factura.getIva());
+    }
 }
