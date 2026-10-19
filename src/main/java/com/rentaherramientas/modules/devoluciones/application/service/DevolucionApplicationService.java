@@ -33,6 +33,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Servicio de Aplicación: Gestión Integral de Devoluciones y Averías.
+ * Orquesta la inspección técnica del lote de maquinaria alquilado, calcula
+ * automáticamente los cargos por mora según los días de retraso frente a la
+ * fecha pactada, registra reportes de averías desacoplados en 4FN con sus
+ * respectivas evidencias fotográficas y actualiza el estado operativo de los equipos.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
