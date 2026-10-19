@@ -1,0 +1,333 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1150" width="100%" height="100%" style="background-color: #0b0f19; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect width="1600" height="1150" fill="#0b0f19"/>
+  <!-- Grid de fondo sutil -->
+  <g opacity="0.05">
+    <path d="M 0,0 L 1600,0 M 0,50 L 1600,50 M 0,100 L 1600,100 M 0,150 L 1600,150 M 0,200 L 1600,200 M 0,250 L 1600,250 M 0,300 L 1600,300 M 0,350 L 1600,350 M 0,400 L 1600,400 M 0,450 L 1600,450 M 0,500 L 1600,500 M 0,550 L 1600,550 M 0,600 L 1600,600 M 0,650 L 1600,650 M 0,700 L 1600,700 M 0,750 L 1600,750 M 0,800 L 1600,800 M 0,850 L 1600,850 M 0,900 L 1600,900 M 0,950 L 1600,950 M 0,1000 L 1600,1000 M 0,1050 L 1600,1050 M 0,1100 L 1600,1100" stroke="#94a3b8" stroke-width="1"/>
+    <path d="M 0,0 L 0,1150 M 50,0 L 50,1150 M 100,0 L 100,1150 M 150,0 L 150,1150 M 200,0 L 200,1150 M 250,0 L 250,1150 M 300,0 L 300,1150 M 350,0 L 350,1150 M 400,0 L 400,1150 M 450,0 L 450,1150 M 500,0 L 500,1150 M 550,0 L 550,1150 M 600,0 L 600,1150 M 650,0 L 650,1150 M 700,0 L 700,1150 M 750,0 L 750,1150 M 800,0 L 800,1150 M 850,0 L 850,1150 M 900,0 L 900,1150 M 950,0 L 950,1150 M 1000,0 L 1000,1150 M 1050,0 L 1050,1150 M 1100,0 L 1100,1150 M 1150,0 L 1150,1150 M 1200,0 L 1200,1150 M 1250,0 L 1250,1150 M 1300,0 L 1300,1150 M 1350,0 L 1350,1150 M 1400,0 L 1400,1150 M 1450,0 L 1450,1150 M 1500,0 L 1500,1150 M 1550,0 L 1550,1150" stroke="#94a3b8" stroke-width="1"/>
+  </g>
+
+  <!-- Banner Título Superior -->
+  <g transform="translate(50, 25)">
+    <rect width="1500" height="60" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1.5" filter="url(#shadow)"/>
+    <circle cx="35" cy="30" r="14" fill="#f59e0b" opacity="0.2"/>
+    <text x="35" y="36" text-anchor="middle" font-size="16">🏗️</text>
+    <text x="65" y="28" font-size="18" font-weight="700" fill="#f8fafc">MODELO RELACIONAL DE BASE DE DATOS (4FN) - renta_herramientas_db</text>
+    <text x="65" y="47" font-size="12" fill="#94a3b8">Plataforma de Renta de Herramientas y Construcción | 16 Tablas Normalizadas en Cuarta Forma Normal | MySQL 8.0</text>
+    <rect x="1330" y="16" width="145" height="28" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="1402" y="34" text-anchor="middle" font-size="11" font-weight="600" fill="#38bdf8">100% 4FN COMPLIANT</text>
+  </g>
+
+  <!-- LÍNEAS DE RELACIÓN / CONECTORES (Detrás de las tarjetas) -->
+  <g stroke="#475569" stroke-width="1.8" fill="none" opacity="0.75">
+    <!-- roles -> usuarios_roles -->
+    <path d="M 270, 180 L 320, 180" marker-end="url(#arrow)"/>
+    <!-- usuarios -> usuarios_roles -->
+    <path d="M 320, 240 L 260, 240 L 260, 220 L 320, 220" />
+    <!-- usuarios -> herramientas (proveedor) -->
+    <path d="M 520, 230 L 610, 230" marker-end="url(#arrow)"/>
+    <!-- categorias -> herramientas -->
+    <path d="M 720, 140 L 720, 180" marker-end="url(#arrow)"/>
+    <!-- usuarios -> reservas (cliente) -->
+    <path d="M 420, 480 L 420, 560 L 610, 560" marker-end="url(#arrow)"/>
+    <!-- reservas -> detalles_reserva -->
+    <path d="M 830, 560 L 920, 560" marker-end="url(#arrow)"/>
+    <!-- herramientas -> detalles_reserva -->
+    <path d="M 830, 310 L 980, 310 L 980, 490" marker-end="url(#arrow)"/>
+    <!-- reservas -> auditoria_estados_reserva -->
+    <path d="M 720, 740 L 720, 800" marker-end="url(#arrow)"/>
+    <!-- reservas -> pagos -->
+    <path d="M 610, 640 L 490, 640 L 490, 800" marker-end="url(#arrow)"/>
+    <!-- metodos_pago -> pagos -->
+    <path d="M 270, 880 L 370, 880" marker-end="url(#arrow)"/>
+    <!-- pagos -> facturas -->
+    <path d="M 490, 990 L 490, 1030 L 610, 1030" marker-end="url(#arrow)"/>
+    <!-- facturas -> detalles_factura -->
+    <path d="M 830, 1030 L 920, 1030" marker-end="url(#arrow)"/>
+    <!-- reservas -> devoluciones -->
+    <path d="M 830, 660 L 1150, 660 L 1150, 230 L 1230, 230" marker-end="url(#arrow)"/>
+    <!-- devoluciones -> reportes_dano -->
+    <path d="M 1340, 390 L 1340, 470" marker-end="url(#arrow)"/>
+    <!-- reportes_dano -> evidencias_dano (4FN) -->
+    <path d="M 1340, 680 L 1340, 740" marker-end="url(#arrow)"/>
+    <!-- devoluciones -> cargos_adicionales -->
+    <path d="M 1450, 260 L 1500, 260 L 1500, 950 L 1450, 950" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- ==================== BLOQUE 1: IDENTIDAD Y USUARIOS ==================== -->
+  
+  <!-- TABLA: ROLES -->
+  <g transform="translate(50, 110)" filter="url(#shadow)">
+    <rect width="220" height="130" rx="8" fill="#131d31" stroke="#3b82f6" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#blueGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#2563eb"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">🔐 ROLES</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#38bdf8">PK  id_rol : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#cbd5e1">UK  nombre : VARCHAR(50)</text>
+    <text x="12" y="92" font-size="11" fill="#94a3b8">    descripcion : VARCHAR(255)</text>
+    <text x="12" y="112" font-size="10" fill="#64748b">-- 20 roles base pre-sembrados</text>
+  </g>
+
+  <!-- TABLA: USUARIOS_ROLES (4FN Relación pura M:N) -->
+  <g transform="translate(320, 140)" filter="url(#shadow)">
+    <rect width="200" height="95" rx="8" fill="#131d31" stroke="#3b82f6" stroke-width="1.2"/>
+    <path d="M 0 0 L 200 0 L 200 28 L 0 28 Z" fill="#1e3a8a" rx="8"/>
+    <rect y="20" width="200" height="8" fill="#1e3a8a"/>
+    <text x="10" y="19" font-size="12" font-weight="700" fill="#93c5fd">🔗 USUARIOS_ROLES (4FN)</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#38bdf8">PK,FK  id_usuario : BIGINT</text>
+    <text x="12" y="68" font-size="11" font-weight="600" fill="#38bdf8">PK,FK  id_rol : BIGINT</text>
+    <text x="12" y="86" font-size="10" fill="#64748b">Asignación desacoplada</text>
+  </g>
+
+  <!-- TABLA: USUARIOS -->
+  <g transform="translate(320, 260)" filter="url(#shadow)">
+    <rect width="200" height="225" rx="8" fill="#131d31" stroke="#3b82f6" stroke-width="1.5"/>
+    <path d="M 0 0 L 200 0 L 200 32 L 0 32 Z" fill="url(#blueGrad)" rx="8"/>
+    <rect y="24" width="200" height="8" fill="#2563eb"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">👤 USUARIOS</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#38bdf8">PK  id_usuario : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#f8fafc">    nombre_completo : VARCHAR(120)</text>
+    <text x="12" y="92" font-size="11" fill="#cbd5e1">UK  email : VARCHAR(100)</text>
+    <text x="12" y="112" font-size="11" fill="#94a3b8">    password_hash : VARCHAR(255)</text>
+    <text x="12" y="132" font-size="11" fill="#cbd5e1">    telefono : VARCHAR(20)</text>
+    <text x="12" y="152" font-size="11" fill="#cbd5e1">    direccion : VARCHAR(150)</text>
+    <text x="12" y="172" font-size="11" fill="#94a3b8">    tipo_documento : ENUM</text>
+    <text x="12" y="192" font-size="11" fill="#cbd5e1">UK  numero_documento : VARCHAR</text>
+    <text x="12" y="212" font-size="11" fill="#10b981">    activo : BOOLEAN</text>
+  </g>
+
+  <!-- ==================== BLOQUE 2: CATÁLOGO E INVENTARIO ==================== -->
+
+  <!-- TABLA: CATEGORIAS -->
+  <g transform="translate(610, 45)" filter="url(#shadow)">
+    <rect width="220" height="105" rx="8" fill="#131d31" stroke="#f59e0b" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 30 L 0 30 Z" fill="url(#goldGrad)" rx="8"/>
+    <rect y="22" width="220" height="8" fill="#d97706"/>
+    <text x="12" y="20" font-size="12" font-weight="700" fill="#ffffff">🏷️ CATEGORIAS</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#fcd34d">PK  id_categoria : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#cbd5e1">UK  nombre : VARCHAR(80)</text>
+    <text x="12" y="88" font-size="11" fill="#94a3b8">    descripcion : TEXT</text>
+  </g>
+
+  <!-- TABLA: HERRAMIENTAS -->
+  <g transform="translate(610, 180)" filter="url(#shadow)">
+    <rect width="220" height="255" rx="8" fill="#131d31" stroke="#f59e0b" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#goldGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#d97706"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">🚜 HERRAMIENTAS</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#fcd34d">PK  id_herramienta : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#38bdf8">FK  id_proveedor : BIGINT</text>
+    <text x="12" y="92" font-size="11" fill="#fcd34d">FK  id_categoria : BIGINT</text>
+    <text x="12" y="112" font-size="11" fill="#f8fafc">    nombre : VARCHAR(120)</text>
+    <text x="12" y="132" font-size="11" fill="#94a3b8">    descripcion : TEXT</text>
+    <text x="12" y="152" font-size="11" fill="#cbd5e1">    marca / modelo : VARCHAR</text>
+    <text x="12" y="172" font-size="11" fill="#cbd5e1">UK  numero_serie : VARCHAR(80)</text>
+    <text x="12" y="192" font-size="11" fill="#10b981">    estado_operativo : ENUM</text>
+    <text x="12" y="212" font-size="11" fill="#fcd34d">    tarifa_diaria : DECIMAL</text>
+    <text x="12" y="232" font-size="11" fill="#fcd34d">    valor_reposicion : DECIMAL</text>
+  </g>
+
+  <!-- ==================== BLOQUE 3: RESERVAS Y DETALLES ==================== -->
+
+  <!-- TABLA: RESERVAS -->
+  <g transform="translate(610, 470)" filter="url(#shadow)">
+    <rect width="220" height="260" rx="8" fill="#131d31" stroke="#10b981" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#greenGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#059669"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">📋 RESERVAS</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#6ee7b7">PK  id_reserva : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#cbd5e1">UK  codigo_reserva : VARCHAR</text>
+    <text x="12" y="92" font-size="11" fill="#38bdf8">FK  id_cliente : BIGINT</text>
+    <text x="12" y="112" font-size="11" fill="#cbd5e1">    fecha_solicitud : TIMESTAMP</text>
+    <text x="12" y="132" font-size="11" fill="#f8fafc">    fecha_inicio : DATE</text>
+    <text x="12" y="152" font-size="11" fill="#f8fafc">    fecha_fin : DATE</text>
+    <text x="12" y="172" font-size="11" fill="#6ee7b7">    estado : ENUM</text>
+    <text x="12" y="192" font-size="11" fill="#6ee7b7">    monto_total_estimado : DEC</text>
+    <text x="12" y="212" font-size="11" fill="#fcd34d">    deposito_garantia : DECIMAL</text>
+    <text x="12" y="232" font-size="11" fill="#94a3b8">    notas_cliente : VARCHAR</text>
+    <text x="12" y="250" font-size="11" fill="#ef4444">    motivo_rechazo : VARCHAR</text>
+  </g>
+
+  <!-- TABLA: DETALLES_RESERVA -->
+  <g transform="translate(920, 470)" filter="url(#shadow)">
+    <rect width="210" height="175" rx="8" fill="#131d31" stroke="#10b981" stroke-width="1.2"/>
+    <path d="M 0 0 L 210 0 L 210 28 L 0 28 Z" fill="#065f46" rx="8"/>
+    <rect y="20" width="210" height="8" fill="#065f46"/>
+    <text x="10" y="19" font-size="12" font-weight="700" fill="#a7f3d0">📦 DETALLES_RESERVA (4FN)</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#6ee7b7">PK  id_detalle_reserva : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#6ee7b7">FK  id_reserva : BIGINT</text>
+    <text x="12" y="88" font-size="11" fill="#fcd34d">FK  id_herramienta : BIGINT</text>
+    <text x="12" y="108" font-size="11" fill="#cbd5e1">    cantidad : INT</text>
+    <text x="12" y="128" font-size="11" fill="#cbd5e1">    precio_unitario_dia : DEC</text>
+    <text x="12" y="148" font-size="11" fill="#cbd5e1">    dias_alquiler : INT</text>
+    <text x="12" y="168" font-size="11" fill="#6ee7b7">    subtotal : DECIMAL</text>
+  </g>
+
+  <!-- TABLA: AUDITORIA_ESTADOS_RESERVA -->
+  <g transform="translate(610, 770)" filter="url(#shadow)">
+    <rect width="220" height="150" rx="8" fill="#131d31" stroke="#10b981" stroke-width="1.2"/>
+    <path d="M 0 0 L 220 0 L 220 28 L 0 28 Z" fill="#065f46" rx="8"/>
+    <rect y="20" width="220" height="8" fill="#065f46"/>
+    <text x="10" y="19" font-size="12" font-weight="700" fill="#a7f3d0">🕒 AUDITORIA_ESTADOS (4FN)</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#6ee7b7">PK  id_auditoria : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#6ee7b7">FK  id_reserva : BIGINT</text>
+    <text x="12" y="88" font-size="11" fill="#cbd5e1">    estado_anterior : VARCHAR</text>
+    <text x="12" y="108" font-size="11" fill="#6ee7b7">    estado_nuevo : VARCHAR</text>
+    <text x="12" y="128" font-size="11" fill="#cbd5e1">    fecha_cambio : TIMESTAMP</text>
+    <text x="12" y="146" font-size="11" fill="#38bdf8">FK  cambiado_por : BIGINT</text>
+  </g>
+
+  <!-- ==================== BLOQUE 4: PAGOS Y FACTURACIÓN ==================== -->
+
+  <!-- TABLA: METODOS_PAGO -->
+  <g transform="translate(50, 830)" filter="url(#shadow)">
+    <rect width="220" height="120" rx="8" fill="#131d31" stroke="#8b5cf6" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 30 L 0 30 Z" fill="url(#purpleGrad)" rx="8"/>
+    <rect y="22" width="220" height="8" fill="#7c3aed"/>
+    <text x="12" y="20" font-size="12" font-weight="700" fill="#ffffff">💳 METODOS_PAGO</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#c4b5fd">PK  id_metodo_pago : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#cbd5e1">UK  nombre : VARCHAR(50)</text>
+    <text x="12" y="88" font-size="11" fill="#94a3b8">    descripcion : VARCHAR(255)</text>
+    <text x="12" y="108" font-size="11" fill="#10b981">    activo : BOOLEAN</text>
+  </g>
+
+  <!-- TABLA: PAGOS -->
+  <g transform="translate(370, 770)" filter="url(#shadow)">
+    <rect width="210" height="210" rx="8" fill="#131d31" stroke="#8b5cf6" stroke-width="1.5"/>
+    <path d="M 0 0 L 210 0 L 210 32 L 0 32 Z" fill="url(#purpleGrad)" rx="8"/>
+    <rect y="24" width="210" height="8" fill="#7c3aed"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">💰 PAGOS</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#c4b5fd">PK  id_pago : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#cbd5e1">UK  numero_transaccion : VARCHAR</text>
+    <text x="12" y="92" font-size="11" fill="#6ee7b7">FK  id_reserva : BIGINT</text>
+    <text x="12" y="112" font-size="11" fill="#c4b5fd">FK  id_metodo_pago : BIGINT</text>
+    <text x="12" y="132" font-size="11" fill="#c4b5fd">    monto : DECIMAL(12,2)</text>
+    <text x="12" y="152" font-size="11" fill="#cbd5e1">    tipo_pago : ENUM</text>
+    <text x="12" y="172" font-size="11" fill="#10b981">    estado_pago : ENUM</text>
+    <text x="12" y="192" font-size="11" fill="#cbd5e1">    fecha_pago : TIMESTAMP</text>
+  </g>
+
+  <!-- TABLA: FACTURAS -->
+  <g transform="translate(610, 950)" filter="url(#shadow)">
+    <rect width="220" height="180" rx="8" fill="#131d31" stroke="#8b5cf6" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#purpleGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#7c3aed"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">🧾 FACTURAS (IVA 19%)</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#c4b5fd">PK  id_factura : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#cbd5e1">UK  numero_factura : VARCHAR</text>
+    <text x="12" y="92" font-size="11" fill="#c4b5fd">UK,FK id_pago : BIGINT</text>
+    <text x="12" y="112" font-size="11" fill="#38bdf8">FK  id_cliente : BIGINT</text>
+    <text x="12" y="130" font-size="11" fill="#cbd5e1">    subtotal (base) : DECIMAL</text>
+    <text x="12" y="148" font-size="11" fill="#fcd34d">    iva (19% legal) : DECIMAL</text>
+    <text x="12" y="166" font-size="11" fill="#c4b5fd">    total : DECIMAL(12,2)</text>
+  </g>
+
+  <!-- TABLA: DETALLES_FACTURA -->
+  <g transform="translate(920, 950)" filter="url(#shadow)">
+    <rect width="210" height="150" rx="8" fill="#131d31" stroke="#8b5cf6" stroke-width="1.2"/>
+    <path d="M 0 0 L 210 0 L 210 28 L 0 28 Z" fill="#4c1d95" rx="8"/>
+    <rect y="20" width="210" height="8" fill="#4c1d95"/>
+    <text x="10" y="19" font-size="12" font-weight="700" fill="#ddd6fe">📑 DETALLES_FACTURA (4FN)</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#c4b5fd">PK  id_detalle_factura : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#c4b5fd">FK  id_factura : BIGINT</text>
+    <text x="12" y="88" font-size="11" fill="#cbd5e1">    descripcion_item : VARCHAR</text>
+    <text x="12" y="108" font-size="11" fill="#cbd5e1">    cantidad : INT</text>
+    <text x="12" y="128" font-size="11" fill="#c4b5fd">    precio_unitario / subtotal</text>
+  </g>
+
+  <!-- ==================== BLOQUE 5: DEVOLUCIONES, DAÑOS Y EVIDENCIAS 4FN ==================== -->
+
+  <!-- TABLA: DEVOLUCIONES -->
+  <g transform="translate(1230, 160)" filter="url(#shadow)">
+    <rect width="220" height="210" rx="8" fill="#131d31" stroke="#ef4444" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#redGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#dc2626"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">🔄 DEVOLUCIONES</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#fca5a5">PK  id_devolucion : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#6ee7b7">UK,FK id_reserva : BIGINT</text>
+    <text x="12" y="92" font-size="11" fill="#cbd5e1">    fecha_devolucion_pactada</text>
+    <text x="12" y="112" font-size="11" fill="#f8fafc">    fecha_devolucion_real</text>
+    <text x="12" y="132" font-size="11" fill="#38bdf8">FK  recibido_por : BIGINT</text>
+    <text x="12" y="152" font-size="11" fill="#cbd5e1">    estado_equipo_general</text>
+    <text x="12" y="172" font-size="11" fill="#fcd34d">    dias_retraso : INT</text>
+    <text x="12" y="192" font-size="11" fill="#94a3b8">    observaciones : TEXT</text>
+  </g>
+
+  <!-- TABLA: REPORTES_DANO -->
+  <g transform="translate(1230, 470)" filter="url(#shadow)">
+    <rect width="220" height="205" rx="8" fill="#131d31" stroke="#ef4444" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 32 L 0 32 Z" fill="url(#redGrad)" rx="8"/>
+    <rect y="24" width="220" height="8" fill="#dc2626"/>
+    <text x="12" y="21" font-size="13" font-weight="700" fill="#ffffff">⚠️ REPORTES_DANO (4FN)</text>
+    <text x="12" y="52" font-size="11" font-weight="600" fill="#fca5a5">PK  id_reporte_dano : BIGINT</text>
+    <text x="12" y="72" font-size="11" fill="#fca5a5">FK  id_devolucion : BIGINT</text>
+    <text x="12" y="92" font-size="11" fill="#fcd34d">FK  id_herramienta : BIGINT</text>
+    <text x="12" y="112" font-size="11" fill="#f87171">    tipo_dano : ENUM</text>
+    <text x="12" y="132" font-size="11" fill="#94a3b8">    descripcion_dano : TEXT</text>
+    <text x="12" y="152" font-size="11" fill="#fca5a5">    costo_reparacion : DEC</text>
+    <text x="12" y="172" font-size="11" fill="#cbd5e1">    responsable_asume : ENUM</text>
+    <text x="12" y="192" font-size="11" fill="#cbd5e1">    fecha_reporte : TIMESTAMP</text>
+  </g>
+
+  <!-- TABLA: EVIDENCIAS_DANO (CLAVE DE LA 4FN: Desacopla fotos multivaluadas) -->
+  <g transform="translate(1230, 740)" filter="url(#shadow)">
+    <rect width="220" height="135" rx="8" fill="#131d31" stroke="#ef4444" stroke-width="1.5"/>
+    <path d="M 0 0 L 220 0 L 220 30 L 0 30 Z" fill="#7f1d1d" rx="8"/>
+    <rect y="22" width="220" height="8" fill="#7f1d1d"/>
+    <text x="10" y="20" font-size="12" font-weight="700" fill="#fecaca">📸 EVIDENCIAS_DANO (4FN)</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#fca5a5">PK  id_evidencia : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#fca5a5">FK  id_reporte_dano : BIGINT</text>
+    <text x="12" y="88" font-size="11" fill="#cbd5e1">    url_foto : VARCHAR(255)</text>
+    <text x="12" y="108" font-size="11" fill="#cbd5e1">    descripcion_foto : VARCHAR</text>
+    <text x="12" y="126" font-size="10" fill="#fca5a5">Desacopla dependencia MVD</text>
+  </g>
+
+  <!-- TABLA: CARGOS_ADICIONALES -->
+  <g transform="translate(1230, 930)" filter="url(#shadow)">
+    <rect width="220" height="165" rx="8" fill="#131d31" stroke="#ef4444" stroke-width="1.2"/>
+    <path d="M 0 0 L 220 0 L 220 28 L 0 28 Z" fill="#7f1d1d" rx="8"/>
+    <rect y="20" width="220" height="8" fill="#7f1d1d"/>
+    <text x="10" y="19" font-size="12" font-weight="700" fill="#fecaca">⚖️ CARGOS_ADICIONALES</text>
+    <text x="12" y="48" font-size="11" font-weight="600" fill="#fca5a5">PK  id_cargo : BIGINT</text>
+    <text x="12" y="68" font-size="11" fill="#fca5a5">FK  id_devolucion : BIGINT</text>
+    <text x="12" y="88" font-size="11" fill="#cbd5e1">    tipo_cargo : ENUM (MORA/DANO)</text>
+    <text x="12" y="108" font-size="11" fill="#fca5a5">    monto : DECIMAL(12,2)</text>
+    <text x="12" y="128" font-size="11" fill="#10b981">    pagado : BOOLEAN</text>
+    <text x="12" y="148" font-size="11" fill="#cbd5e1">    descripcion : VARCHAR(200)</text>
+  </g>
+
+</svg>
