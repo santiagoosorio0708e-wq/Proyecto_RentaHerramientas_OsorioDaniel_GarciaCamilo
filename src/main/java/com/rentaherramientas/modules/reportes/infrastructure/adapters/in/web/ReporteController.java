@@ -43,6 +43,7 @@ public class ReporteController {
     @GetMapping("/dashboard")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR')")
     @Operation(summary = "Dashboard ejecutivo consolidado", description = "Provee una vista integral que consolida KPIs financieros, métricas operativas de la flota, herramientas más alquiladas y clientes frecuentes.")
+    @ApiResponse(responseCode = "200", description = "Dashboard ejecutivo generado exitosamente")
     public ResponseEntity<ApiResponseDto<DashboardCompletoDto>> obtenerDashboard() {
         DashboardCompletoDto dashboard = reporteApplicationService.obtenerDashboardCompleto();
         return ResponseEntity.ok(ApiResponseDto.ok("Dashboard ejecutivo generado exitosamente", dashboard));
