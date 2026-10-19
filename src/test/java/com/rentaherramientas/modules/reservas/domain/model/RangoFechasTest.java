@@ -39,4 +39,23 @@ class RangoFechasTest {
         assertTrue(r1.seSolapaCon(r2));
         assertTrue(r2.seSolapaCon(r1));
     }
+
+    @Test
+    @DisplayName("Debe retornar false cuando dos rangos de fechas son completamente disjuntos")
+    void solapaCon_RangosDisjuntos_RetornaFalse() {
+        RangoFechas r1 = new RangoFechas(LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 5));
+        RangoFechas r2 = new RangoFechas(LocalDate.of(2026, 11, 6), LocalDate.of(2026, 11, 10));
+
+        assertFalse(r1.seSolapaCon(r2));
+        assertFalse(r2.seSolapaCon(r1));
+    }
+
+    @Test
+    @DisplayName("Debe computar 1 día de alquiler cuando fechaInicio es igual a fechaFin")
+    void calcularDias_MismaFechaInicioYFin_RetornaUnDia() {
+        LocalDate fecha = LocalDate.of(2026, 11, 20);
+        RangoFechas rango = new RangoFechas(fecha, fecha);
+
+        assertEquals(1L, rango.getDiasAlquiler());
+    }
 }
