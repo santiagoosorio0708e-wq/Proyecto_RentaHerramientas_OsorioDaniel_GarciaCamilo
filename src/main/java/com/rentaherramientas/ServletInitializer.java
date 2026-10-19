@@ -14,6 +14,8 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * El motivo de que exista: cuando Tomcat despliega un WAR no ejecuta ningun
  * main(), sino que busca una clase que extienda SpringBootServletInitializer
  * para saber como iniciar el contexto de Spring.
+ *
+ * @author Daniel Osorio & Camilo García
  */
 public class ServletInitializer extends SpringBootServletInitializer {
 
