@@ -53,6 +53,8 @@ public class PagoController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Consultar pago por ID", description = "Obtiene los detalles de una transacción de pago por su clave primaria.")
+    @ApiResponse(responseCode = "200", description = "Transacción de pago encontrada")
+    @ApiResponse(responseCode = "404", description = "Transacción no encontrada")
     public ResponseEntity<ApiResponseDto<PagoResponseDto>> obtenerPorId(
             @Parameter(description = "ID del pago") @PathVariable Long id
     ) {
