@@ -119,6 +119,8 @@ public class ReservaController {
 
     @PatchMapping("/{id}/finalizar")
     @Operation(summary = "Finalizar alquiler", description = "Pasa la reserva a estado FINALIZADA una vez recibida la herramienta.")
+    @ApiResponse(responseCode = "200", description = "Alquiler culminado exitosamente")
+    @ApiResponse(responseCode = "422", description = "La reserva no está en estado válido para finalizar")
     public ResponseEntity<ApiResponseDto<ReservaResponseDto>> finalizarAlquiler(
             @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "1") Long usuarioId
@@ -129,6 +131,8 @@ public class ReservaController {
 
     @PatchMapping("/{id}/cancelar")
     @Operation(summary = "Cancelar reserva", description = "Permite cancelar una reserva antes de que el equipo sea despachado.")
+    @ApiResponse(responseCode = "200", description = "Reserva cancelada exitosamente")
+    @ApiResponse(responseCode = "422", description = "La reserva ya fue iniciada o despachada")
     public ResponseEntity<ApiResponseDto<ReservaResponseDto>> cancelarReserva(
             @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "1") Long usuarioId
