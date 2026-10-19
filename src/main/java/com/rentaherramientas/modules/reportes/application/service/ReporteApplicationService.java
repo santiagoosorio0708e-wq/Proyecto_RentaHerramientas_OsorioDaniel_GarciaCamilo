@@ -17,6 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio de Aplicación: Inteligencia de Negocio, Analítica y Reportes.
+ * Consolida los KPIs estratégicos de la plataforma para la alta gerencia:
+ * balance financiero, recaudo tributario (IVA 19%), índice de siniestralidad
+ * y rankings de maquinaria más alquilada y clientes corporativos frecuentes.
+ *
+ * @author Daniel Osorio (DEV 2)
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
