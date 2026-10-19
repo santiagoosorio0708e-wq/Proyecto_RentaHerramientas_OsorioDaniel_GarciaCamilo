@@ -58,6 +58,7 @@ public class DevolucionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PROVEEDOR')")
     @Operation(summary = "Registrar devolución de herramientas", description = "Registra el check-in físico de las herramientas devueltas, calcula mora automática si hay retraso, genera reportes de averías y finaliza la reserva.")
     @ApiResponse(responseCode = "201", description = "Devolución registrada exitosamente")
+    @ApiResponse(responseCode = "422", description = "Regla de negocio no satisfecha o reserva no apta para check-in")
     public ResponseEntity<ApiResponseDto<DevolucionResponseDto>> registrarDevolucion(
             @Valid @RequestBody RegistrarDevolucionCommand command) {
 
