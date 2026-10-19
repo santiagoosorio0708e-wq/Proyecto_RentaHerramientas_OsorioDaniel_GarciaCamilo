@@ -11,7 +11,14 @@ const API = (() => {
 
     'use strict';
 
-    const URL_BASE = 'http://localhost:8080/api/v1';
+    const URL_BASE = (() => {
+        if (typeof window !== 'undefined' && window.location && window.location.origin) {
+            if (window.location.port === '8080' || window.location.pathname.startsWith('/api/v1')) {
+                return `${window.location.origin}/api/v1`;
+            }
+        }
+        return 'http://localhost:8080/api/v1';
+    })();
 
     const CLAVE_ACCESS  = 'rh_access_token';
     const CLAVE_REFRESH = 'rh_refresh_token';
