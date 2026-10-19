@@ -81,3 +81,17 @@ SELECT
 FROM reportes_dano rd
 LEFT JOIN evidencias_dano ed ON rd.id_reporte = ed.id_reporte
 GROUP BY rd.id_reporte, rd.id_devolucion, rd.id_herramienta, rd.tipo_dano, rd.responsable_asume, rd.costo_estimado_reparacion;
+
+-- Vista: Rendimiento e Ingresos Generados por Proveedor
+CREATE OR REPLACE VIEW vista_ingresos_proveedor AS
+SELECT 
+    u.id_usuario AS id_proveedor,
+    u.nombre_completo AS nombre_proveedor,
+    COUNT(DISTINCT h.id_herramienta) AS flota_total,
+    COUNT(DISTINCT dr.id_reserva) AS total_alquileres,
+    COALESCE(SUM(dr.subtotal), 0.00) AS ingresos_totales
+FROM usuarios u
+JOIN herramientas h ON u.id_usuario = h.id_proveedor
+LEFT JOIN detalles_reserva dr ON h.id_herramienta = dr.id_herramienta
+GROUP BY u.id_usuario, u.nombre_completo;
+
