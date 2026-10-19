@@ -269,14 +269,26 @@
     border-radius: var(--radio-sm);
 }
 
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* ==========================================================================
+   OPTIMIZACIÓN MAC / RETINA Y SCROLLBARS NATIVAS ESTILO MACOS
+   ========================================================================== */
 body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     background-color: var(--color-fondo);
     background-image: 
         radial-gradient(at 15% 10%, rgba(245, 158, 11, 0.08) 0px, transparent 50%),
@@ -287,6 +299,29 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+}
+
+/* Scrollbars sutiles y elegantes estilo macOS */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.28);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.55);
 }
 
 h1, h2, h3, h4, .marca {
@@ -1291,15 +1326,353 @@ tr:hover td {
     text-decoration: underline;
 }
 
+/* ==========================================================================
+   ANIMACIONES DE APERTURA ULTRA-FLUIDAS (60 FPS & ACELERACIÓN GPU)
+   ========================================================================== */
+@keyframes macOpeningFluid {
+    0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes heroSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ------------------------------------------------------------- Responsive */
-@media (max-width: 768px) {
-    .hero-contenido { padding: 28px 20px; }
-    .hero-titulo { font-size: 1.85rem; }
-    .barra-superior .contenedor { min-height: 56px; }
-    .botones-tarjeta { grid-template-columns: 1fr; }
+.hero-catalogo {
+    animation: heroSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
 }
+
+.seccion, .tarjeta, .caja-acceso {
+    animation: macOpeningFluid 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    will-change: transform, opacity;
+}
+
+/* Efecto escalonado (stagger) para tarjetas de herramientas en el catálogo */
+.rejilla-herramientas > .tarjeta-herramienta {
+    animation: macOpeningFluid 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    will-change: transform, opacity;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 380px;
+}
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(1) { animation-delay: 0.04s; }
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(2) { animation-delay: 0.08s; }
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(3) { animation-delay: 0.12s; }
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(4) { animation-delay: 0.16s; }
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(5) { animation-delay: 0.20s; }
+.rejilla-herramientas > .tarjeta-herramienta:nth-child(6) { animation-delay: 0.24s; }
+
+/* Micro-interacciones de hover fluidas estilo macOS */
+.tarjeta-herramienta {
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.26s ease;
+}
+
+.tarjeta-herramienta:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 42px -12px rgba(0, 0, 0, 0.55), 0 0 24px -2px var(--color-acento-resplandor);
+}
+
+.boton, .boton-secundario, .pildora-cat, .pestana {
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.boton:hover, .boton-secundario:hover {
+    transform: translateY(-2px);
+}
+
+.boton:active, .boton-secundario:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   SISTEMA RESPONSIVE INTEGRAL (MOBILE, TABLET, MACBOOK, DESKTOP)
+   ========================================================================== */
+
+/* 1. Laptops, MacBooks (13", 14", 16") y Pantallas Medianas */
+@media (max-width: 1024px) {
+    :root {
+        --ancho-max: 980px;
+    }
+
+    .contenedor {
+        padding: 0 16px;
+    }
+
+    .rejilla-kpis {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .rejilla-herramientas {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+    }
+
+    .hero-titulo {
+        font-size: 2.35rem;
+    }
+}
+
+/* 2. Tablets (iPad, iPad Pro) y Teléfonos en Horizontal */
+@media (max-width: 768px) {
+    /* Barra demo rápida adaptable */
+    .barra-demo {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 8px 12px;
+    }
+
+    .barra-demo-grupo {
+        display: flex;
+        align-items: center;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+    .barra-demo-grupo::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Barra Superior y Menú */
+    .barra-superior .contenedor {
+        min-height: auto;
+        padding: 10px 14px;
+        gap: 10px;
+    }
+
+    .marca {
+        font-size: 1.2rem;
+    }
+
+    .menu {
+        width: 100%;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px;
+        padding: 4px 0 6px 0;
+        scrollbar-width: none;
+    }
+    .menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .menu a {
+        white-space: nowrap;
+        padding: 7px 12px;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    /* Hero Banner Adaptado */
+    .hero-contenido {
+        padding: 24px 16px;
+    }
+
+    .hero-titulo {
+        font-size: 1.85rem;
+        line-height: 1.2;
+    }
+
+    .hero-descripcion {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+
+    .hero-estadisticas {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat-item {
+        padding: 12px 14px;
+    }
+
+    .stat-item h4 {
+        font-size: 1.4rem;
+    }
+
+    /* Píldoras con Desplazamiento Táctil Inercial */
+    .pildoras-categorias {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding: 4px 0 10px 0;
+        gap: 8px;
+        scrollbar-width: none;
+    }
+    .pildoras-categorias::-webkit-scrollbar {
+        display: none;
+    }
+
+    .pildora-cat {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 7px 14px;
+        font-size: 0.84rem;
+    }
+
+    /* Grillas y Secciones */
+    .rejilla-herramientas {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .rejilla-kpis {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .fila-encabezado {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .fila-campos {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .botones-tarjeta {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tablas con Scroll Táctil */
+    .envoltura-tabla {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radio-sm);
+        border: 1px solid var(--color-borde);
+    }
+
+    table {
+        min-width: 620px;
+    }
+
+    /* Modales en Móvil y Tablet */
+    .fondo-modal {
+        padding: 12px;
+        align-items: flex-end;
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 88vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUpMobile {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+
+    .cuerpo-modal {
+        max-height: calc(88vh - 130px);
+        overflow-y: auto;
+        padding: 18px 16px;
+    }
+
+    .pestanas {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        scrollbar-width: none;
+    }
+    .pestanas::-webkit-scrollbar {
+        display: none;
+    }
+
+    .pestana {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+/* 3. Teléfonos Móviles Pequeños y Estándar (iPhone, Galaxy) */
+@media (max-width: 480px) {
+    .contenedor {
+        padding: 0 12px;
+    }
+
+    .hero-titulo {
+        font-size: 1.55rem;
+    }
+
+    .hero-tag {
+        font-size: 0.72rem;
+        padding: 3px 10px;
+    }
+
+    .hero-estadisticas {
+        grid-template-columns: 1fr;
+    }
+
+    .tarjeta {
+        padding: 16px;
+        border-radius: var(--radio-sm);
+    }
+
+    /* Prevenir zoom automático molesto de Safari iOS al enfocar inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+
+    /* Target táctil mínimo de 44px según directrices Apple HIG */
+    .boton,
+    .boton-secundario,
+    .boton-peligro,
+    .boton-demo-rol {
+        min-height: 42px;
+    }
+
+    .caja-acceso {
+        padding: 22px 16px;
+    }
+}
+
+/* 4. Preferencia de Accesibilidad de Movimiento Reducido */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+

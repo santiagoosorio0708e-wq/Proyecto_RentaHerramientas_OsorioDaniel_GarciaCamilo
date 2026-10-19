@@ -10,6 +10,7 @@ services:
 
   mysql:
     image: mysql:8.0
+    platform: linux/amd64   # Compatibilidad nativa para Mac Apple Silicon (M1/M2/M3/M4) e Intel
     container_name: renta-mysql
     restart: unless-stopped
     environment:

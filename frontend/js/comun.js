@@ -83,7 +83,12 @@ const UI = (() => {
     // ------------------------------------------------------------------
 
     function obtenerTemaActual() {
-        return localStorage.getItem('rh_tema') || 'dark';
+        const guardado = localStorage.getItem('rh_tema');
+        if (guardado) return guardado;
+        if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'light';
+        }
+        return 'dark';
     }
 
     function aplicarTema(tema) {
@@ -95,6 +100,7 @@ const UI = (() => {
     function alternarTema() {
         const actual = obtenerTemaActual();
         const nuevo = actual === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('rh_tema_manual', 'true');
         aplicarTema(nuevo);
         toast(nuevo === 'light' ? '☀️ Modo Día activado' : '🌙 Modo Noche activado', 'info');
     }
@@ -110,6 +116,19 @@ const UI = (() => {
                 btn.setAttribute('title', 'Cambiar a Modo Noche');
             }
         });
+    }
+
+    // Sincronización en tiempo real con macOS / sistema operativo
+    if (typeof window !== 'undefined' && window.matchMedia) {
+        try {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('rh_tema_manual')) {
+                    aplicarTema(e.matches ? 'dark' : 'light');
+                }
+            });
+        } catch (e) {
+            // Compatibilidad Safari legacy
+        }
     }
 
     // Aplicar de inmediato el tema configurado
