@@ -11,6 +11,7 @@ import com.rentaherramientas.modules.reportes.application.dto.ResumenFinancieroD
 import com.rentaherramientas.modules.reportes.application.service.ReporteApplicationService;
 import com.rentaherramientas.modules.reportes.domain.ports.in.ConsultarReportesUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
