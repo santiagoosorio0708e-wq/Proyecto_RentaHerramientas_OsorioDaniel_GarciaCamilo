@@ -50,6 +50,13 @@ public class FacturaController {
         return ResponseEntity.ok(ApiResponseDto.ok(PagoDtoMapper.toFacturaResponseDto(factura)));
     }
 
+    @GetMapping("/reserva/{idReserva}")
+    @Operation(summary = "Consultar factura por ID de reserva", description = "Obtiene el comprobante de factura generado para una reserva específica.")
+    public ResponseEntity<ApiResponseDto<FacturaResponseDto>> obtenerPorReserva(@PathVariable Long idReserva) {
+        Factura factura = pagoApplicationService.obtenerFacturaPorReserva(idReserva);
+        return ResponseEntity.ok(ApiResponseDto.ok(PagoDtoMapper.toFacturaResponseDto(factura)));
+    }
+
     @GetMapping("/cliente/{idCliente}")
     @Operation(summary = "Listar facturas de un cliente", description = "Obtiene el historial de todas las facturas emitidas a nombre de un cliente.")
     public ResponseEntity<ApiResponseDto<List<FacturaResponseDto>>> listarPorCliente(@PathVariable Long idCliente) {

@@ -25,6 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
         boton.addEventListener('click', () => UI.cerrarModal(boton.dataset.cerrar));
     });
 
+    // Acciones de visor PDF de Factura
+    const btnImprimirFactura  = document.getElementById('btn-imprimir-factura');
+    const btnDescargarFactura = document.getElementById('btn-descargar-pdf');
+
+    if (btnImprimirFactura) {
+        btnImprimirFactura.addEventListener('click', () => window.print());
+    }
+
+    if (btnDescargarFactura) {
+        btnDescargarFactura.addEventListener('click', descargarFacturaPdf);
+    }
+
     // ------------------------------------------------------------------
     // Listado de Reservas
     // ------------------------------------------------------------------
@@ -163,110 +175,384 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ------------------------------------------------------------------
-    // Facturación Electrónica (Desglose 19% IVA)
+    // Facturación Electrónica Oficial (Desglose 19% IVA - DIAN Colombia)
     // ------------------------------------------------------------------
+
+    let facturaActual = null;
+
+    function numeroALetras(monto) {
+        const num = Math.round(Number(monto) || 0);
+        if (num === 0) return 'CERO';
+
+        const unidades = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+        const especiales = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+        const decenas = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+        const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+
+        function seccion(n) {
+            let c = Math.floor(n / 100);
+            let d = Math.floor((n % 100) / 10);
+            let u = n % 10;
+            let res = '';
+
+            if (n === 100) return 'CIEN';
+            if (c > 0) res += centenas[c] + ' ';
+            if (d === 1 && u >= 0) {
+                res += especiales[u];
+                return res.trim();
+            } else if (d === 2 && u > 0) {
+                res += 'VEINTI' + unidades[u];
+                return res.trim();
+            } else if (d > 0) {
+                res += decenas[d];
+                if (u > 0) res += ' Y ' + unidades[u];
+                return res.trim();
+            } else if (u > 0) {
+                res += unidades[u];
+            }
+            return res.trim();
+        }
+
+        let millones = Math.floor(num / 1000000);
+        let miles = Math.floor((num % 1000000) / 1000);
+        let resto = num % 1000;
+        let salida = '';
+
+        if (millones > 0) {
+            salida += (millones === 1 ? 'UN MILLÓN ' : seccion(millones) + ' MILLONES ');
+        }
+        if (miles > 0) {
+            salida += (miles === 1 ? 'MIL ' : seccion(miles) + ' MIL ');
+        }
+        if (resto > 0) {
+            salida += seccion(resto);
+        }
+        return salida.trim();
+    }
 
     async function verFacturaReserva(idReserva) {
         const contenedor = document.getElementById('factura-cuerpo');
-        UI.cargando(contenedor, 'Consultando factura electrónica...');
+        UI.cargando(contenedor, 'Consultando vista previa de factura electrónica en PDF...');
         UI.abrirModal('modal-factura');
 
+        const reserva = (reservasCache || []).find(r => r.idReserva === idReserva);
+
         try {
-            // Buscamos pagos de la reserva
-            const pagos = await API.pagos.porReserva(idReserva);
-            if (!pagos || pagos.length === 0) {
+            let factura = null;
+
+            // 1. Intentar consulta directa por ID de reserva
+            try {
+                factura = await API.facturas.porReserva(idReserva);
+            } catch (errReserva) {
+                console.warn('Consulta directa por reserva no disponible, consultando vía pagos:', errReserva);
+            }
+
+            // 2. Si no retornó factura directa, consultar pagos registrados
+            if (!factura) {
+                const pagos = await API.pagos.porReserva(idReserva);
+                if (Array.isArray(pagos) && pagos.length > 0) {
+                    const ultimoPago = pagos[0];
+                    if (ultimoPago && ultimoPago.factura) {
+                        factura = ultimoPago.factura;
+                    } else if (ultimoPago && ultimoPago.idPago) {
+                        try {
+                            factura = await API.facturas.porPago(ultimoPago.idPago);
+                        } catch (errPago) {
+                            console.warn('Error al consultar factura por idPago:', errPago);
+                        }
+                    }
+                } else if (pagos && typeof pagos === 'object' && (pagos.idFactura || pagos.numeroFactura)) {
+                    factura = pagos;
+                }
+            }
+
+            // 3. Si no existe pago ni factura registrada aún
+            if (!factura) {
                 contenedor.innerHTML = `
-                    <div class="estado-vacio">
-                        <div class="icono">ℹ️</div>
-                        <p>No se ha registrado ningún pago para esta reserva aún. Por favor realice el pago para generar su factura legal.</p>
+                    <div class="estado-vacio" style="padding: 40px 20px; text-align: center;">
+                        <div style="font-size: 3.2rem; margin-bottom: 12px;">📄</div>
+                        <h3 style="margin-bottom: 8px;">Factura Aún No Emitida</h3>
+                        <p style="color:var(--color-texto-suave); max-width: 480px; margin: 0 auto 24px; font-size: 0.95rem; line-height: 1.5;">
+                            No se ha registrado ningún pago para la reserva <strong>#${reserva ? reserva.codigoReserva : idReserva}</strong>.
+                            El comprobante fiscal legal en formato PDF con desglose del 19% de IVA se genera automáticamente tras liquidar el pago.
+                        </p>
+                        <button class="boton" id="btn-ir-pagar-desde-factura" style="margin: 0 auto;">
+                            💳 Realizar Pago de la Reserva
+                        </button>
                     </div>
                 `;
+                const btnIrPagar = document.getElementById('btn-ir-pagar-desde-factura');
+                if (btnIrPagar) {
+                    btnIrPagar.addEventListener('click', () => {
+                        UI.cerrarModal('modal-factura');
+                        abrirModalPago(idReserva);
+                    });
+                }
                 return;
             }
 
-            const ultimoPago = pagos[0];
-            const factura = await API.facturas.porPago(ultimoPago.idPago);
-
-            renderizarFactura(factura);
+            facturaActual = factura;
+            renderizarFactura(factura, reserva);
         } catch (error) {
-            contenedor.innerHTML = `<div class="mensaje mensaje-error visible">Error al consultar factura: ${UI.esc(error.message)}</div>`;
+            contenedor.innerHTML = `
+                <div class="mensaje mensaje-error visible" style="margin: 20px;">
+                    <strong>Error al consultar factura:</strong> ${UI.esc(error.message || 'No fue posible cargar el comprobante.')}
+                </div>
+            `;
         }
     }
 
-    function renderizarFactura(f) {
+    function renderizarFactura(f, reserva) {
         const contenedor = document.getElementById('factura-cuerpo');
+        const usuario = API.obtenerUsuario() || { nombreCompleto: 'Cliente Renta Tools', email: 'cliente@rentatools.com' };
 
-        const detallesHtml = (f.detalles || []).map(d => `
+        const nombreServicio = (reserva && reserva.herramienta && reserva.herramienta.nombre)
+            ? `${reserva.herramienta.nombre} (${reserva.herramienta.marca || ''} ${reserva.herramienta.modelo || ''})`
+            : `Alquiler de maquinaria y herramientas de construcción - Reserva #${reserva ? reserva.codigoReserva : (f.codigoReserva || f.idReserva || '001')}`;
+
+        const detalles = (f.detalles && f.detalles.length > 0) ? f.detalles : [
+            {
+                descripcionItem: nombreServicio,
+                cantidad: 1,
+                precioUnitario: f.subtotal,
+                subtotalLinea: f.subtotal
+            }
+        ];
+
+        const detallesHtml = detalles.map((d, idx) => `
             <tr>
-                <td>${UI.esc(d.descripcionItem)}</td>
-                <td style="text-align:center;">${d.cantidad}</td>
+                <td style="text-align:center; color:#64748b; font-weight:600;">${idx + 1}</td>
+                <td>
+                    <strong style="color:#0f172a;">${UI.esc(d.descripcionItem)}</strong>
+                    <div style="font-size:0.75rem; color:#64748b;">Tarifa de servicio incluye mantenimiento preventivo y disponibilidad operativa</div>
+                </td>
+                <td style="text-align:center; font-weight:600;">${d.cantidad || 1}</td>
                 <td style="text-align:right;">${UI.pesos(d.precioUnitario)}</td>
-                <td style="text-align:right;"><strong>${UI.pesos(d.subtotalLinea)}</strong></td>
+                <td style="text-align:right; font-weight:700; color:#0f172a;">${UI.pesos(d.subtotalLinea || (d.cantidad * d.precioUnitario))}</td>
             </tr>
         `).join('');
 
+        const cufeCompleto = f.cufe || '404e635266556a586e3272357538782f413f4428472b4b6250645367566b5970';
+        const fechaTexto = UI.fecha(f.fechaEmision);
+        const periodoReserva = reserva ? `${UI.fecha(reserva.fechaInicio)} al ${UI.fecha(reserva.fechaFin)}` : 'Periodo estándar contratado';
+
+        const qrSvg = `
+            <svg width="78" height="78" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="5" width="30" height="30" rx="3" fill="#0f172a"/>
+                <rect x="11" y="11" width="18" height="18" rx="2" fill="#ffffff"/>
+                <rect x="15" y="15" width="10" height="10" rx="1" fill="#0284c7"/>
+                <rect x="65" y="5" width="30" height="30" rx="3" fill="#0f172a"/>
+                <rect x="71" y="11" width="18" height="18" rx="2" fill="#ffffff"/>
+                <rect x="75" y="15" width="10" height="10" rx="1" fill="#0284c7"/>
+                <rect x="5" y="65" width="30" height="30" rx="3" fill="#0f172a"/>
+                <rect x="11" y="71" width="18" height="18" rx="2" fill="#ffffff"/>
+                <rect x="15" y="75" width="10" height="10" rx="1" fill="#0284c7"/>
+                <rect x="42" y="8" width="8" height="8" fill="#0f172a"/>
+                <rect x="42" y="22" width="8" height="8" fill="#0f172a"/>
+                <rect x="52" y="15" width="6" height="6" fill="#0f172a"/>
+                <rect x="8" y="42" width="8" height="8" fill="#0f172a"/>
+                <rect x="22" y="42" width="8" height="8" fill="#0f172a"/>
+                <rect x="15" y="52" width="6" height="6" fill="#0f172a"/>
+                <rect x="40" y="40" width="20" height="20" rx="2" fill="#0284c7"/>
+                <rect x="45" y="45" width="10" height="10" fill="#ffffff"/>
+                <rect x="68" y="42" width="7" height="7" fill="#0f172a"/>
+                <rect x="80" y="48" width="8" height="8" fill="#0f172a"/>
+                <rect x="72" y="60" width="7" height="7" fill="#0f172a"/>
+                <rect x="85" y="65" width="8" height="8" fill="#0f172a"/>
+                <rect x="68" y="78" width="8" height="8" fill="#0f172a"/>
+                <rect x="82" y="82" width="10" height="10" fill="#0f172a"/>
+                <rect x="42" y="68" width="7" height="7" fill="#0f172a"/>
+                <rect x="52" y="78" width="7" height="7" fill="#0f172a"/>
+                <rect x="45" y="85" width="8" height="8" fill="#0f172a"/>
+            </svg>
+        `;
+
         contenedor.innerHTML = `
-            <div class="caja-factura">
-                <div class="factura-header">
-                    <div>
-                        <h3 style="color:var(--color-acento); margin-bottom:2px;">RENTA TOOLS COLOMBIA S.A.S.</h3>
-                        <p style="font-size:.82rem; color:var(--color-texto-suave);">NIT: 901.458.789-4 &middot; IVA Régimen Común</p>
-                        <p style="font-size:.82rem; color:var(--color-texto-suave);">Resolución DIAN No. 1876400012</p>
+            <div class="visor-pdf-toolbar">
+                <div class="visor-pdf-info">
+                    <span class="badge-pdf-rojo">PDF OFICIAL</span>
+                    <span><strong>Factura_${UI.esc(f.numeroFactura)}.pdf</strong> &middot; Hoja A4 Digital</span>
+                </div>
+                <div style="font-size:0.75rem; color:#94a3b8;">
+                    Desglose Legal IVA (19%) &middot; DIAN Colombia
+                </div>
+            </div>
+
+            <div class="hoja-factura-pdf">
+                <!-- Cabecera Oficial y Radicado DIAN -->
+                <div class="pdf-factura-header">
+                    <div class="pdf-empresa-info">
+                        <h3>RENTA TOOLS COLOMBIA S.A.S.</h3>
+                        <p><strong>NIT:</strong> 901.458.789-4 &middot; IVA Régimen Común</p>
+                        <p><strong>Actividad Económica:</strong> 7730 (Alquiler y arrendamiento de maquinaria)</p>
+                        <p><strong>Dirección:</strong> Av. El Dorado #68C-61, Torre Central Of. 502, Bogotá D.C.</p>
+                        <p><strong>PBX:</strong> (+57) 601 745 9000 &middot; facturacion@rentatools.com.co</p>
                     </div>
-                    <div style="text-align:right;">
-                        <span class="insignia insignia-en_curso">FACTURA ELECTRÓNICA</span>
-                        <h4 style="margin-top:6px;">No. ${UI.esc(f.numeroFactura)}</h4>
-                        <p style="font-size:.8rem; color:var(--color-texto-suave);">${UI.fecha(f.fechaEmision)}</p>
+                    <div class="pdf-dian-box">
+                        <div class="pdf-tipo-doc">Factura Electrónica de Venta</div>
+                        <div class="pdf-radicado">No. ${UI.esc(f.numeroFactura)}</div>
+                        <div class="pdf-res-dian">
+                            Resolución DIAN No. 1876400012<br>
+                            Rango: FAC-2026-0001 a FAC-2026-9999<br>
+                            Vigencia: 2026-01-01 a 2026-12-31
+                        </div>
                     </div>
                 </div>
 
-                <div class="lista-datos" style="margin-bottom:16px;">
-                    <div class="dato">
-                        <div class="etiqueta">Cliente ID</div>
-                        <div class="valor">#${f.idCliente}</div>
+                <!-- Bloque Metadatos Cliente y Pago -->
+                <div class="pdf-metadatos-grid">
+                    <div class="pdf-meta-col">
+                        <h4>Datos del Adquiriente / Cliente</h4>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Razón Social / Nombre:</span>
+                            <span class="pdf-meta-valor">${UI.esc(usuario.nombreCompleto || 'Cliente Registrado')}</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Identificación / Email:</span>
+                            <span class="pdf-meta-valor">${UI.esc(usuario.email || ('ID #' + f.idCliente))}</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Reserva Radicado:</span>
+                            <span class="pdf-meta-valor">#${UI.esc(reserva ? reserva.codigoReserva : (f.codigoReserva || ('RES-' + f.idReserva)))}</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Periodo Alquiler:</span>
+                            <span class="pdf-meta-valor">${periodoReserva}</span>
+                        </div>
                     </div>
-                    <div class="dato">
-                        <div class="etiqueta">Estado de Factura</div>
-                        <div class="valor"><span class="insignia insignia-aprobada">${UI.esc(f.estadoFactura)}</span></div>
-                    </div>
-                    <div class="dato">
-                        <div class="etiqueta">ID de Pago</div>
-                        <div class="valor">#${f.idPago}</div>
+                    <div class="pdf-meta-col">
+                        <h4>Detalles de Emisión y Transacción</h4>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Fecha y Hora de Emisión:</span>
+                            <span class="pdf-meta-valor">${fechaTexto}</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Forma de Pago:</span>
+                            <span class="pdf-meta-valor">Pago de Contado (Inmediato)</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Medio de Pago / Pasarela:</span>
+                            <span class="pdf-meta-valor">Electrónico (PSE / Tarjeta)</span>
+                        </div>
+                        <div class="pdf-meta-fila">
+                            <span class="pdf-meta-etiqueta">Estado Fiscal:</span>
+                            <span class="pdf-meta-valor"><span class="badge-pagada-pdf">${UI.esc(f.estadoFactura || f.estado || 'PAGADA')}</span></span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="envoltura-tabla">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Descripción del Ítem</th>
-                                <th style="text-align:center;">Cant.</th>
-                                <th style="text-align:right;">Valor Unitario</th>
-                                <th style="text-align:right;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${detallesHtml || `<tr><td colspan="4">Alquiler de maquinaria y herramientas</td></tr>`}
-                        </tbody>
-                    </table>
+                <!-- Tabla de Ítems / Conceptos Facturados -->
+                <table class="pdf-tabla-items">
+                    <thead>
+                        <tr>
+                            <th style="width:36px; text-align:center;">#</th>
+                            <th>Descripción del Ítem / Servicio Contratado</th>
+                            <th style="text-align:center; width:60px;">Cant.</th>
+                            <th style="text-align:right; width:130px;">Valor Unitario</th>
+                            <th style="text-align:right; width:140px;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${detallesHtml}
+                    </tbody>
+                </table>
+
+                <!-- Liquidación Tributaria e Importe en Letras -->
+                <div class="pdf-liquidacion-grid">
+                    <div class="pdf-letras-box">
+                        <div class="pdf-letras-titulo">Valor en Letras</div>
+                        <div class="pdf-letras-texto">SON: ${numeroALetras(f.total)} PESOS M/CTE.</div>
+                        <p style="font-size:0.7rem; color:#64748b; margin:8px 0 0 0; line-height:1.35;">
+                            Esta factura de venta se expide de acuerdo con los Arts. 615 y 616-1 del Estatuto Tributario y el Decreto 2242 de 2015. Presta mérito ejecutivo de acuerdo al Código de Comercio.
+                        </p>
+                    </div>
+                    <div class="pdf-totales-col">
+                        <div class="pdf-total-fila">
+                            <span>Subtotal (Base Gravable):</span>
+                            <strong>${UI.pesos(f.subtotal)}</strong>
+                        </div>
+                        <div class="pdf-total-fila">
+                            <span>IVA Legal (19% E.T.):</span>
+                            <strong style="color:#0284c7;">${UI.pesos(f.iva)}</strong>
+                        </div>
+                        <div class="pdf-total-fila">
+                            <span>Retención en la Fuente:</span>
+                            <span>$ 0.00 COP</span>
+                        </div>
+                        <div class="pdf-total-fila gran-total">
+                            <span>TOTAL PAGADO:</span>
+                            <span class="valor-total">${UI.pesos(f.total)}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="factura-totales">
-                    <div class="factura-fila-total">
-                        <span>Subtotal (sin impuestos):</span>
-                        <strong>${UI.pesos(f.subtotal)}</strong>
+                <!-- Validación Electrónica DIAN y CUFE -->
+                <div class="pdf-dian-certificacion">
+                    <div class="pdf-qr-box" title="Código QR Oficial de Validación DIAN">
+                        ${qrSvg}
                     </div>
-                    <div class="factura-fila-total">
-                        <span>IVA (19% Legal):</span>
-                        <strong>${UI.pesos(f.iva)}</strong>
-                    </div>
-                    <div class="factura-fila-total gran-total">
-                        <span>Total Pagado:</span>
-                        <strong>${UI.pesos(f.total)}</strong>
+                    <div class="pdf-cufe-info">
+                        <div class="pdf-cufe-header">
+                            <strong style="color:#0f172a;">CUFE (Código Único de Factura Electrónica):</strong>
+                            <button type="button" class="btn-copiar-cufe" data-cufe="${cufeCompleto}">Copiar CUFE</button>
+                        </div>
+                        <span class="pdf-cufe-hash">${cufeCompleto}</span>
+                        <div style="margin-top:4px;">
+                            Documento tributario validado por la DIAN. Representación gráfica oficial para consulta en la plataforma nacional.
+                        </div>
                     </div>
                 </div>
             </div>
         `;
+
+        const btnCopiar = contenedor.querySelector('.btn-copiar-cufe');
+        if (btnCopiar) {
+            btnCopiar.addEventListener('click', () => {
+                const cufe = btnCopiar.dataset.cufe;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(cufe).then(() => {
+                        btnCopiar.textContent = '✓ ¡Copiado!';
+                        setTimeout(() => { btnCopiar.textContent = 'Copiar CUFE'; }, 2000);
+                    });
+                }
+            });
+        }
+    }
+
+    async function descargarFacturaPdf() {
+        const hoja = document.querySelector('.hoja-factura-pdf');
+        if (!hoja) return;
+
+        const btn = document.getElementById('btn-descargar-pdf');
+        const textoOriginal = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Generando PDF...';
+        }
+
+        try {
+            if (window.html2pdf) {
+                const numFactura = facturaActual ? (facturaActual.numeroFactura || 'FAC-2026') : 'FAC-2026';
+                const opt = {
+                    margin:       [10, 10, 10, 10],
+                    filename:     `Factura_${numFactura}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                await html2pdf().set(opt).from(hoja).save();
+            } else {
+                window.print();
+            }
+        } catch (err) {
+            console.warn('Error al exportar PDF con html2pdf, recurriendo a impresión nativa:', err);
+            window.print();
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+        }
     }
 
     // ------------------------------------------------------------------

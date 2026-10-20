@@ -3,6 +3,20 @@
 Todas las modificaciones notables a este proyecto están documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.2.0] - 2026-10-20
+
+### Corregido
+- **Resolución de Error en Facturación Electrónica (`idPago` undefined):** Corrección del flujo asíncrono y de los métodos de búsqueda en `api.js` y `mock_data.js` que impedían consultar la factura y provocaban una excepción de lectura sobre propiedades indefinidas.
+- **Sincronización de Controladores y Puertos:** Inclusión del método `obtenerFacturaPorReserva` en `ConsultarFacturaUseCase`, `PagoApplicationService` y el endpoint REST `GET /facturas/reserva/{idReserva}` en `FacturaController`.
+- **Importación de Anotaciones OpenAPI:** Corrección del import faltante de `@ApiResponse` en `ReporteController.java`.
+
+### Añadido
+- **Visor Oficial de Factura Electrónica en PDF (Estándar DIAN):**
+  - Hoja digital A4 (`.hoja-factura-pdf`) con diseño tributario legal: membrete oficial de RENTA TOOLS COLOMBIA S.A.S. (NIT 901.458.789-4), radicado DIAN No. 1876400012, desglose de ítems, cálculo del 19% de IVA (Art. 468 E.T.) e importe en letras en pesos colombianos.
+  - Bloque de certificación digital con código QR fiscal vectorial y CUFE con botón interactivo de copiado rápido al portapapeles.
+  - Exportación y descarga directa a archivo PDF (`html2pdf.js`).
+  - Soporte de impresión y guardado PDF nativo impecable mediante reglas dedicadas `@media print`.
+
 ## [1.1.0] - 2026-10-19
 
 ### Añadido

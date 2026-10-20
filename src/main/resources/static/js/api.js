@@ -457,10 +457,10 @@ const API = (() => {
             fallback: () => MockStore.procesarPago(cuerpo)
         }),
         obtener: (id) => peticion('/pagos/' + id, {
-            fallback: () => MockStore.obtenerFacturaPorReserva(id)
+            fallback: () => MockStore.obtenerFacturaPorPago(id)
         }),
         porReserva: (idReserva) => peticion('/pagos/reserva/' + idReserva, {
-            fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+            fallback: () => MockStore.obtenerPagosPorReserva(idReserva)
         })
     };
 
@@ -470,6 +470,9 @@ const API = (() => {
         }),
         porReserva: (idReserva) => peticion('/facturas/reserva/' + idReserva, {
             fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+        }),
+        porPago: (idPago) => peticion('/facturas/pago/' + idPago, {
+            fallback: () => MockStore.obtenerFacturaPorPago(idPago)
         }),
         misFacturas: () => peticion('/facturas/mis-facturas', {
             fallback: () => [MockStore.obtenerFacturaPorReserva(101)]
