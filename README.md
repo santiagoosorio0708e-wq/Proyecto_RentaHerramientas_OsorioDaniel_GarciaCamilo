@@ -14,7 +14,7 @@
 [![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT%200.12.6-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://jwt.io/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0%20(4FN)-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Swagger OpenAPI](https://img.shields.io/badge/OpenAPI%203.0-Swagger%20UI-85EA2D?style=flat-square&logo=swagger&logoColor=black)](http://localhost:8080/api/v1/swagger-ui.html)
-[![Tests](https://img.shields.io/badge/Tests-57%20Passed-brightgreen?style=flat-square&logo=junit5&logoColor=white)](https://junit.org/junit5/)
+[![Tests](https://img.shields.io/badge/Tests-61%20Passed-brightgreen?style=flat-square&logo=junit5&logoColor=white)](https://junit.org/junit5/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 
 <p align="center">
@@ -614,7 +614,7 @@ El sistema utiliza autenticación stateless basada en JSON Web Tokens (JJWT 0.12
 <a id="-pruebas-automatizadas"></a>
 ## 🧪 Pruebas Automatizadas
 
-La solución cuenta con una suite completa de **57 pruebas automatizadas (unitarias y de integración)** con Spring Boot Test y JUnit 5, ejecutadas sobre motor en memoria H2 para total aislamiento:
+La solución cuenta con una suite completa de **61 pruebas automatizadas (unitarias y de integración)** con Spring Boot Test y JUnit 5, ejecutadas sobre motor en memoria H2 para total aislamiento:
 
 ```powershell
 .\mvnw.cmd test
@@ -626,19 +626,19 @@ La solución cuenta con una suite completa de **57 pruebas automatizadas (unitar
 |---|:---:|---|
 | **`AuthApplicationServiceTest`** | **11** | Registro de clientes/proveedores, login, rotación de refresh tokens, encriptación BCrypt y validación de roles. |
 | **`HerramientaApplicationServiceTest`** | **15** | CRUD de maquinaria, cambio de estados operativos, control de pertenencia de proveedor y reglas de tarifas. |
-| **`ReservaApplicationServiceTest`** | **4** | Creación de reservas, transiciones de estado (`SOLICITADA` ➔ `APROBADA`), cálculo de garantías y disponibilidad de fechas. |
+| **`ReservaApplicationServiceTest`** | **6** | Creación de reservas, transiciones de estado (`SOLICITADA` ➔ `APROBADA`), cálculo de garantías y disponibilidad de fechas. |
 | **`RangoFechasTest`** | **5** | Validación de solapamiento de fechas, duraciones mínimas y reglas de calendario de alquiler. |
-| **`PagoApplicationServiceTest`** | **3** | Aprobación de transacciones en pasarela simulada, emisión síncrona de facturas y vinculación con reservas. |
-| **`FacturaTest`** | **2** | Verificación matemática exacta de descomposición de base imponible y el 19% de IVA legal. |
-| **`DevolucionApplicationServiceTest`** | **4** | Cálculo dinámico de mora por días de retraso, penalización por daños en 4FN y actualización automática de flota. |
+| **`PagoApplicationServiceTest`** | **5** | Aprobación de transacciones en pasarela simulada, emisión síncrona de facturas y vinculación con reservas. |
+| **`FacturaTest`** | **3** | Verificación matemática exacta de descomposición de base imponible y el 19% de IVA legal. |
+| **`DevolucionApplicationServiceTest`** | **6** | Cálculo dinámico de mora por días de retraso, penalización por daños en 4FN y actualización automática de flota. |
 | **`ReporteApplicationServiceTest`** | **5** | Consolidación de KPIs del dashboard gerencial, ranking de herramientas populares y clientes frecuentes. |
-| **`ApiExceptionTest`** | **7** | Manejo de excepciones personalizadas, códigos HTTP y respuestas estandarizadas `ApiResponseDto`. |
+| **`GlobalExceptionHandlerTest`** | **4** | Manejo de excepciones personalizadas, códigos HTTP y respuestas estandarizadas `ApiResponseDto`. |
 | **`RentaHerramientasApplicationTests`** | **1** | Carga integral del contexto Spring Boot, repositorios JPA e inyección de dependencias. |
 
 ```text
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 57, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS

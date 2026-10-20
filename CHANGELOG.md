@@ -3,6 +3,21 @@
 Todas las modificaciones notables a este proyecto están documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.1.1] - 2026-10-20
+
+### Corregido
+- **La autenticación ya no se simula en el cliente.** El inicio de sesión y el registro van siempre contra el backend. Antes, si el servidor no respondía, el navegador concedía una sesión con datos locales y aceptaba cualquier correo y cualquier contraseña, incluso de usuarios que nunca se habían registrado.
+- **Detección del estado del servidor.** El sondeo de disponibilidad apuntaba a `/actuator/health`, un endpoint inexistente porque el proyecto no incluye el starter de Spring Boot Actuator. La respuesta `404` hacía que la aplicación diera por caído un backend que estaba funcionando y mostrara datos locales en su lugar. Ahora se sondea `/categorias`, que sí existe y es público.
+- **Guardia de las pantallas privadas (`UI.exigirSesion`).** Cuando no había sesión, la función abría una de demostración automáticamente, de modo que `admin.html` y `proveedor.html` se podían abrir sin haber iniciado sesión nunca. Ahora redirige al inicio de sesión y verifica el rol.
+- **Tiempo de espera de las peticiones.** Se amplió de 2 a 15 segundos (y el sondeo de 1,2 a 3 segundos), porque la primera llamada a un Spring Boot recién arrancado puede tardar más por el arranque en frío de la JVM.
+- **Documentación de pruebas en el README.** El total y el desglose por suite no coincidían con el código: eran 61 pruebas y no 57, y la suite `ApiExceptionTest` se llama en realidad `GlobalExceptionHandlerTest`.
+
+### Añadido
+- **Archivo `LICENSE` (MIT).** El README ya mostraba la insignia de licencia MIT, pero el archivo no existía en el repositorio.
+
+### Cambiado
+- **Accesos rápidos de la demostración.** Los botones de Cliente, Proveedor y Administrador siguen existiendo, pero ahora hacen un inicio de sesión real contra `/auth/login` con las credenciales del usuario de prueba, por lo que el token que se guarda es un JWT firmado por el backend.
+
 ## [1.1.0] - 2026-10-19
 
 ### Añadido
