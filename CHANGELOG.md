@@ -3,6 +3,21 @@
 Todas las modificaciones notables a este proyecto están documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-10-20
+
+### Añadido
+- **Base de Datos SQLite 3 con Permanencia Total de Datos:**
+  - Configuración de SQLite como base de datos por defecto (`renta_herramientas.db`) con soporte universal para Windows, Linux y macOS (Apple Silicon M1/M2/M3/M4 e Intel) sin requerir instalaciones de MySQL ni contenedores Docker.
+  - Conexión optimizada HikariCP con Write-Ahead Logging (`PRAGMA journal_mode=WAL;`), llaves foráneas (`PRAGMA foreign_keys=ON;`) y timeout de bloqueo concurrente de 30 segundos (`busy_timeout=30000;`).
+  - Componente sembrador automático (`DataInitializer`): detecta bases de datos nuevas y carga automáticamente roles maestros, usuarios con contraseñas BCrypt reales (`Password123`), 20 categorías, 20 herramientas con fotos HD, tarifas y especificaciones técnicas, 4 métodos de pago y reservas iniciales con facturación e IVA del 19%.
+  - Garantía de permanencia: cualquier cambio o registro nuevo efectuado desde la web se almacena directamente en el archivo SQLite persistiendo entre reinicios y cambios de dispositivo.
+  - Controlador de diagnóstico y salud (`HealthController`): rutas públicas `/health` y `/actuator/health` para supervisión en tiempo real del estado del backend y del motor de datos.
+  - Prueba de integración automatizada (`SQLitePersistenceTest`): 100% de cobertura validando creación física de la BD, idempotencia de datos maestros y transaccionalidad en tiempo de ejecución (63/63 tests pasando).
+
+### Mejorado
+- **Lanzador para macOS (`start-mac.sh`):** Configurado con SQLite por defecto, eliminando dependencias de servicios externos para arranque en un solo clic en Mac.
+- **Detección Dinámica de Backend en `api.js`:** Consulta optimizada al endpoint de catálogo y salud para enlace reactivo inmediato entre frontend y backend Spring Boot.
+
 ## [1.2.0] - 2026-10-20
 
 ### Corregido
