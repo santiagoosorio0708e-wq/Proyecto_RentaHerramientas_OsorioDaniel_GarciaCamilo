@@ -136,9 +136,12 @@ public class Usuario {
         this.password = nuevaPassword;
     }
 
-    public void actualizarDatosContacto(String nombreCompleto, String telefono, String direccion) {
+    public void actualizarDatosContacto(String nombreCompleto, String email, String telefono, String direccion) {
         if (nombreCompleto != null && !nombreCompleto.isBlank()) {
             this.nombreCompleto = nombreCompleto.trim();
+        }
+        if (email != null && !email.isBlank()) {
+            this.email = new Email(email.trim());
         }
         if (telefono != null && !telefono.isBlank()) {
             this.telefono = telefono.trim();
@@ -146,6 +149,10 @@ public class Usuario {
         if (direccion != null && !direccion.isBlank()) {
             this.direccion = direccion.trim();
         }
+    }
+
+    public void actualizarDatosContacto(String nombreCompleto, String telefono, String direccion) {
+        actualizarDatosContacto(nombreCompleto, null, telefono, direccion);
     }
 
     public void asignarPerfilProveedor(PerfilProveedor perfil) {

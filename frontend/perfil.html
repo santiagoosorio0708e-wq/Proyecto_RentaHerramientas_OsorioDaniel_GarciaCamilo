@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080c14" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+    <title>Mi Perfil y Panel de Usuario | RentaTools Pro</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Barra de Sesión / Navegación Principal -->
+<header class="barra-superior">
+    <div class="contenedor">
+        <a href="index.html" class="marca">
+            <div class="marca-icono">🏗️</div>
+            <div>RENTA<span>TOOLS</span> <small style="font-size:0.65rem; color:#94a3b8; font-weight:600; display:block; letter-spacing:1px;">EQUIPOS DE CONSTRUCCIÓN</small></div>
+        </a>
+        <nav class="menu" id="menu-sesion">
+            <!-- Renderizado dinámicamente por comun.js -->
+        </nav>
+    </div>
+</header>
+
+<main class="contenedor seccion">
+
+    <!-- HERO / BANNER DE PERFIL -->
+    <section class="perfil-hero">
+        <div class="perfil-usuario-info">
+            <div class="perfil-avatar-circulo" id="perfil-avatar-letras">DO</div>
+            <div class="perfil-titulos">
+                <h1 id="perfil-nombre-cabecera">Cargando perfil...</h1>
+                <div class="email">
+                    <span id="perfil-email-cabecera">usuario@rentatool.com</span>
+                    <span>&bull;</span>
+                    <span style="color:#10b981; font-weight:700;">🟢 Cuenta Activa</span>
+                </div>
+                <div class="perfil-insignias">
+                    <span class="etiqueta-rol" id="perfil-rol-badge">CLIENTE</span>
+                    <span class="insignia insignia-aprobada" id="perfil-doc-badge">NIT/CC: 1098765432</span>
+                    <span class="insignia insignia-en_curso" id="perfil-cupo-badge">Cupo Crédito: $ 15.000.000</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="index.html" class="boton boton-secundario" style="display:inline-flex; align-items:center; gap:8px;">
+                🚜 Explorar Catálogo
+            </a>
+            <button class="boton" id="btn-cerrar-sesion-hero" style="display:inline-flex; align-items:center; gap:8px;">
+                🚪 Cerrar Sesión
+            </button>
+        </div>
+    </section>
+
+    <!-- METRICAS / KPIS DEL USUARIO -->
+    <div class="rejilla-kpis" style="margin-bottom: 28px;">
+        <div class="tarjeta tarjeta-kpi">
+            <div class="kpi-icono">📦</div>
+            <div class="kpi-datos">
+                <div class="kpi-valor" id="kpi-total-alquileres">0</div>
+                <div class="kpi-etiqueta">Alquileres Realizados</div>
+            </div>
+        </div>
+        <div class="tarjeta tarjeta-kpi">
+            <div class="kpi-icono">🛒</div>
+            <div class="kpi-datos">
+                <div class="kpi-valor" id="kpi-total-carrito">0</div>
+                <div class="kpi-etiqueta">Equipos en Carrito</div>
+            </div>
+        </div>
+        <div class="tarjeta tarjeta-kpi">
+            <div class="kpi-icono">💰</div>
+            <div class="kpi-datos">
+                <div class="kpi-valor" id="kpi-total-inversion">$ 0</div>
+                <div class="kpi-etiqueta">Inversión Total en Obra</div>
+            </div>
+        </div>
+        <div class="tarjeta tarjeta-kpi">
+            <div class="kpi-icono">🛡️</div>
+            <div class="kpi-datos">
+                <div class="kpi-valor" style="color:var(--color-exito);">100%</div>
+                <div class="kpi-etiqueta">Cumplimiento & Garantías</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS INTERACTIVAS -->
+    <div class="pestanas-perfil">
+        <button class="pestana-perfil activa" id="tab-btn-datos" data-tab="datos">
+            👤 Mis Datos Personales
+        </button>
+        <button class="pestana-perfil" id="tab-btn-carrito" data-tab="carrito">
+            🛒 Carrito de Compras <span class="badge-contador-carrito" id="tab-contador-carrito" style="display:none;">0</span>
+        </button>
+        <button class="pestana-perfil" id="tab-btn-historial" data-tab="historial">
+            📜 Alquileres Pasados & Historial <span class="badge-contador-carrito" id="tab-contador-historial" style="background:var(--color-superficie-3); color:#ffffff;">0</span>
+        </button>
+        <button class="pestana-perfil" id="tab-btn-facturas" data-tab="facturas">
+            💳 Facturación Electrónica DIAN
+        </button>
+    </div>
+
+    <div id="mensaje-global-perfil" class="mensaje"></div>
+
+    <!-- ====================================================================
+         TAB 1: MIS DATOS PERSONALES Y SEGURIDAD
+         ==================================================================== -->
+    <section class="panel-tab-perfil activo" id="panel-datos">
+        <div class="grilla-perfil-datos">
+            <!-- Formulario de Actualización de Datos -->
+            <div class="tarjeta">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+                    <div style="font-size:1.6rem;">📝</div>
+                    <div>
+                        <h2 style="font-size:1.35rem; margin:0;">Información de Contacto</h2>
+                        <p class="ayuda-campo" style="margin:0;">Actualice su nombre, correo corporativo y datos de entrega.</p>
+                    </div>
+                </div>
+
+                <div id="mensaje-datos" class="mensaje"></div>
+
+                <form id="form-actualizar-datos" class="formulario">
+                    <div class="grupo-campo" style="margin-bottom:14px;">
+                        <label for="perfil-nombre">Nombre Completo o Razón Social *</label>
+                        <input type="text" id="perfil-nombre" name="nombreCompleto" required minlength="3" maxlength="120" placeholder="Ej. Daniel Felipe Osorio">
+                    </div>
+
+                    <div class="grupo-campo" style="margin-bottom:14px;">
+                        <label for="perfil-email">Correo Electrónico (Acceso y Facturación) *</label>
+                        <input type="email" id="perfil-email" name="email" required placeholder="ejemplo@rentatool.com">
+                    </div>
+
+                    <div class="fila-campos" style="margin-bottom:14px;">
+                        <div class="grupo-campo">
+                            <label for="perfil-telefono">Teléfono / WhatsApp *</label>
+                            <input type="tel" id="perfil-telefono" name="telefono" placeholder="+57 318 555 0109">
+                        </div>
+                        <div class="grupo-campo">
+                            <label for="perfil-ciudad">Ciudad Principal de Obra</label>
+                            <input type="text" id="perfil-ciudad" name="ciudad" value="Bucaramanga / Medellín" readonly style="opacity:0.8;">
+                        </div>
+                    </div>
+
+                    <div class="grupo-campo" style="margin-bottom:20px;">
+                        <label for="perfil-direccion">Dirección Física de Despacho / Sede</label>
+                        <input type="text" id="perfil-direccion" name="direccion" placeholder="Ej. Carrera 33 # 48-19, Bucaramanga">
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button type="submit" class="boton" id="btn-guardar-perfil" style="min-width:200px;">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Seguridad y Credenciales -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div class="tarjeta">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                        <div style="font-size:1.5rem;">🔒</div>
+                        <div>
+                            <h3 style="font-size:1.15rem; margin:0;">Seguridad & Contraseña</h3>
+                            <p class="ayuda-campo" style="margin:0;">Reemplace su contraseña periódicamente.</p>
+                        </div>
+                    </div>
+
+                    <div id="mensaje-password" class="mensaje"></div>
+
+                    <form id="form-cambiar-password" class="formulario">
+                        <div class="grupo-campo" style="margin-bottom:12px;">
+                            <label for="pwd-actual">Contraseña Actual *</label>
+                            <input type="password" id="pwd-actual" required placeholder="••••••••••••" autocomplete="current-password">
+                        </div>
+
+                        <div class="grupo-campo" style="margin-bottom:12px;">
+                            <label for="pwd-nueva">Nueva Contraseña (Mín. 8 caracteres) *</label>
+                            <input type="password" id="pwd-nueva" required minlength="8" placeholder="••••••••••••" autocomplete="new-password">
+                        </div>
+
+                        <div class="grupo-campo" style="margin-bottom:16px;">
+                            <label for="pwd-confirmar">Confirmar Nueva Contraseña *</label>
+                            <input type="password" id="pwd-confirmar" required minlength="8" placeholder="••••••••••••" autocomplete="new-password">
+                        </div>
+
+                        <button type="submit" class="boton boton-secundario" id="btn-cambiar-pwd" style="width:100%;">
+                            🔐 Actualizar Contraseña
+                        </button>
+                    </form>
+                </div>
+
+                <div class="tarjeta" style="background:rgba(245, 158, 11, 0.04); border-color:rgba(245, 158, 11, 0.2);">
+                    <h4 style="color:var(--color-acento-claro); margin-bottom:8px;">💡 Información de la Cuenta</h4>
+                    <ul style="padding-left:18px; margin:0; font-size:0.86rem; color:var(--color-texto-suave); display:flex; flex-direction:column; gap:6px;">
+                        <li>Todas sus transacciones están protegidas por autenticación JWT con cifrado SHA-256.</li>
+                        <li>Las facturas electrónicas emitidas quedan registradas ante la DIAN con IVA del 19%.</li>
+                        <li>Los depósitos en garantía se reembolsan en un plazo máximo de 24 horas tras la liquidación del check-in.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 2: CARRITO DE COMPRAS Y COTIZADOR DE ALQUILERES
+         ==================================================================== -->
+    <section class="panel-tab-perfil" id="panel-carrito">
+        <div class="tarjeta">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px;">
+                <div>
+                    <h2 style="font-size:1.4rem; margin:0;">🛒 Carrito de Equipos para Alquiler</h2>
+                    <p class="ayuda-campo" style="margin:0;">Configure las fechas de trabajo de cada máquina antes de confirmar su solicitud.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <a href="index.html" class="boton boton-secundario boton-pequeno">
+                        ➕ Agregar Más Equipos
+                    </a>
+                    <button class="boton boton-secundario boton-pequeno" id="btn-vaciar-carrito" style="color:var(--color-error); border-color:var(--color-error-bg);">
+                        🗑️ Vaciar Carrito
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenedor dinámico del Carrito -->
+            <div id="contenedor-carrito-items">
+                <!-- Inyectado vía perfil.js -->
+            </div>
+
+            <!-- Caja de Totales y Liquidación del Carrito -->
+            <div id="caja-totales-carrito" style="display:none;">
+                <div class="carrito-totales-caja">
+                    <h3 style="margin:0; font-size:1.15rem;">Resumen de Cotización & Liquidación</h3>
+                    <div class="carrito-totales-fila">
+                        <span>Equipos seleccionados:</span>
+                        <strong id="resumen-cant-equipos">0</strong>
+                    </div>
+                    <div class="carrito-totales-fila">
+                        <span>Subtotal Alquiler (Días acumulados):</span>
+                        <strong id="resumen-subtotal-alquiler">$ 0</strong>
+                    </div>
+                    <div class="carrito-totales-fila">
+                        <span>Depósitos de Garantía (100% Reembolsables):</span>
+                        <strong id="resumen-total-depositos" style="color:var(--color-acento-claro);">$ 0</strong>
+                    </div>
+                    <div class="carrito-totales-fila">
+                        <span>IVA Estimado (19% sobre servicio de alquiler):</span>
+                        <strong id="resumen-iva-alquiler">$ 0</strong>
+                    </div>
+                    <div class="carrito-totales-fila gran-total">
+                        <span>Gran Total Compromiso Inicial:</span>
+                        <strong id="resumen-gran-total">$ 0</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+                    <a href="index.html" class="boton boton-secundario">
+                        Seguir Explorando Catálogo
+                    </a>
+                    <button class="boton" id="btn-confirmar-todo-carrito" style="padding:14px 28px; font-size:1.05rem;">
+                        🚀 Confirmar y Crear Solicitudes de Alquiler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 3: ALQUILERES PASADOS Y HISTORIAL
+         ==================================================================== -->
+    <section class="panel-tab-perfil" id="panel-historial">
+        <div class="tarjeta">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px;">
+                <div>
+                    <h2 style="font-size:1.4rem; margin:0;">📜 Historial de Alquileres</h2>
+                    <p class="subtitulo" style="margin:0; font-size:0.92rem;">Consulte sus órdenes de maquinaria, devoluciones pasadas y comprobantes.</p>
+                </div>
+                <div style="display:flex; gap:8px;" id="filtros-historial">
+                    <button class="pildora-cat activa" data-filtro="todos">Todos</button>
+                    <button class="pildora-cat" data-filtro="finalizados">Completados / Devueltos</button>
+                    <button class="pildora-cat" data-filtro="activos">En Curso</button>
+                    <button class="pildora-cat" data-filtro="cancelados">Cancelados</button>
+                </div>
+            </div>
+
+            <div id="contenedor-historial-alquileres">
+                <!-- Inyectado vía perfil.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 4: FACTURACIÓN ELECTRÓNICA DIAN
+         ==================================================================== -->
+    <section class="panel-tab-perfil" id="panel-facturas">
+        <div class="tarjeta">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px;">
+                <div>
+                    <h2 style="font-size:1.4rem; margin:0;">💳 Facturación Electrónica de Alquileres</h2>
+                    <p class="subtitulo" style="margin:0; font-size:0.92rem;">Comprobantes fiscales digitales emitidos bajo normativa DIAN con IVA 19%.</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="insignia insignia-aprobada">DIAN Resol. 1876400012</span>
+                </div>
+            </div>
+
+            <div id="contenedor-facturas-dian">
+                <!-- Inyectado vía perfil.js -->
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL DE VISUALIZACIÓN DE FACTURA ELECTRÓNICA DIAN (PDF OFICIAL) -->
+<div class="fondo-modal" id="modal-factura">
+    <div class="modal modal-documento-pdf" style="max-width: 860px; width: 95vw; max-height: 94vh; display: flex; flex-direction: column;">
+        <div class="cabecera-modal" style="border-bottom: 1px solid var(--color-borde); padding: 14px 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge-pdf-rojo">PDF</span>
+                <div>
+                    <h2 style="font-size: 1.15rem; margin: 0; line-height: 1.2;">Factura Electrónica de Venta</h2>
+                    <span style="font-size: 0.78rem; color: var(--color-texto-suave);">Vista Previa Oficial DIAN &bull; Comprobante Fiscal Digital</span>
+                </div>
+            </div>
+            <button class="cerrar-modal" data-cerrar="modal-factura" title="Cerrar vista previa">&times;</button>
+        </div>
+        <div class="cuerpo-modal" id="factura-cuerpo" style="padding: 16px; overflow-y: auto; background: var(--color-fondo-elevado);">
+            <!-- Hoja A4 renderizada dinámicamente -->
+        </div>
+        <div class="pie-modal" style="border-top: 1px solid var(--color-borde); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="font-size: 0.8rem; color: var(--color-texto-suave); display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                <span>Resolución DIAN No. 1876400012 &middot; Régimen Común</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="boton boton-secundario" data-cerrar="modal-factura">Cerrar</button>
+                <button class="boton boton-secundario" id="btn-imprimir-factura" style="display: inline-flex; align-items: center; gap: 6px;">
+                    🖨️ Imprimir
+                </button>
+                <button class="boton" id="btn-descargar-pdf" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    📥 Descargar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS EN ORDEN DE DEPENDENCIA -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="js/mock_data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/perfil.js"></script>
+</body>
+</html>

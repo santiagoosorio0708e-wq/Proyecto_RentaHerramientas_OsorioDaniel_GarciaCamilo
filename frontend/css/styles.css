@@ -2055,4 +2055,232 @@ tr:hover td {
     }
 }
 
+/* ==========================================================================
+   INTERFAZ DE PERFIL DE USUARIO, CARRITO Y HISTORIAL DE ALQUILERES
+   ========================================================================== */
+
+.perfil-hero {
+    background: var(--color-vidrio-tarjeta);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: var(--radio-lg);
+    padding: 32px;
+    margin-bottom: 28px;
+    box-shadow: var(--sombra);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.perfil-hero::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--color-acento-resplandor) 0%, transparent 70%);
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+.perfil-usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.perfil-avatar-circulo {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #080c14;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 900;
+    box-shadow: 0 0 20px -2px var(--color-acento-resplandor);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.perfil-titulos h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.perfil-titulos .email {
+    color: var(--color-texto-suave);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.perfil-insignias {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.pestanas-perfil {
+    display: flex;
+    gap: 12px;
+    border-bottom: 2px solid var(--color-borde);
+    padding-bottom: 2px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.pestanas-perfil::-webkit-scrollbar {
+    display: none;
+}
+
+.pestana-perfil {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--color-texto-suave);
+    font-size: 1.02rem;
+    font-weight: 700;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: var(--transicion);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    position: relative;
+    bottom: -2px;
+}
+
+.pestana-perfil:hover {
+    color: var(--color-texto);
+    border-bottom-color: var(--color-borde-fuerte);
+}
+
+.pestana-perfil.activa {
+    color: var(--color-acento-claro);
+    border-bottom-color: var(--color-acento);
+}
+
+.panel-tab-perfil {
+    display: none;
+    animation: macFadeIn 0.35s ease;
+}
+
+.panel-tab-perfil.activo {
+    display: block;
+}
+
+/* Grilla para Datos de Usuario y Seguridad */
+.grilla-perfil-datos {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .grilla-perfil-datos {
+        grid-template-columns: 1fr;
+    }
+    .perfil-hero {
+        padding: 24px;
+    }
+}
+
+/* Carrito de Compras */
+.tabla-carrito {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-carrito th, .tabla-carrito td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-borde);
+    text-align: left;
+}
+
+.tabla-carrito th {
+    background: var(--color-superficie-2);
+    color: var(--color-texto-suave);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.carrito-item-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.carrito-item-icono {
+    font-size: 1.8rem;
+    background: var(--color-superficie-2);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radio-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-borde);
+}
+
+.carrito-totales-caja {
+    background: var(--color-superficie-2);
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: var(--radio);
+    padding: 24px;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.carrito-totales-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: var(--color-texto-suave);
+}
+
+.carrito-totales-fila.gran-total {
+    border-top: 2px dashed var(--color-borde-fuerte);
+    padding-top: 14px;
+    margin-top: 6px;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--color-acento-claro);
+}
+
+.badge-contador-carrito {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--color-acento);
+    color: #080c14;
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+
 

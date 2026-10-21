@@ -64,8 +64,16 @@ public class UsuarioApplicationService implements GestionarUsuarioUseCase {
     @Transactional
     public Usuario actualizarPerfil(String emailAutenticado, ActualizarPerfilRequest request) {
         Usuario usuario = obtenerPorEmail(emailAutenticado);
+
+        if (request.email() != null && !request.email().isBlank()
+                && !request.email().trim().equalsIgnoreCase(emailAutenticado.trim())) {
+            if (usuarioRepository.buscarPorEmail(new Email(request.email().trim())).isPresent()) {
+                throw new BusinessRuleException("El correo electronico ya esta registrado por otro usuario");
+            }
+        }
+
         usuario.actualizarDatosContacto(
-                request.nombreCompleto(), request.telefono(), request.direccion());
+                request.nombreCompleto(), request.email(), request.telefono(), request.direccion());
         return usuarioRepository.guardar(usuario);
     }
 

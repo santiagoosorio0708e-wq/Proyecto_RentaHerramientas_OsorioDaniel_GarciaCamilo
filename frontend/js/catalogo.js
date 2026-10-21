@@ -134,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="boton boton-pequeno btn-alquilar-directo" data-id="${h.idHerramienta}">
                             Alquilar
                         </button>
+                        <button class="boton boton-secundario boton-pequeno btn-agregar-carrito" data-id="${h.idHerramienta}" title="Agregar al Carrito de alquileres">
+                            🛒
+                        </button>
                         <button class="boton boton-secundario boton-pequeno btn-detalle" data-id="${h.idHerramienta}">
                             Ver Ficha
                         </button>
@@ -145,6 +148,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         contenedor.querySelectorAll('.btn-detalle').forEach(boton => {
             boton.addEventListener('click', () => verDetalle(boton.dataset.id));
+        });
+
+        contenedor.querySelectorAll('.btn-agregar-carrito').forEach(boton => {
+            boton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = boton.dataset.id;
+                try {
+                    const h = await API.catalogo.detalle(id);
+                    UI.carrito.agregar(h);
+                    UI.toast(`¡"${h.nombre}" agregada al carrito de alquileres! 🛒`, 'exito');
+                } catch (err) {
+                    UI.toast('Error al agregar al carrito: ' + err.message, 'error');
+                }
+            });
         });
 
         contenedor.querySelectorAll('.btn-alquilar-directo').forEach(boton => {
@@ -246,6 +263,16 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.cerrarModal('modal-detalle');
         abrirModalReservaConHerramienta(herramientaActual);
     });
+
+    const btnAgregarCarritoModal = document.getElementById('btn-agregar-carrito-modal');
+    if (btnAgregarCarritoModal) {
+        btnAgregarCarritoModal.addEventListener('click', () => {
+            if (!herramientaActual) return;
+            UI.carrito.agregar(herramientaActual);
+            UI.toast(`¡"${herramientaActual.nombre}" agregada al carrito de alquileres! 🛒`, 'exito');
+            UI.cerrarModal('modal-detalle');
+        });
+    }
 
     function abrirModalReservaConHerramienta(h) {
         herramientaActual = h;

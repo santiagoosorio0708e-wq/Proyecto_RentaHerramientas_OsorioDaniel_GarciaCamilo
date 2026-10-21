@@ -349,6 +349,41 @@ const API = (() => {
         miPerfil: () => peticion('/usuarios/me', {
             fallback: () => obtenerUsuario()
         }),
+        actualizarPerfil: async (datos) => {
+            return peticion('/usuarios/me', {
+                metodo: 'PUT',
+                cuerpo: datos,
+                fallback: () => {
+                    const actual = obtenerUsuario() || {};
+                    const act = {
+                        ...actual,
+                        nombreCompleto: datos.nombreCompleto || actual.nombreCompleto,
+                        email: datos.email || actual.email,
+                        telefono: datos.telefono || actual.telefono,
+                        direccion: datos.direccion || actual.direccion
+                    };
+                    guardarSesion(act);
+                    MockStore.actualizarPerfilUsuario(actual.idUsuario, act);
+                    return act;
+                }
+            }).then(resp => {
+                const actual = obtenerUsuario() || {};
+                const nuevo = {
+                    ...actual,
+                    nombreCompleto: (resp && resp.nombreCompleto) || datos.nombreCompleto || actual.nombreCompleto,
+                    email: (resp && resp.email) || datos.email || actual.email,
+                    telefono: (resp && resp.telefono) || datos.telefono || actual.telefono,
+                    direccion: (resp && resp.direccion) || datos.direccion || actual.direccion
+                };
+                guardarSesion(nuevo);
+                return nuevo;
+            });
+        },
+        cambiarPassword: (datos) => peticion('/usuarios/me/password', {
+            metodo: 'PATCH',
+            cuerpo: datos,
+            fallback: () => ({ mensaje: 'Contraseña actualizada correctamente' })
+        }),
         listar: (rol) => peticion('/usuarios' + (rol ? '?rol=' + encodeURIComponent(rol) : ''), {
             fallback: () => MockStore.listarUsuarios(rol)
         }),

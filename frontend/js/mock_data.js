@@ -1169,6 +1169,21 @@ const MockStore = (() => {
             throw new Error('Proveedor no encontrado');
         },
 
+        actualizarPerfilUsuario: (idUsuario, datos) => {
+            inicializar();
+            const u = cargar(KEY_USUARIOS, USUARIOS_SEED);
+            const usr = u.find(x => x.idUsuario === Number(idUsuario) || (datos.email && x.email === datos.email));
+            if (usr) {
+                if (datos.nombreCompleto) usr.nombreCompleto = datos.nombreCompleto;
+                if (datos.email) usr.email = datos.email;
+                if (datos.telefono) usr.telefono = datos.telefono;
+                if (datos.direccion) usr.direccion = datos.direccion;
+                guardar(KEY_USUARIOS, u);
+                return usr;
+            }
+            return datos;
+        },
+
         // Dashboard
         obtenerDashboard: () => {
             inicializar();

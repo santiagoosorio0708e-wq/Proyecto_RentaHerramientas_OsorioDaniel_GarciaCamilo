@@ -1,6 +1,7 @@
 package com.rentaherramientas.modules.identidad.application.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -12,6 +13,10 @@ public record ActualizarPerfilRequest(
         @Size(min = 3, max = 120, message = "El nombre debe tener entre 3 y 120 caracteres")
         String nombreCompleto,
 
+        @Schema(description = "Correo electronico de contacto y acceso", example = "juan.garcia@rentatool.com")
+        @Email(message = "El formato de correo electronico es invalido")
+        String email,
+
         @Schema(description = "Telefono de contacto", example = "3185550109")
         @Pattern(regexp = "^[0-9+\\s-]{7,20}$", message = "El telefono tiene un formato invalido")
         String telefono,
@@ -20,4 +25,8 @@ public record ActualizarPerfilRequest(
         @Size(max = 180, message = "La direccion no puede superar 180 caracteres")
         String direccion
 ) {
+    public ActualizarPerfilRequest(String nombreCompleto, String telefono, String direccion) {
+        this(nombreCompleto, null, telefono, direccion);
+    }
 }
+

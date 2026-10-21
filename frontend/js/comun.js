@@ -134,6 +134,96 @@ const UI = (() => {
     // Aplicar de inmediato el tema configurado
     aplicarTema(obtenerTemaActual());
 
+    // ------------------------------------------------------------------
+    // Carrito de Compras Local Resiliente
+    // ------------------------------------------------------------------
+
+    const Carrito = {
+        CLAVE: 'rh_carrito_compras',
+        obtener: () => {
+            try {
+                return JSON.parse(localStorage.getItem('rh_carrito_compras') || '[]');
+            } catch (e) {
+                return [];
+            }
+        },
+        guardar: (items) => {
+            localStorage.setItem('rh_carrito_compras', JSON.stringify(items));
+            window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: items }));
+            actualizarBadgesCarrito();
+        },
+        agregar: (herramienta, fechaInicio = null, fechaFin = null, cantidad = 1) => {
+            const items = Carrito.obtener();
+            const hoy = new Date();
+            const hoyStr = hoy.toISOString().split('T')[0];
+            const ret = new Date();
+            ret.setDate(hoy.getDate() + 3);
+            const retStr = ret.toISOString().split('T')[0];
+
+            const fIni = fechaInicio || hoyStr;
+            const fFin = fechaFin || retStr;
+
+            const idx = items.findIndex(i => Number(i.idHerramienta) === Number(herramienta.idHerramienta));
+            if (idx >= 0) {
+                items[idx].cantidad = (items[idx].cantidad || 1) + (Number(cantidad) || 1);
+                if (fechaInicio) items[idx].fechaInicio = fechaInicio;
+                if (fechaFin) items[idx].fechaFin = fechaFin;
+            } else {
+                items.push({
+                    idHerramienta: Number(herramienta.idHerramienta),
+                    nombre: herramienta.nombre,
+                    marca: herramienta.marca || 'CAT',
+                    modelo: herramienta.modelo || 'Industrial',
+                    categoria: herramienta.categoria || herramienta.categoriaPrincipal || 'Maquinaria',
+                    tarifaDiaria: Number(herramienta.tarifaDiaria) || 75000,
+                    fechaInicio: fIni,
+                    fechaFin: fFin,
+                    cantidad: Number(cantidad) || 1
+                });
+            }
+            Carrito.guardar(items);
+            return items;
+        },
+        eliminar: (idHerramienta) => {
+            const items = Carrito.obtener().filter(i => Number(i.idHerramienta) !== Number(idHerramienta));
+            Carrito.guardar(items);
+            return items;
+        },
+        actualizarItem: (idHerramienta, updates) => {
+            const items = Carrito.obtener();
+            const item = items.find(i => Number(i.idHerramienta) === Number(idHerramienta));
+            if (item) {
+                Object.assign(item, updates);
+                Carrito.guardar(items);
+            }
+            return items;
+        },
+        vaciar: () => {
+            localStorage.removeItem('rh_carrito_compras');
+            window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: [] }));
+            actualizarBadgesCarrito();
+        },
+        contar: () => {
+            const items = Carrito.obtener();
+            return items.reduce((sum, it) => sum + (Number(it.cantidad) || 1), 0);
+        }
+    };
+
+    function actualizarBadgesCarrito() {
+        const cant = Carrito.contar();
+        document.querySelectorAll('.badge-contador-carrito').forEach(el => {
+            el.textContent = cant;
+            el.style.display = cant > 0 ? 'inline-flex' : 'none';
+        });
+    }
+
+    if (typeof window !== 'undefined') {
+        window.Carrito = Carrito;
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'rh_carrito_compras') actualizarBadgesCarrito();
+        });
+    }
+
     /**
      * Construye y sincroniza la barra superior y la barra de demo rápido.
      */
@@ -150,11 +240,19 @@ const UI = (() => {
 
         const online = API.esOnline();
         const usuario = API.obtenerUsuario();
+        const cantCarrito = Carrito.contar();
+        const badgeCarritoHtml = `<span class="badge-contador-carrito" style="display:${cantCarrito > 0 ? 'inline-flex' : 'none'};">${cantCarrito}</span>`;
 
         let enlaces = `<a href="index.html"${paginaActual === 'catalogo' ? ' class="activo"' : ''}>🚜 Catálogo</a>`;
 
         if (usuario) {
             enlaces += `<a href="reservas.html"${paginaActual === 'reservas' ? ' class="activo"' : ''}>📋 Mis Reservas</a>`;
+        }
+
+        enlaces += `<a href="perfil.html?tab=carrito"${paginaActual === 'carrito' ? ' class="activo"' : ''}>🛒 Carrito ${badgeCarritoHtml}</a>`;
+
+        if (usuario) {
+            enlaces += `<a href="perfil.html"${paginaActual === 'perfil' ? ' class="activo"' : ''}>👤 Mi Perfil</a>`;
         }
 
         if (API.esProveedor() || API.esAdmin()) {
@@ -201,10 +299,10 @@ const UI = (() => {
                 <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
                     ${textoTemaNav}
                 </button>
-                <span class="usuario-sesion">
+                <a href="perfil.html" class="usuario-sesion" title="Ver y editar mi perfil" style="text-decoration:none; cursor:pointer;">
                     <span class="etiqueta-rol">${esc(API.rolPrincipal())}</span>
                     <span>${esc(usuario.nombreCompleto)}</span>
-                </span>
+                </a>
                 <button class="boton-secundario boton-pequeno" id="btn-salir" title="Cerrar sesión">Salir</button>
             </div>
         `;
@@ -320,7 +418,8 @@ const UI = (() => {
         mensaje, ocultarMensaje, pesos, fecha, fechaConHora, esc, insignia,
         cargando, vacio, pintarBarra, exigirSesion,
         abrirModal, cerrarModal, leerFormulario, toast,
-        aplicarTema, alternarTema, obtenerTemaActual
+        aplicarTema, alternarTema, obtenerTemaActual,
+        carrito: Carrito, actualizarBadgesCarrito
     };
 
 })();
