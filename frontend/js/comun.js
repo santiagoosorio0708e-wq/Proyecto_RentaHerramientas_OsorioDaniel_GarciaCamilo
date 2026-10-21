@@ -318,19 +318,24 @@ const UI = (() => {
         }
     }
 
+    /**
+     * Guardia de las paginas privadas.
+     *
+     * Sin sesion se devuelve al login: una pantalla protegida no puede abrir
+     * una sesion por su cuenta, porque entonces el control de acceso no
+     * controlaria nada. Con sesion pero sin el rol necesario se devuelve al
+     * inicio. El backend vuelve a validar el token y el rol en cada peticion;
+     * esta comprobacion solo evita mostrar una pantalla que no corresponde.
+     */
     function exigirSesion(rolRequerido) {
         if (!API.haySesion()) {
-            toast('Debes iniciar sesión para acceder a esta sección.', 'info');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 600);
+            toast('Debe iniciar sesión para entrar a esta sección.', 'error');
+            setTimeout(() => { window.location.href = 'login.html'; }, 600);
             return false;
         }
         if (rolRequerido && !API.tieneRol(rolRequerido) && !API.esAdmin()) {
             toast('Permisos insuficientes para esta sección.', 'error');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 600);
+            setTimeout(() => { window.location.href = 'index.html'; }, 600);
             return false;
         }
         return true;

@@ -34,6 +34,12 @@ const API = (() => {
 
     let _backendDisponible = null; // null: no verificado, true: online, false: offline
 
+    // La primera peticion contra un Spring Boot recien arrancado puede tardar
+    // varios segundos (JVM en frio + pool de conexiones). Un timeout corto daba
+    // por caido un backend que si estaba respondiendo.
+    const TIMEOUT_PETICION_MS = 15000;
+    const TIMEOUT_SONDEO_MS   = 3000;
+
     // ------------------------------------------------------------------
     // Almacenamiento de la sesion
     // ------------------------------------------------------------------
@@ -97,17 +103,27 @@ const API = (() => {
     // Diagnostico y Estado de Conexion
     // ------------------------------------------------------------------
 
+    /**
+     * Comprueba si el backend esta respondiendo.
+     *
+     * Se sondea /categorias, que es un endpoint publico que si existe en la
+     * API. Antes se usaba /actuator/health, pero el proyecto no incluye el
+     * starter de Actuator: esa ruta devolvia 404 y la aplicacion daba por
+     * caido un servidor que estaba funcionando bien.
+     *
+     * Cualquier respuesta HTTP sirve como prueba de vida, incluso un error:
+     * lo que se esta midiendo es si hay un servidor al otro lado, no si la
+     * peticion concreta tuvo exito.
+     */
     async function verificarBackend() {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1500);
-            let res = await fetch(URL_BASE + '/catalogo', {
+            const timeoutId = setTimeout(() => controller.abort(), typeof TIMEOUT_SONDEO_MS !== 'undefined' ? TIMEOUT_SONDEO_MS : 3000);
+            let res = await fetch(URL_BASE + '/categorias', {
                 method: 'GET',
                 signal: controller.signal
             }).catch(() => null);
 
             if (!res || (!res.ok && res.status !== 401 && res.status !== 403)) {
-                res = await fetch(URL_BASE + '/actuator/health', {
+                res = await fetch(URL_BASE + '/health', {
                     method: 'GET',
                     signal: controller.signal
                 }).catch(() => null);
@@ -115,7 +131,7 @@ const API = (() => {
 
             clearTimeout(timeoutId);
 
-            _backendDisponible = (res && (res.ok || res.status === 401 || res.status === 403));
+            _backendDisponible = !!res;
         } catch (e) {
             _backendDisponible = false;
         }
@@ -177,7 +193,7 @@ const API = (() => {
         let respuesta;
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_PETICION_MS);
 
             respuesta = await fetch(URL_BASE + ruta, {
                 method: metodo,
@@ -267,81 +283,52 @@ const API = (() => {
     // ------------------------------------------------------------------
 
     const auth = {
+        // La autenticacion NUNCA usa el almacen local de respaldo: la identidad
+        // de un usuario solo la puede confirmar el backend contra la base de
+        // datos. Si el servidor no responde, el login falla con un error claro
+        // en vez de conceder una sesion que no existe.
         login: async (email, password) => {
             return peticion('/auth/login', {
                 metodo: 'POST',
                 cuerpo: { email, password },
-                publica: true,
-                fallback: () => MockStore.login(email, password)
+                publica: true
             }).then(datos => {
                 guardarSesion(datos);
                 return datos;
             });
         },
+        // El registro tampoco se simula: la cuenta tiene que quedar realmente
+        // guardada en la base de datos, con su contrasena cifrada en BCrypt.
         registrarCliente: (cuerpo) => peticion('/auth/registro/cliente', {
             metodo: 'POST',
             cuerpo,
-            publica: true,
-            fallback: () => {
-                const nuevo = {
-                    idUsuario: Date.now(),
-                    nombreCompleto: cuerpo.nombreCompleto || 'Nuevo Cliente',
-                    email: cuerpo.email,
-                    roles: ['ROLE_CLIENTE']
-                };
-                return nuevo;
-            }
+            publica: true
         }),
         registrarProveedor: (cuerpo) => peticion('/auth/registro/proveedor', {
             metodo: 'POST',
             cuerpo,
-            publica: true,
-            fallback: () => {
-                const nuevo = {
-                    idUsuario: Date.now(),
-                    nombreCompleto: cuerpo.razonSocial || 'Nuevo Proveedor',
-                    email: cuerpo.email,
-                    roles: ['ROLE_PROVEEDOR']
-                };
-                return nuevo;
-            }
+            publica: true
         }),
         logout: () => {
             borrarSesion();
             window.location.href = 'login.html';
         },
-        iniciarComoDemo: (rol) => {
-            let datos;
-            if (rol === 'ADMIN') {
-                datos = {
-                    idUsuario: 1,
-                    nombreCompleto: 'Carlos Andrés Pérez (Admin)',
-                    email: 'admin.perez@rentatool.com',
-                    roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'],
-                    accessToken: 'demo_admin_' + Date.now(),
-                    refreshToken: 'demo_refresh_' + Date.now()
-                };
-            } else if (rol === 'PROVEEDOR') {
-                datos = {
-                    idUsuario: 4,
-                    nombreCompleto: 'MaquiAntioquia SAS (Proveedor)',
-                    email: 'ventas@maquiantioquia.com',
-                    roles: ['ROLE_PROVEEDOR'],
-                    accessToken: 'demo_prov_' + Date.now(),
-                    refreshToken: 'demo_refresh_' + Date.now()
-                };
-            } else {
-                datos = {
-                    idUsuario: 8,
-                    nombreCompleto: 'Daniel Felipe Osorio (Cliente)',
-                    email: 'daniel.osorio@gmail.com',
-                    roles: ['ROLE_CLIENTE'],
-                    accessToken: 'demo_cli_' + Date.now(),
-                    refreshToken: 'demo_refresh_' + Date.now()
-                };
-            }
-            guardarSesion(datos);
-            return datos;
+        /**
+         * Botones de acceso rapido de la demostracion.
+         *
+         * No crean una sesion por su cuenta: rellenan las credenciales del
+         * usuario de prueba correspondiente y hacen un login real contra
+         * /auth/login. El token que queda guardado es un JWT firmado por el
+         * backend, igual que si se hubiera escrito el formulario a mano.
+         */
+        iniciarComoDemo: async (rol) => {
+            const CUENTAS_DEMO = {
+                ADMIN:     'admin.perez@rentatool.com',
+                PROVEEDOR: 'ventas@maquiantioquia.com',
+                CLIENTE:   'camilo.garcia@gmail.com'
+            };
+            const email = CUENTAS_DEMO[rol] || CUENTAS_DEMO.CLIENTE;
+            return auth.login(email, 'Password123');
         }
     };
 

@@ -615,7 +615,7 @@ El sistema utiliza autenticación stateless basada en JSON Web Tokens (JJWT 0.12
 <a id="-pruebas-automatizadas"></a>
 ## 🧪 Pruebas Automatizadas
 
-La solución cuenta con una suite completa de **57 pruebas automatizadas (unitarias y de integración)** con Spring Boot Test y JUnit 5, ejecutadas sobre motor en memoria H2 para total aislamiento:
+La solución cuenta con una suite completa de **61 pruebas automatizadas (unitarias y de integración)** con Spring Boot Test y JUnit 5, ejecutadas sobre motor en memoria H2 para total aislamiento:
 
 ```powershell
 .\mvnw.cmd test
@@ -627,19 +627,19 @@ La solución cuenta con una suite completa de **57 pruebas automatizadas (unitar
 |---|:---:|---|
 | **`AuthApplicationServiceTest`** | **11** | Registro de clientes/proveedores, login, rotación de refresh tokens, encriptación BCrypt y validación de roles. |
 | **`HerramientaApplicationServiceTest`** | **15** | CRUD de maquinaria, cambio de estados operativos, control de pertenencia de proveedor y reglas de tarifas. |
-| **`ReservaApplicationServiceTest`** | **4** | Creación de reservas, transiciones de estado (`SOLICITADA` ➔ `APROBADA`), cálculo de garantías y disponibilidad de fechas. |
+| **`ReservaApplicationServiceTest`** | **6** | Creación de reservas, transiciones de estado (`SOLICITADA` ➔ `APROBADA`), cálculo de garantías y disponibilidad de fechas. |
 | **`RangoFechasTest`** | **5** | Validación de solapamiento de fechas, duraciones mínimas y reglas de calendario de alquiler. |
-| **`PagoApplicationServiceTest`** | **3** | Aprobación de transacciones en pasarela simulada, emisión síncrona de facturas y vinculación con reservas. |
-| **`FacturaTest`** | **2** | Verificación matemática exacta de descomposición de base imponible y el 19% de IVA legal. |
-| **`DevolucionApplicationServiceTest`** | **4** | Cálculo dinámico de mora por días de retraso, penalización por daños en 4FN y actualización automática de flota. |
+| **`PagoApplicationServiceTest`** | **5** | Aprobación de transacciones en pasarela simulada, emisión síncrona de facturas y vinculación con reservas. |
+| **`FacturaTest`** | **3** | Verificación matemática exacta de descomposición de base imponible y el 19% de IVA legal. |
+| **`DevolucionApplicationServiceTest`** | **6** | Cálculo dinámico de mora por días de retraso, penalización por daños en 4FN y actualización automática de flota. |
 | **`ReporteApplicationServiceTest`** | **5** | Consolidación de KPIs del dashboard gerencial, ranking de herramientas populares y clientes frecuentes. |
-| **`ApiExceptionTest`** | **7** | Manejo de excepciones personalizadas, códigos HTTP y respuestas estandarizadas `ApiResponseDto`. |
+| **`GlobalExceptionHandlerTest`** | **4** | Manejo de excepciones personalizadas, códigos HTTP y respuestas estandarizadas `ApiResponseDto`. |
 | **`RentaHerramientasApplicationTests`** | **1** | Carga integral del contexto Spring Boot, repositorios JPA e inyección de dependencias. |
 
 ```text
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 57, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS

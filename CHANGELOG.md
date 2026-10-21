@@ -3,6 +3,15 @@
 Todas las modificaciones notables a este proyecto están documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.4.0] - 2026-10-20
+
+### Añadido
+- **Módulo de Perfil Integral del Usuario (`perfil.html` / `perfil.js`):**
+  - Actualización reactiva de datos personales (nombre completo, correo electrónico, teléfono y dirección) con validación de no duplicidad de correo en backend y persistencia local inmediata.
+  - Carrito de compras y cotizador de alquileres con cálculo dinámico de días, subtotales, depósito de garantía, IVA 19% y confirmación en lote de reservas.
+  - Historial de alquileres pasados con visualización de estados, tarifas diarias, montos totales y re-alquiler rápido con un clic.
+  - Visor interactivo y exportación en PDF de Facturación Electrónica DIAN.
+
 ## [1.3.0] - 2026-10-20
 
 ### Añadido
@@ -31,6 +40,17 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/
   - Bloque de certificación digital con código QR fiscal vectorial y CUFE con botón interactivo de copiado rápido al portapapeles.
   - Exportación y descarga directa a archivo PDF (`html2pdf.js`).
   - Soporte de impresión y guardado PDF nativo impecable mediante reglas dedicadas `@media print`.
+
+## [1.1.1] - 2026-10-20
+
+### Corregido
+- **La autenticación ya no se simula en el cliente:** El inicio de sesión y el registro van siempre contra el backend con JWT firmado.
+- **Detección del estado del servidor:** Sondeo optimizado para verificar conectividad real con el servidor.
+- **Guardia de las pantallas privadas (`UI.exigirSesion`):** Redirección obligatoria a `login.html` sin auto-iniciar sesiones no deseadas.
+- **Tiempo de espera de las peticiones:** Soporte ampliado para arranque en frío de la JVM.
+
+### Añadido
+- **Archivo `LICENSE` (MIT):** Licencia de código abierto MIT en la raíz del repositorio.
 
 ## [1.1.0] - 2026-10-19
 

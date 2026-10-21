@@ -856,21 +856,23 @@ const MockStore = (() => {
             return true;
         },
 
-        // Autenticacion
+        /**
+         * Autenticacion local.
+         *
+         * Solo se usa para consultas de respaldo cuando el servidor no
+         * responde; el login de la aplicacion siempre va contra el backend
+         * (ver api.js). Aun asi, aqui tampoco se acepta un correo que no
+         * exista: un usuario que no se ha registrado no puede entrar.
+         */
         login: (email, password) => {
             inicializar();
             const usuarios = cargar(KEY_USUARIOS, USUARIOS_SEED);
             const u = usuarios.find(x => x.email.toLowerCase() === email.toLowerCase());
             if (!u) {
-                // Para maxima comodidad en evaluacion, si el email es nuevo lo acepta como cliente
-                return {
-                    idUsuario: 99,
-                    nombreCompleto: email.split('@')[0],
-                    email: email,
-                    roles: ['ROLE_CLIENTE'],
-                    accessToken: 'demo_token_' + Date.now(),
-                    refreshToken: 'demo_refresh_' + Date.now()
-                };
+                throw new Error('Credenciales inválidas.');
+            }
+            if (u.activo === false) {
+                throw new Error('La cuenta se encuentra bloqueada.');
             }
             return {
                 idUsuario: u.idUsuario,
