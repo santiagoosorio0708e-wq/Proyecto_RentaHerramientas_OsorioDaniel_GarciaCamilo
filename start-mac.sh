@@ -35,17 +35,18 @@ echo -e "\n${YELLOW}⚙️  [2/4] Configurando permisos de Maven Wrapper en macO
 chmod +x ./mvnw
 echo -e "${GREEN}✓ Permisos de ejecución aplicados correctamente a ./mvnw${NC}"
 
-# 3. Configuración de Variables de Entorno por defecto (pueden ser sobreescritas)
+# 3. Configuración de Variables de Entorno por defecto (SQLite portable y autónomo)
 export SERVER_PORT="${SERVER_PORT:-8080}"
-export DB_URL="${DB_URL:-jdbc:mysql://localhost:3306/renta_herramientas_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}"
-export DB_USERNAME="${DB_USERNAME:-root}"
+export DB_URL="${DB_URL:-jdbc:sqlite:renta_herramientas.db}"
+export DB_DRIVER="${DB_DRIVER:-org.sqlite.JDBC}"
+export DB_USERNAME="${DB_USERNAME:-}"
 export DB_PASSWORD="${DB_PASSWORD:-}"
 export JWT_SECRET="${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}"
 
 echo -e "\n${YELLOW}🚀 [3/4] Variables de configuración activas:${NC}"
 echo -e "   - Puerto HTTP: ${SERVER_PORT}"
-echo -e "   - URL Base Datos: ${DB_URL}"
-echo -e "   - Usuario BD: ${DB_USERNAME}"
+echo -e "   - Motor Base de Datos: ${GREEN}SQLite 3 (renta_herramientas.db)${NC}"
+echo -e "   - Portabilidad: ${GREEN}100% Nativo en macOS (Apple Silicon M1/M2/M3/M4 e Intel) - Sin MySQL ni Docker${NC}"
 
 # 4. Abrir automáticamente en Safari / Chrome en background tras arranque
 (

@@ -134,96 +134,125 @@ const UI = (() => {
     // Aplicar de inmediato el tema configurado
     aplicarTema(obtenerTemaActual());
 
+    // ------------------------------------------------------------------
+    // Carrito de Compras Local Resiliente
+    // ------------------------------------------------------------------
+
+    const Carrito = {
+        CLAVE: 'rh_carrito_compras',
+        obtener: () => {
+            try {
+                return JSON.parse(localStorage.getItem('rh_carrito_compras') || '[]');
+            } catch (e) {
+                return [];
+            }
+        },
+        guardar: (items) => {
+            localStorage.setItem('rh_carrito_compras', JSON.stringify(items));
+            window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: items }));
+            actualizarBadgesCarrito();
+        },
+        agregar: (herramienta, fechaInicio = null, fechaFin = null, cantidad = 1) => {
+            const items = Carrito.obtener();
+            const hoy = new Date();
+            const hoyStr = hoy.toISOString().split('T')[0];
+            const ret = new Date();
+            ret.setDate(hoy.getDate() + 3);
+            const retStr = ret.toISOString().split('T')[0];
+
+            const fIni = fechaInicio || hoyStr;
+            const fFin = fechaFin || retStr;
+
+            const idx = items.findIndex(i => Number(i.idHerramienta) === Number(herramienta.idHerramienta));
+            if (idx >= 0) {
+                items[idx].cantidad = (items[idx].cantidad || 1) + (Number(cantidad) || 1);
+                if (fechaInicio) items[idx].fechaInicio = fechaInicio;
+                if (fechaFin) items[idx].fechaFin = fechaFin;
+            } else {
+                items.push({
+                    idHerramienta: Number(herramienta.idHerramienta),
+                    nombre: herramienta.nombre,
+                    marca: herramienta.marca || 'CAT',
+                    modelo: herramienta.modelo || 'Industrial',
+                    categoria: herramienta.categoria || herramienta.categoriaPrincipal || 'Maquinaria',
+                    tarifaDiaria: Number(herramienta.tarifaDiaria) || 75000,
+                    fechaInicio: fIni,
+                    fechaFin: fFin,
+                    cantidad: Number(cantidad) || 1
+                });
+            }
+            Carrito.guardar(items);
+            return items;
+        },
+        eliminar: (idHerramienta) => {
+            const items = Carrito.obtener().filter(i => Number(i.idHerramienta) !== Number(idHerramienta));
+            Carrito.guardar(items);
+            return items;
+        },
+        actualizarItem: (idHerramienta, updates) => {
+            const items = Carrito.obtener();
+            const item = items.find(i => Number(i.idHerramienta) === Number(idHerramienta));
+            if (item) {
+                Object.assign(item, updates);
+                Carrito.guardar(items);
+            }
+            return items;
+        },
+        vaciar: () => {
+            localStorage.removeItem('rh_carrito_compras');
+            window.dispatchEvent(new CustomEvent('carrito-actualizado', { detail: [] }));
+            actualizarBadgesCarrito();
+        },
+        contar: () => {
+            const items = Carrito.obtener();
+            return items.reduce((sum, it) => sum + (Number(it.cantidad) || 1), 0);
+        }
+    };
+
+    function actualizarBadgesCarrito() {
+        const cant = Carrito.contar();
+        document.querySelectorAll('.badge-contador-carrito').forEach(el => {
+            el.textContent = cant;
+            el.style.display = cant > 0 ? 'inline-flex' : 'none';
+        });
+    }
+
+    if (typeof window !== 'undefined') {
+        window.Carrito = Carrito;
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'rh_carrito_compras') actualizarBadgesCarrito();
+        });
+    }
+
     /**
      * Construye y sincroniza la barra superior y la barra de demo rápido.
      */
     function pintarBarra(paginaActual) {
-        // 1. Barra de Demo Rápido (Se inyecta antes del header si no existe)
-        let barraDemo = document.getElementById('barra-demo-rapido');
-        if (!barraDemo) {
-            barraDemo = document.createElement('div');
-            barraDemo.id = 'barra-demo-rapido';
-            barraDemo.className = 'barra-demo';
-            document.body.insertBefore(barraDemo, document.body.firstChild);
+        // Remover barra demo flotante si existiera en el DOM
+        const barraDemo = document.getElementById('barra-demo-rapido');
+        if (barraDemo) {
+            barraDemo.remove();
         }
 
-        const online = API.esOnline();
-        const tema = obtenerTemaActual();
-        barraDemo.innerHTML = `
-            <div class="barra-demo-grupo">
-                <span style="color:var(--color-texto-suave); font-weight:700;">🚀 MODO DE PRUEBA RÁPIDO:</span>
-                <button class="boton-demo-rol" id="btn-demo-cliente" title="Ingresar como Daniel Osorio (daniel.osorio@gmail.com)">
-                    👤 Cliente: Daniel Osorio
-                </button>
-                <button class="boton-demo-rol" id="btn-demo-proveedor" title="Ingresar como MaquiAntioquia (Proveedor)">
-                    🏢 Proveedor
-                </button>
-                <button class="boton-demo-rol" id="btn-demo-admin" title="Ingresar como Carlos Pérez (Admin)">
-                    ⚙️ Administrador
-                </button>
-            </div>
-            <div class="barra-demo-grupo">
-                <button class="boton-demo-rol boton-toggle-tema" id="btn-toggle-tema-top" title="Cambiar tema Día / Noche">
-                    ${tema === 'dark' ? '☀️ Modo Día' : '🌙 Modo Noche'}
-                </button>
-                <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="Estado de la conexión REST">
-                    <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
-                    ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Sin conexión con el servidor'}
-                </span>
-                <button class="boton-demo-rol" id="btn-reintentar-api" style="padding:2px 8px;" title="Reintentar conexión con backend">
-                    🔄 Verificar
-                </button>
-            </div>
-        `;
-
-        const btnTemaTop = document.getElementById('btn-toggle-tema-top');
-        if (btnTemaTop) btnTemaTop.addEventListener('click', alternarTema);
-
-        // Cada acceso rapido hace un login real contra /auth/login con las
-        // credenciales del usuario de prueba. Si el backend no responde o la
-        // base de datos no esta cargada, avisa en lugar de simular la sesion.
-        function accesoRapido(idBoton, rol, etiqueta, destino) {
-            const boton = document.getElementById(idBoton);
-            if (!boton) return;
-            boton.addEventListener('click', async () => {
-                const textoOriginal = boton.textContent;
-                boton.disabled = true;
-                boton.textContent = '⏳ Entrando...';
-                try {
-                    await API.auth.iniciarComoDemo(rol);
-                    toast('Sesión iniciada como ' + etiqueta, 'exito');
-                    setTimeout(() => { window.location.href = destino; }, 300);
-                } catch (error) {
-                    toast(error.message, 'error');
-                    boton.disabled = false;
-                    boton.textContent = textoOriginal;
-                }
-            });
-        }
-
-        accesoRapido('btn-demo-cliente', 'CLIENTE', 'Cliente', 'index.html');
-        accesoRapido('btn-demo-proveedor', 'PROVEEDOR', 'Proveedor', 'proveedor.html');
-        accesoRapido('btn-demo-admin', 'ADMIN', 'Administrador', 'admin.html');
-
-        document.getElementById('btn-reintentar-api').addEventListener('click', async () => {
-            const btn = document.getElementById('btn-reintentar-api');
-            btn.textContent = '⏳ Comprobando...';
-            const ok = await API.verificarBackend();
-            btn.textContent = '🔄 Verificar';
-            toast(ok ? '¡Conectado al servidor Spring Boot!' : 'Servidor Spring Boot offline. El modo local sigue 100% funcional.', ok ? 'exito' : 'info');
-            pintarBarra(paginaActual);
-        });
-
-        // 2. Menú de navegación principal
+        // Menú de navegación principal
         const contenedor = document.getElementById('menu-sesion');
         if (!contenedor) return;
 
+        const online = API.esOnline();
         const usuario = API.obtenerUsuario();
+        const cantCarrito = Carrito.contar();
+        const badgeCarritoHtml = `<span class="badge-contador-carrito" style="display:${cantCarrito > 0 ? 'inline-flex' : 'none'};">${cantCarrito}</span>`;
 
         let enlaces = `<a href="index.html"${paginaActual === 'catalogo' ? ' class="activo"' : ''}>🚜 Catálogo</a>`;
 
         if (usuario) {
             enlaces += `<a href="reservas.html"${paginaActual === 'reservas' ? ' class="activo"' : ''}>📋 Mis Reservas</a>`;
+        }
+
+        enlaces += `<a href="perfil.html?tab=carrito"${paginaActual === 'carrito' ? ' class="activo"' : ''}>🛒 Carrito ${badgeCarritoHtml}</a>`;
+
+        if (usuario) {
+            enlaces += `<a href="perfil.html"${paginaActual === 'perfil' ? ' class="activo"' : ''}>👤 Mi Perfil</a>`;
         }
 
         if (API.esProveedor() || API.esAdmin()) {
@@ -239,10 +268,18 @@ const UI = (() => {
         const temaActual = obtenerTemaActual();
         const textoTemaNav = temaActual === 'dark' ? '☀️ Día' : '🌙 Noche';
 
+        const badgeConexion = `
+            <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="${online ? 'Conectado a la API REST de Spring Boot' : 'Operando en Modo Local Resiliente'}">
+                <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
+                ${online ? '🟢 Servidor Conectado' : '🟡 Modo Local'}
+            </span>
+        `;
+
         if (!usuario) {
             contenedor.innerHTML = `
                 ${enlaces}
-                <div style="display:flex; align-items:center; gap:8px; margin-left:8px;">
+                <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                    ${badgeConexion}
                     <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
                         ${textoTemaNav}
                     </button>
@@ -258,13 +295,14 @@ const UI = (() => {
         contenedor.innerHTML = `
             ${enlaces}
             <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                ${badgeConexion}
                 <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
                     ${textoTemaNav}
                 </button>
-                <span class="usuario-sesion">
+                <a href="perfil.html" class="usuario-sesion" title="Ver y editar mi perfil" style="text-decoration:none; cursor:pointer;">
                     <span class="etiqueta-rol">${esc(API.rolPrincipal())}</span>
                     <span>${esc(usuario.nombreCompleto)}</span>
-                </span>
+                </a>
                 <button class="boton-secundario boton-pequeno" id="btn-salir" title="Cerrar sesión">Salir</button>
             </div>
         `;
@@ -385,7 +423,8 @@ const UI = (() => {
         mensaje, ocultarMensaje, pesos, fecha, fechaConHora, esc, insignia,
         cargando, vacio, pintarBarra, exigirSesion,
         abrirModal, cerrarModal, leerFormulario, toast,
-        aplicarTema, alternarTema, obtenerTemaActual
+        aplicarTema, alternarTema, obtenerTemaActual,
+        carrito: Carrito, actualizarBadgesCarrito
     };
 
 })();

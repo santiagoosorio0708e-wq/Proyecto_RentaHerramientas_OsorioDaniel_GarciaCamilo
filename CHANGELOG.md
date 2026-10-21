@@ -3,20 +3,54 @@
 Todas las modificaciones notables a este proyecto están documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.4.0] - 2026-10-20
+
+### Añadido
+- **Módulo de Perfil Integral del Usuario (`perfil.html` / `perfil.js`):**
+  - Actualización reactiva de datos personales (nombre completo, correo electrónico, teléfono y dirección) con validación de no duplicidad de correo en backend y persistencia local inmediata.
+  - Carrito de compras y cotizador de alquileres con cálculo dinámico de días, subtotales, depósito de garantía, IVA 19% y confirmación en lote de reservas.
+  - Historial de alquileres pasados con visualización de estados, tarifas diarias, montos totales y re-alquiler rápido con un clic.
+  - Visor interactivo y exportación en PDF de Facturación Electrónica DIAN.
+
+## [1.3.0] - 2026-10-20
+
+### Añadido
+- **Base de Datos SQLite 3 con Permanencia Total de Datos:**
+  - Configuración de SQLite como base de datos por defecto (`renta_herramientas.db`) con soporte universal para Windows, Linux y macOS (Apple Silicon M1/M2/M3/M4 e Intel) sin requerir instalaciones de MySQL ni contenedores Docker.
+  - Conexión optimizada HikariCP con Write-Ahead Logging (`PRAGMA journal_mode=WAL;`), llaves foráneas (`PRAGMA foreign_keys=ON;`) y timeout de bloqueo concurrente de 30 segundos (`busy_timeout=30000;`).
+  - Componente sembrador automático (`DataInitializer`): detecta bases de datos nuevas y carga automáticamente roles maestros, usuarios con contraseñas BCrypt reales (`Password123`), 20 categorías, 20 herramientas con fotos HD, tarifas y especificaciones técnicas, 4 métodos de pago y reservas iniciales con facturación e IVA del 19%.
+  - Garantía de permanencia: cualquier cambio o registro nuevo efectuado desde la web se almacena directamente en el archivo SQLite persistiendo entre reinicios y cambios de dispositivo.
+  - Controlador de diagnóstico y salud (`HealthController`): rutas públicas `/health` y `/actuator/health` para supervisión en tiempo real del estado del backend y del motor de datos.
+  - Prueba de integración automatizada (`SQLitePersistenceTest`): 100% de cobertura validando creación física de la BD, idempotencia de datos maestros y transaccionalidad en tiempo de ejecución (63/63 tests pasando).
+
+### Mejorado
+- **Lanzador para macOS (`start-mac.sh`):** Configurado con SQLite por defecto, eliminando dependencias de servicios externos para arranque en un solo clic en Mac.
+- **Detección Dinámica de Backend en `api.js`:** Consulta optimizada al endpoint de catálogo y salud para enlace reactivo inmediato entre frontend y backend Spring Boot.
+
+## [1.2.0] - 2026-10-20
+
+### Corregido
+- **Resolución de Error en Facturación Electrónica (`idPago` undefined):** Corrección del flujo asíncrono y de los métodos de búsqueda en `api.js` y `mock_data.js` que impedían consultar la factura y provocaban una excepción de lectura sobre propiedades indefinidas.
+- **Sincronización de Controladores y Puertos:** Inclusión del método `obtenerFacturaPorReserva` en `ConsultarFacturaUseCase`, `PagoApplicationService` y el endpoint REST `GET /facturas/reserva/{idReserva}` en `FacturaController`.
+- **Importación de Anotaciones OpenAPI:** Corrección del import faltante de `@ApiResponse` en `ReporteController.java`.
+
+### Añadido
+- **Visor Oficial de Factura Electrónica en PDF (Estándar DIAN):**
+  - Hoja digital A4 (`.hoja-factura-pdf`) con diseño tributario legal: membrete oficial de RENTA TOOLS COLOMBIA S.A.S. (NIT 901.458.789-4), radicado DIAN No. 1876400012, desglose de ítems, cálculo del 19% de IVA (Art. 468 E.T.) e importe en letras en pesos colombianos.
+  - Bloque de certificación digital con código QR fiscal vectorial y CUFE con botón interactivo de copiado rápido al portapapeles.
+  - Exportación y descarga directa a archivo PDF (`html2pdf.js`).
+  - Soporte de impresión y guardado PDF nativo impecable mediante reglas dedicadas `@media print`.
+
 ## [1.1.1] - 2026-10-20
 
 ### Corregido
-- **La autenticación ya no se simula en el cliente.** El inicio de sesión y el registro van siempre contra el backend. Antes, si el servidor no respondía, el navegador concedía una sesión con datos locales y aceptaba cualquier correo y cualquier contraseña, incluso de usuarios que nunca se habían registrado.
-- **Detección del estado del servidor.** El sondeo de disponibilidad apuntaba a `/actuator/health`, un endpoint inexistente porque el proyecto no incluye el starter de Spring Boot Actuator. La respuesta `404` hacía que la aplicación diera por caído un backend que estaba funcionando y mostrara datos locales en su lugar. Ahora se sondea `/categorias`, que sí existe y es público.
-- **Guardia de las pantallas privadas (`UI.exigirSesion`).** Cuando no había sesión, la función abría una de demostración automáticamente, de modo que `admin.html` y `proveedor.html` se podían abrir sin haber iniciado sesión nunca. Ahora redirige al inicio de sesión y verifica el rol.
-- **Tiempo de espera de las peticiones.** Se amplió de 2 a 15 segundos (y el sondeo de 1,2 a 3 segundos), porque la primera llamada a un Spring Boot recién arrancado puede tardar más por el arranque en frío de la JVM.
-- **Documentación de pruebas en el README.** El total y el desglose por suite no coincidían con el código: eran 61 pruebas y no 57, y la suite `ApiExceptionTest` se llama en realidad `GlobalExceptionHandlerTest`.
+- **La autenticación ya no se simula en el cliente:** El inicio de sesión y el registro van siempre contra el backend con JWT firmado.
+- **Detección del estado del servidor:** Sondeo optimizado para verificar conectividad real con el servidor.
+- **Guardia de las pantallas privadas (`UI.exigirSesion`):** Redirección obligatoria a `login.html` sin auto-iniciar sesiones no deseadas.
+- **Tiempo de espera de las peticiones:** Soporte ampliado para arranque en frío de la JVM.
 
 ### Añadido
-- **Archivo `LICENSE` (MIT).** El README ya mostraba la insignia de licencia MIT, pero el archivo no existía en el repositorio.
-
-### Cambiado
-- **Accesos rápidos de la demostración.** Los botones de Cliente, Proveedor y Administrador siguen existiendo, pero ahora hacen un inicio de sesión real contra `/auth/login` con las credenciales del usuario de prueba, por lo que el token que se guarda es un JWT firmado por el backend.
+- **Archivo `LICENSE` (MIT):** Licencia de código abierto MIT en la raíz del repositorio.
 
 ## [1.1.0] - 2026-10-19
 

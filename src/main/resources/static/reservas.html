@@ -129,23 +129,41 @@
     </div>
 </div>
 
-<!-- Modal de Factura Electrónica -->
+<!-- Modal de Factura Electrónica (Visor PDF Oficial DIAN) -->
 <div class="fondo-modal" id="modal-factura">
-    <div class="modal" style="max-width: 650px;">
-        <div class="cabecera-modal">
-            <h2>Factura Electrónica de Alquiler</h2>
-            <button class="cerrar-modal" data-cerrar="modal-factura">&times;</button>
+    <div class="modal modal-documento-pdf" style="max-width: 860px; width: 95vw; max-height: 94vh; display: flex; flex-direction: column;">
+        <div class="cabecera-modal" style="border-bottom: 1px solid var(--color-borde); padding: 14px 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="badge-pdf-rojo">PDF</span>
+                <div>
+                    <h2 style="font-size: 1.15rem; margin: 0; line-height: 1.2;">Factura Electrónica de Venta</h2>
+                    <span style="font-size: 0.78rem; color: var(--color-texto-suave);">Vista Previa Oficial DIAN &bull; Comprobante Fiscal Digital</span>
+                </div>
+            </div>
+            <button class="cerrar-modal" data-cerrar="modal-factura" title="Cerrar vista previa">&times;</button>
         </div>
-        <div class="cuerpo-modal" id="factura-cuerpo">
-            <!-- Dinámico vía reservas.js -->
+        <div class="cuerpo-modal" id="factura-cuerpo" style="padding: 16px; overflow-y: auto; background: var(--color-fondo-elevado);">
+            <!-- Hoja A4 renderizada dinámicamente vía reservas.js -->
         </div>
-        <div class="pie-modal">
-            <button class="boton boton-secundario" data-cerrar="modal-factura">Cerrar</button>
-            <button class="boton" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <div class="pie-modal" style="border-top: 1px solid var(--color-borde); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="font-size: 0.8rem; color: var(--color-texto-suave); display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                <span>Resolución DIAN No. 1876400012 &middot; Régimen Común</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="boton boton-secundario" data-cerrar="modal-factura">Cerrar</button>
+                <button class="boton boton-secundario" id="btn-imprimir-factura" style="display: inline-flex; align-items: center; gap: 6px;">
+                    🖨️ Imprimir
+                </button>
+                <button class="boton" id="btn-descargar-pdf" style="display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    📥 Descargar PDF
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="js/mock_data.js"></script>
 <script src="js/api.js"></script>
 <script src="js/comun.js"></script>

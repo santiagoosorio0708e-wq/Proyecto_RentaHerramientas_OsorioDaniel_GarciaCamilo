@@ -8,5 +8,6 @@ public interface ConsultarFacturaUseCase {
     Factura obtenerFacturaPorId(Long id);
     Factura obtenerFacturaPorNumero(String numeroFactura);
     Factura obtenerFacturaPorPago(Long idPago);
+    Factura obtenerFacturaPorReserva(Long idReserva);
     List<Factura> listarFacturasPorCliente(Long idCliente);
 }

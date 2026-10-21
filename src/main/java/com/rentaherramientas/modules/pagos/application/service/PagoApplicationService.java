@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -135,6 +136,22 @@ public class PagoApplicationService implements ProcesarPagoUseCase, ConsultarPag
     public Factura obtenerFacturaPorPago(Long idPago) {
         return facturaRepositoryPort.buscarPorPago(idPago)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró factura vinculada al pago ID: " + idPago));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Factura obtenerFacturaPorReserva(Long idReserva) {
+        List<Pago> pagos = pagoRepositoryPort.buscarPorReserva(idReserva);
+        if (pagos.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron pagos registrados para la reserva ID: " + idReserva);
+        }
+        for (Pago p : pagos) {
+            Optional<Factura> f = facturaRepositoryPort.buscarPorPago(p.getIdPago());
+            if (f.isPresent()) {
+                return f.get();
+            }
+        }
+        throw new ResourceNotFoundException("No se encontró factura emitida para los pagos de la reserva ID: " + idReserva);
     }
 
     @Override

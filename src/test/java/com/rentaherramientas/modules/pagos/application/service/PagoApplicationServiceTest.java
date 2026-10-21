@@ -163,6 +163,28 @@ class PagoApplicationServiceTest {
     }
 
     @Test
+    @DisplayName("Debe consultar factura por ID de reserva exitosamente")
+    void obtenerFacturaPorReserva_Exito() {
+        Pago pago = Pago.builder()
+                .idPago(201L)
+                .idReserva(10L)
+                .build();
+        Factura factura = Factura.builder()
+                .idFactura(1L)
+                .numeroFactura("FAC-2026-0001")
+                .idPago(201L)
+                .total(new BigDecimal("500000.00"))
+                .build();
+
+        when(pagoRepositoryPort.buscarPorReserva(10L)).thenReturn(java.util.List.of(pago));
+        when(facturaRepositoryPort.buscarPorPago(201L)).thenReturn(Optional.of(factura));
+
+        Factura resultado = pagoService.obtenerFacturaPorReserva(10L);
+        assertNotNull(resultado);
+        assertEquals("FAC-2026-0001", resultado.getNumeroFactura());
+    }
+
+    @Test
     @DisplayName("Debe lanzar excepcion si se consulta una factura inexistente")
     void obtenerFacturaPorNumero_NoExiste_LanzaExcepcion() {
         when(facturaRepositoryPort.buscarPorNumero("FAC-INEXISTENTE")).thenReturn(Optional.empty());

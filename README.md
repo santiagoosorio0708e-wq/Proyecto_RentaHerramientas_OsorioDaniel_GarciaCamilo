@@ -12,9 +12,10 @@
 [![Java](https://img.shields.io/badge/Java-21%20LTS-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT%200.12.6-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://jwt.io/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0%20(4FN)-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-3%20(Aut%C3%B3nomo%20%26%20Port%C3%A1til)-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0%20(4FN%20Compatible)-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Swagger OpenAPI](https://img.shields.io/badge/OpenAPI%203.0-Swagger%20UI-85EA2D?style=flat-square&logo=swagger&logoColor=black)](http://localhost:8080/api/v1/swagger-ui.html)
-[![Tests](https://img.shields.io/badge/Tests-61%20Passed-brightgreen?style=flat-square&logo=junit5&logoColor=white)](https://junit.org/junit5/)
+[![Tests](https://img.shields.io/badge/Tests-63%20Passed-brightgreen?style=flat-square&logo=junit5&logoColor=white)](https://junit.org/junit5/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 
 <p align="center">
@@ -98,8 +99,8 @@ El backend y frontend han sido desarrollados con tecnologías modernas bajo est�
 | **Framework Base** | **Spring Boot** | **3.4.1** | Núcleo de inyección de dependencias, API REST y configuración declarativa. |
 | **Seguridad** | **Spring Security + JJWT** | **0.12.6** | Autenticación Stateless basada en JWT (Access + Refresh Token) y control RBAC. |
 | **Persistencia** | **Spring Data JPA / Hibernate** | **6.6.4** | ORM, repositorios tipados, auditoría y consultas optimizadas. |
-| **Base de Datos** | **MySQL Server** | **8.0+** | RDBMS relacional configurado en Cuarta Forma Normal (4FN). |
-| **BD de Pruebas** | **H2 Database** | **2.3+** | Motor en memoria para ejecución veloz e independiente de tests. |
+| **Base de Datos Core** | **SQLite 3 / MySQL** | **3.47+ / 8.0+** | SQLite por defecto (autónomo y portátil para Windows/macOS/Linux) y compatible con MySQL 4FN. |
+| **BD de Pruebas** | **H2 / SQLite Disk** | **2.3+ / 3.47+** | Motor en memoria para tests ultrarrápidos y verificación física en disco. |
 | **Documentación** | **Springdoc OpenAPI / Swagger UI** | **2.8.3** | Especificación OAS 3.0 interactiva para prueba y exploración de endpoints. |
 | **Frontend** | **HTML5, CSS3 Moderno, JavaScript ES6+** | **Vanilla** | UI moderna, responsive (móvil/escritorio), modo día/noche y sin librerías pesadas. |
 | **Contenedores** | **Docker & Docker Compose** | **24+** | Empaquetado reproducible multi-etapa y orquestación con MySQL 8. |
