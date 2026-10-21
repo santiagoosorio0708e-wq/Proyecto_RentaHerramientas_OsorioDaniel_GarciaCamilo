@@ -41,29 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPrv = document.getElementById('btn-rapido-proveedor');
     const btnAdm = document.getElementById('btn-rapido-admin');
 
-    if (btnCli) {
-        btnCli.addEventListener('click', () => {
-            API.auth.iniciarComoDemo('CLIENTE');
-            UI.toast('Sesión iniciada como Cliente: Daniel Osorio (daniel.osorio@gmail.com)', 'exito');
-            setTimeout(redirigirSegunRol, 400);
+    // Los accesos rapidos hacen un login real contra el backend con las
+    // credenciales del usuario de prueba. Si el servidor esta caido o las
+    // credenciales no existen, falla igual que el formulario manual.
+    async function accesoRapido(boton, rol, etiqueta) {
+        if (!boton) return;
+        boton.addEventListener('click', async () => {
+            const textoOriginal = boton.textContent;
+            boton.disabled = true;
+            boton.textContent = '⏳ Entrando...';
+            UI.ocultarMensaje('mensaje');
+            try {
+                await API.auth.iniciarComoDemo(rol);
+                UI.toast('Sesión iniciada como ' + etiqueta, 'exito');
+                setTimeout(redirigirSegunRol, 400);
+            } catch (error) {
+                UI.mensaje('mensaje', error.message, 'error');
+                boton.disabled = false;
+                boton.textContent = textoOriginal;
+            }
         });
     }
 
-    if (btnPrv) {
-        btnPrv.addEventListener('click', () => {
-            API.auth.iniciarComoDemo('PROVEEDOR');
-            UI.toast('Sesión iniciada como Proveedor', 'exito');
-            setTimeout(redirigirSegunRol, 400);
-        });
-    }
-
-    if (btnAdm) {
-        btnAdm.addEventListener('click', () => {
-            API.auth.iniciarComoDemo('ADMIN');
-            UI.toast('Sesión iniciada como Administrador', 'exito');
-            setTimeout(redirigirSegunRol, 400);
-        });
-    }
+    accesoRapido(btnCli, 'CLIENTE', 'Cliente');
+    accesoRapido(btnPrv, 'PROVEEDOR', 'Proveedor');
+    accesoRapido(btnAdm, 'ADMIN', 'Administrador');
 
     function redirigirSegunRol() {
         if (API.esAdmin())          window.location.href = 'admin.html';

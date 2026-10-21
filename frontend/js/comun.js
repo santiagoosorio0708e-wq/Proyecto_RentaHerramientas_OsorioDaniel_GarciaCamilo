@@ -168,7 +168,7 @@ const UI = (() => {
                 </button>
                 <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="Estado de la conexión REST">
                     <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
-                    ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Modo Local Activo (100% Funcional)'}
+                    ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Sin conexión con el servidor'}
                 </span>
                 <button class="boton-demo-rol" id="btn-reintentar-api" style="padding:2px 8px;" title="Reintentar conexión con backend">
                     🔄 Verificar
@@ -179,34 +179,31 @@ const UI = (() => {
         const btnTemaTop = document.getElementById('btn-toggle-tema-top');
         if (btnTemaTop) btnTemaTop.addEventListener('click', alternarTema);
 
-        document.getElementById('btn-demo-cliente').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('CLIENTE');
-            toast('Sesión iniciada como Cliente: Daniel Osorio (daniel.osorio@gmail.com)', 'exito');
-            setTimeout(() => {
-                if (window.location.pathname.includes('login') || window.location.pathname.includes('registro')) {
-                    window.location.href = 'index.html';
-                } else {
-                    pintarBarra(paginaActual);
-                    window.location.reload();
+        // Cada acceso rapido hace un login real contra /auth/login con las
+        // credenciales del usuario de prueba. Si el backend no responde o la
+        // base de datos no esta cargada, avisa en lugar de simular la sesion.
+        function accesoRapido(idBoton, rol, etiqueta, destino) {
+            const boton = document.getElementById(idBoton);
+            if (!boton) return;
+            boton.addEventListener('click', async () => {
+                const textoOriginal = boton.textContent;
+                boton.disabled = true;
+                boton.textContent = '⏳ Entrando...';
+                try {
+                    await API.auth.iniciarComoDemo(rol);
+                    toast('Sesión iniciada como ' + etiqueta, 'exito');
+                    setTimeout(() => { window.location.href = destino; }, 300);
+                } catch (error) {
+                    toast(error.message, 'error');
+                    boton.disabled = false;
+                    boton.textContent = textoOriginal;
                 }
-            }, 300);
-        });
+            });
+        }
 
-        document.getElementById('btn-demo-proveedor').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('PROVEEDOR');
-            toast('Sesión iniciada como Proveedor: MaquiAntioquia', 'exito');
-            setTimeout(() => {
-                window.location.href = 'proveedor.html';
-            }, 300);
-        });
-
-        document.getElementById('btn-demo-admin').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('ADMIN');
-            toast('Sesión iniciada como Administrador del Sistema', 'exito');
-            setTimeout(() => {
-                window.location.href = 'admin.html';
-            }, 300);
-        });
+        accesoRapido('btn-demo-cliente', 'CLIENTE', 'Cliente', 'index.html');
+        accesoRapido('btn-demo-proveedor', 'PROVEEDOR', 'Proveedor', 'proveedor.html');
+        accesoRapido('btn-demo-admin', 'ADMIN', 'Administrador', 'admin.html');
 
         document.getElementById('btn-reintentar-api').addEventListener('click', async () => {
             const btn = document.getElementById('btn-reintentar-api');
@@ -283,16 +280,24 @@ const UI = (() => {
         }
     }
 
+    /**
+     * Guardia de las paginas privadas.
+     *
+     * Sin sesion se devuelve al login: una pantalla protegida no puede abrir
+     * una sesion por su cuenta, porque entonces el control de acceso no
+     * controlaria nada. Con sesion pero sin el rol necesario se devuelve al
+     * inicio. El backend vuelve a validar el token y el rol en cada peticion;
+     * esta comprobacion solo evita mostrar una pantalla que no corresponde.
+     */
     function exigirSesion(rolRequerido) {
         if (!API.haySesion()) {
-            // Autoiniciar cliente de prueba si no hay sesion para no bloquear al revisor
-            API.auth.iniciarComoDemo('CLIENTE');
-            toast('Iniciada sesión de demostración automáticamente.', 'info');
-            return true;
+            toast('Debe iniciar sesión para entrar a esta sección.', 'error');
+            setTimeout(() => { window.location.href = 'login.html'; }, 600);
+            return false;
         }
         if (rolRequerido && !API.tieneRol(rolRequerido) && !API.esAdmin()) {
             toast('Permisos insuficientes para esta sección.', 'error');
-            window.location.href = 'index.html';
+            setTimeout(() => { window.location.href = 'index.html'; }, 600);
             return false;
         }
         return true;
