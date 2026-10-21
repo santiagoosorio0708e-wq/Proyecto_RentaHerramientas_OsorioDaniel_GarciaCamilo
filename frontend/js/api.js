@@ -24,6 +24,14 @@ const API = (() => {
     const CLAVE_REFRESH = 'rh_refresh_token';
     const CLAVE_USUARIO = 'rh_usuario';
 
+    // Limpieza inicial: garantiza que la aplicación comience sin ninguna sesión activa por defecto
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('rh_sesion_limpia_v4') !== 'true') {
+        localStorage.removeItem(CLAVE_ACCESS);
+        localStorage.removeItem(CLAVE_REFRESH);
+        localStorage.removeItem(CLAVE_USUARIO);
+        localStorage.setItem('rh_sesion_limpia_v4', 'true');
+    }
+
     let _backendDisponible = null; // null: no verificado, true: online, false: offline
 
     // ------------------------------------------------------------------
@@ -281,7 +289,6 @@ const API = (() => {
                     email: cuerpo.email,
                     roles: ['ROLE_CLIENTE']
                 };
-                guardarSesion(nuevo);
                 return nuevo;
             }
         }),
@@ -296,7 +303,6 @@ const API = (() => {
                     email: cuerpo.email,
                     roles: ['ROLE_PROVEEDOR']
                 };
-                guardarSesion(nuevo);
                 return nuevo;
             }
         }),

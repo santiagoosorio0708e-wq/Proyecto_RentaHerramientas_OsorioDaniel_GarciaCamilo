@@ -138,89 +138,17 @@ const UI = (() => {
      * Construye y sincroniza la barra superior y la barra de demo rápido.
      */
     function pintarBarra(paginaActual) {
-        // 1. Barra de Demo Rápido (Se inyecta antes del header si no existe)
-        let barraDemo = document.getElementById('barra-demo-rapido');
-        if (!barraDemo) {
-            barraDemo = document.createElement('div');
-            barraDemo.id = 'barra-demo-rapido';
-            barraDemo.className = 'barra-demo';
-            document.body.insertBefore(barraDemo, document.body.firstChild);
+        // Remover barra demo flotante si existiera en el DOM
+        const barraDemo = document.getElementById('barra-demo-rapido');
+        if (barraDemo) {
+            barraDemo.remove();
         }
 
-        const online = API.esOnline();
-        const tema = obtenerTemaActual();
-        barraDemo.innerHTML = `
-            <div class="barra-demo-grupo">
-                <span style="color:var(--color-texto-suave); font-weight:700;">🚀 MODO DE PRUEBA RÁPIDO:</span>
-                <button class="boton-demo-rol" id="btn-demo-cliente" title="Ingresar como Daniel Osorio (daniel.osorio@gmail.com)">
-                    👤 Cliente: Daniel Osorio
-                </button>
-                <button class="boton-demo-rol" id="btn-demo-proveedor" title="Ingresar como MaquiAntioquia (Proveedor)">
-                    🏢 Proveedor
-                </button>
-                <button class="boton-demo-rol" id="btn-demo-admin" title="Ingresar como Carlos Pérez (Admin)">
-                    ⚙️ Administrador
-                </button>
-            </div>
-            <div class="barra-demo-grupo">
-                <button class="boton-demo-rol boton-toggle-tema" id="btn-toggle-tema-top" title="Cambiar tema Día / Noche">
-                    ${tema === 'dark' ? '☀️ Modo Día' : '🌙 Modo Noche'}
-                </button>
-                <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="Estado de la conexión REST">
-                    <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
-                    ${online ? '🟢 Servidor Conectado (API v1)' : '🟡 Modo Local Activo (100% Funcional)'}
-                </span>
-                <button class="boton-demo-rol" id="btn-reintentar-api" style="padding:2px 8px;" title="Reintentar conexión con backend">
-                    🔄 Verificar
-                </button>
-            </div>
-        `;
-
-        const btnTemaTop = document.getElementById('btn-toggle-tema-top');
-        if (btnTemaTop) btnTemaTop.addEventListener('click', alternarTema);
-
-        document.getElementById('btn-demo-cliente').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('CLIENTE');
-            toast('Sesión iniciada como Cliente: Daniel Osorio (daniel.osorio@gmail.com)', 'exito');
-            setTimeout(() => {
-                if (window.location.pathname.includes('login') || window.location.pathname.includes('registro')) {
-                    window.location.href = 'index.html';
-                } else {
-                    pintarBarra(paginaActual);
-                    window.location.reload();
-                }
-            }, 300);
-        });
-
-        document.getElementById('btn-demo-proveedor').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('PROVEEDOR');
-            toast('Sesión iniciada como Proveedor: MaquiAntioquia', 'exito');
-            setTimeout(() => {
-                window.location.href = 'proveedor.html';
-            }, 300);
-        });
-
-        document.getElementById('btn-demo-admin').addEventListener('click', () => {
-            API.auth.iniciarComoDemo('ADMIN');
-            toast('Sesión iniciada como Administrador del Sistema', 'exito');
-            setTimeout(() => {
-                window.location.href = 'admin.html';
-            }, 300);
-        });
-
-        document.getElementById('btn-reintentar-api').addEventListener('click', async () => {
-            const btn = document.getElementById('btn-reintentar-api');
-            btn.textContent = '⏳ Comprobando...';
-            const ok = await API.verificarBackend();
-            btn.textContent = '🔄 Verificar';
-            toast(ok ? '¡Conectado al servidor Spring Boot!' : 'Servidor Spring Boot offline. El modo local sigue 100% funcional.', ok ? 'exito' : 'info');
-            pintarBarra(paginaActual);
-        });
-
-        // 2. Menú de navegación principal
+        // Menú de navegación principal
         const contenedor = document.getElementById('menu-sesion');
         if (!contenedor) return;
 
+        const online = API.esOnline();
         const usuario = API.obtenerUsuario();
 
         let enlaces = `<a href="index.html"${paginaActual === 'catalogo' ? ' class="activo"' : ''}>🚜 Catálogo</a>`;
@@ -242,10 +170,18 @@ const UI = (() => {
         const temaActual = obtenerTemaActual();
         const textoTemaNav = temaActual === 'dark' ? '☀️ Día' : '🌙 Noche';
 
+        const badgeConexion = `
+            <span class="badge-estado-conexion ${online ? 'online' : 'offline'}" id="badge-api-status" title="${online ? 'Conectado a la API REST de Spring Boot' : 'Operando en Modo Local Resiliente'}">
+                <span class="pulso-dot ${online ? 'verde' : 'amarillo'}"></span>
+                ${online ? '🟢 Servidor Conectado' : '🟡 Modo Local'}
+            </span>
+        `;
+
         if (!usuario) {
             contenedor.innerHTML = `
                 ${enlaces}
-                <div style="display:flex; align-items:center; gap:8px; margin-left:8px;">
+                <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                    ${badgeConexion}
                     <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
                         ${textoTemaNav}
                     </button>
@@ -261,6 +197,7 @@ const UI = (() => {
         contenedor.innerHTML = `
             ${enlaces}
             <div style="display:flex; align-items:center; gap:10px; margin-left:12px;">
+                ${badgeConexion}
                 <button class="boton-toggle-tema boton-toggle-nav" id="btn-toggle-tema-nav" title="Cambiar tema Día / Noche">
                     ${textoTemaNav}
                 </button>
@@ -285,14 +222,17 @@ const UI = (() => {
 
     function exigirSesion(rolRequerido) {
         if (!API.haySesion()) {
-            // Autoiniciar cliente de prueba si no hay sesion para no bloquear al revisor
-            API.auth.iniciarComoDemo('CLIENTE');
-            toast('Iniciada sesión de demostración automáticamente.', 'info');
-            return true;
+            toast('Debes iniciar sesión para acceder a esta sección.', 'info');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 600);
+            return false;
         }
         if (rolRequerido && !API.tieneRol(rolRequerido) && !API.esAdmin()) {
             toast('Permisos insuficientes para esta sección.', 'error');
-            window.location.href = 'index.html';
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 600);
             return false;
         }
         return true;

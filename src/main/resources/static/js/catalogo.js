@@ -235,6 +235,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnAbrirReserva.addEventListener('click', () => {
         if (!herramientaActual) return;
+        if (!API.haySesion()) {
+            UI.cerrarModal('modal-detalle');
+            UI.toast('Debes iniciar sesión para alquilar una herramienta.', 'info');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 700);
+            return;
+        }
         UI.cerrarModal('modal-detalle');
         abrirModalReservaConHerramienta(herramientaActual);
     });
@@ -293,7 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = '⏳ Procesando reserva...';
 
         try {
-            const usuario = API.obtenerUsuario() || { idUsuario: 9 };
+            if (!API.haySesion()) {
+                UI.mensaje('reserva-mensaje', 'Debes iniciar sesión para completar la reserva.', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                return;
+            }
+            const usuario = API.obtenerUsuario();
             const idHerramienta = Number(document.getElementById('reserva-id-herramienta').value);
             const fechaInicio = inputInicio.value;
             const fechaFin = inputFin.value;
