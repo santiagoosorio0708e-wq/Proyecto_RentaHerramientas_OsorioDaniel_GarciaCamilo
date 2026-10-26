@@ -73,14 +73,15 @@ CREATE TABLE IF NOT EXISTS perfiles_proveedor (
 CREATE TABLE IF NOT EXISTS perfiles_cliente (
     id_perfil_cliente     BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_usuario            BIGINT NOT NULL UNIQUE,
-    tipo_cliente          ENUM('PARTICULAR', 'EMPRESARIAL') NOT NULL DEFAULT 'PARTICULAR',
+    tipo_cliente          VARCHAR(20) NOT NULL DEFAULT 'PARTICULAR',
     ciudad_residencia     VARCHAR(80),
     cupo_credito          DECIMAL(12, 2) DEFAULT 0.00,
     fecha_registro        DATE NOT NULL,
     alquileres_realizados INT  DEFAULT 0,
     CONSTRAINT fk_perfilcliente_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario) ON DELETE CASCADE,
-    CONSTRAINT chk_cupo_no_negativo CHECK (cupo_credito >= 0)
+    CONSTRAINT chk_cupo_no_negativo CHECK (cupo_credito >= 0),
+    CONSTRAINT chk_tipo_cliente CHECK (tipo_cliente IN ('PARTICULAR', 'EMPRESARIAL'))
 ) ENGINE=InnoDB;
 
 -- ============================================================================

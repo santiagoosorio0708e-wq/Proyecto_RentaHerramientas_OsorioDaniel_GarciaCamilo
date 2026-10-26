@@ -119,6 +119,19 @@ Para dejarlo corriendo en segundo plano:
 docker compose up --build -d
 ```
 
+Si el puerto `8080` ya está ocupado (por ejemplo, por otra instalación de Tomcat),
+puede publicar el backend en otro puerto:
+
+```bash
+HOST_SERVER_PORT=8081 docker compose up --build -d
+```
+
+Si también está ocupado el puerto `3307` de MySQL, puede cambiar ambos:
+
+```bash
+HOST_SERVER_PORT=8081 MYSQL_HOST_PORT=3308 docker compose up --build -d
+```
+
 ### Verificar
 
 ```bash
@@ -131,6 +144,9 @@ Cuando en los logs aparezca `Started RentaHerramientasApplication`, pruebe:
 ```bash
 curl http://localhost:8080/api/v1/catalogo
 ```
+
+Con `HOST_SERVER_PORT=8081`, use `http://localhost:8081/api/v1/catalogo` y abra
+`http://localhost:8081/api/v1/login.html` para iniciar sesión.
 
 ### Comandos útiles
 
