@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +115,20 @@ public class ReservaApplicationService implements CrearReservaUseCase, Consultar
     @Transactional(readOnly = true)
     public List<Reserva> listarTodas() {
         return reservaRepositoryPort.buscarTodas();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> filtrarPorRangoFechas(LocalDate desde, LocalDate hasta) {
+        if (desde == null && hasta == null) {
+            return reservaRepositoryPort.buscarTodas();
+        }
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+        }
+        LocalDate limiteInferior = desde != null ? desde : LocalDate.of(1900, 1, 1);
+        LocalDate limiteSuperior = hasta != null ? hasta : LocalDate.of(9999, 12, 31);
+        return reservaRepositoryPort.buscarPorRangoFechaInicio(limiteInferior, limiteSuperior);
     }
 
     @Override

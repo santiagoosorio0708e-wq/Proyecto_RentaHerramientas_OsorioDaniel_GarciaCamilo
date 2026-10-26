@@ -17,6 +17,8 @@ public interface SpringDataReservaRepository extends JpaRepository<ReservaJpaEnt
 
     List<ReservaJpaEntity> findByIdClienteOrderByFechaSolicitudDesc(Long idCliente);
 
+    List<ReservaJpaEntity> findByFechaInicioBetweenOrderByFechaInicioAsc(LocalDate desde, LocalDate hasta);
+
     @Query("SELECT COUNT(d) > 0 FROM DetalleReservaJpaEntity d " +
            "JOIN d.reserva r " +
            "WHERE d.idHerramienta = :idHerramienta " +

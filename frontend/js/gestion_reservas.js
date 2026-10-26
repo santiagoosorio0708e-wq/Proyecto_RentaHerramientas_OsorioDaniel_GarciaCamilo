@@ -49,6 +49,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ------------------------------------------------------------------
+    // 0. Filtrado de reservas por rango de fechas
+    // ------------------------------------------------------------------
+
+    const formFiltroFechas  = document.getElementById('form-filtro-fechas');
+    const inputFiltroInicio = document.getElementById('filtro-fecha-inicio');
+    const inputFiltroFin    = document.getElementById('filtro-fecha-fin');
+    const tablaFiltroFechas = document.getElementById('tabla-filtro-fechas');
+
+    formFiltroFechas.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const inicio = inputFiltroInicio.value;
+        const fin = inputFiltroFin.value;
+
+        if (inicio && fin && inicio > fin) {
+            UI.mensaje('mensaje-filtro', 'La fecha de inicio no puede ser posterior a la fecha de fin.', 'error');
+            return;
+        }
+
+        UI.cargando(tablaFiltroFechas, 'Buscando reservas...');
+        try {
+            const resultado = await API.reservas.filtrar(inicio, fin);
+            pintarFiltroFechas(resultado || []);
+        } catch (error) {
+            tablaFiltroFechas.innerHTML = '';
+            UI.mensaje('mensaje-filtro', 'Error al filtrar reservas: ' + error.message, 'error');
+        }
+    });
+
+    function pintarFiltroFechas(reservas) {
+        if (reservas.length === 0) {
+            tablaFiltroFechas.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px;">No se encontraron reservas en el periodo seleccionado.</td></tr>`;
+            return;
+        }
+        tablaFiltroFechas.innerHTML = reservas.map(r => {
+            const herramientas = (r.detalles || []).map(d => d.nombreHerramienta).filter(Boolean).join(', ') || '-';
+            return `
+                <tr>
+                    <td><strong>${UI.esc(String(r.idReserva))}</strong></td>
+                    <td>Cliente #${UI.esc(String(r.idCliente))}</td>
+                    <td>${UI.esc(herramientas)}</td>
+                    <td>${UI.fecha(r.fechaInicio)}</td>
+                    <td>${UI.fecha(r.fechaFin)}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
     async function cargarTodo() {
         await Promise.all([cargarReservas(), cargarDevoluciones()]);
     }

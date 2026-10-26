@@ -58,6 +58,14 @@ public class ReservaPersistenceAdapter implements ReservaRepositoryPort, Auditor
     }
 
     @Override
+    public List<Reserva> buscarPorRangoFechaInicio(LocalDate desde, LocalDate hasta) {
+        return reservaRepository.findByFechaInicioBetweenOrderByFechaInicioAsc(desde, hasta)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public boolean existeConflictoFechas(Long idHerramienta, LocalDate inicio, LocalDate fin) {
         return reservaRepository.existsConflictoFechas(idHerramienta, inicio, fin);
     }
