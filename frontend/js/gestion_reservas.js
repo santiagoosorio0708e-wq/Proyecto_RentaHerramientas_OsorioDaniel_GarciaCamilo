@@ -68,17 +68,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        UI.ocultarMensaje('mensaje-filtro');
         UI.cargando(tablaFiltroFechas, 'Buscando reservas...');
         try {
             const resultado = await API.reservas.filtrar(inicio, fin);
-            pintarFiltroFechas(resultado || []);
+            const nombres = await obtenerNombresClientes();
+            pintarFiltroFechas(resultado || [], nombres);
         } catch (error) {
             tablaFiltroFechas.innerHTML = '';
             UI.mensaje('mensaje-filtro', 'Error al filtrar reservas: ' + error.message, 'error');
         }
     });
 
-    function pintarFiltroFechas(reservas) {
+    async function obtenerNombresClientes() {
+        try {
+            const usuarios = await API.usuarios.listar();
+            return new Map((usuarios || []).map(u => [u.idUsuario, u.nombreCompleto]));
+        } catch (e) {
+            return new Map();
+        }
+    }
+
+    function pintarFiltroFechas(reservas, nombres = new Map()) {
         if (reservas.length === 0) {
             tablaFiltroFechas.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px;">No se encontraron reservas en el periodo seleccionado.</td></tr>`;
             return;
@@ -88,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <tr>
                     <td><strong>${UI.esc(String(r.idReserva))}</strong></td>
-                    <td>Cliente #${UI.esc(String(r.idCliente))}</td>
+                    <td>${UI.esc(nombres.get(r.idCliente) || ('Cliente #' + r.idCliente))}</td>
                     <td>${UI.esc(herramientas)}</td>
                     <td>${UI.fecha(r.fechaInicio)}</td>
                     <td>${UI.fecha(r.fechaFin)}</td>
