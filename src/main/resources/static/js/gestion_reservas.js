@@ -95,11 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         tablaFiltroFechas.innerHTML = reservas.map(r => {
-            const herramientas = (r.detalles || []).map(d => d.nombreHerramienta).filter(Boolean).join(', ') || '-';
+            const herramientas = (r.detalles || r.items || []).map(d => d.nombreHerramienta).filter(Boolean).join(', ') || '-';
             return `
                 <tr>
                     <td><strong>${UI.esc(String(r.idReserva))}</strong></td>
-                    <td>${UI.esc(nombres.get(r.idCliente) || ('Cliente #' + r.idCliente))}</td>
+                    <td>${UI.esc(r.clienteNombre || nombres.get(r.idCliente) || ('Cliente #' + r.idCliente))}</td>
                     <td>${UI.esc(herramientas)}</td>
                     <td>${UI.fecha(r.fechaInicio)}</td>
                     <td>${UI.fecha(r.fechaFin)}</td>
