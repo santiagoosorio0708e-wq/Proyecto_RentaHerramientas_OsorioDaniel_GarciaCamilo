@@ -58,10 +58,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputFiltroFin    = document.getElementById('filtro-fecha-fin');
     const tablaFiltroFechas = document.getElementById('tabla-filtro-fechas');
 
+    const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    inputFiltroInicio.min = hoy;
+    inputFiltroFin.min = hoy;
+    inputFiltroInicio.addEventListener('change', () => {
+        inputFiltroFin.min = inputFiltroInicio.value && inputFiltroInicio.value > hoy ? inputFiltroInicio.value : hoy;
+        if (inputFiltroFin.value && inputFiltroFin.value < inputFiltroFin.min) inputFiltroFin.value = '';
+    });
+
     formFiltroFechas.addEventListener('submit', async (e) => {
         e.preventDefault();
         const inicio = inputFiltroInicio.value;
         const fin = inputFiltroFin.value;
+
+        if ((inicio && inicio < hoy) || (fin && fin < hoy)) {
+            UI.mensaje('mensaje-filtro', 'No se pueden seleccionar fechas que ya pasaron.', 'error');
+            return;
+        }
 
         if (inicio && fin && inicio > fin) {
             UI.mensaje('mensaje-filtro', 'La fecha de inicio no puede ser posterior a la fecha de fin.', 'error');
