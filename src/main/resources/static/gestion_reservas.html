@@ -33,6 +33,41 @@
 
     <div id="mensaje" class="mensaje"></div>
 
+    <!-- FILTRADO DE RESERVAS POR RANGO DE FECHAS -->
+    <section class="tarjeta" style="margin-bottom:24px;">
+        <div class="fila-encabezado">
+            <h2>Filtrar Reservas por Rango de Fechas</h2>
+        </div>
+        <form id="form-filtro-fechas" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:14px;">
+            <div>
+                <label for="filtro-fecha-inicio">Fecha inicio</label>
+                <input type="date" id="filtro-fecha-inicio">
+            </div>
+            <div>
+                <label for="filtro-fecha-fin">Fecha fin</label>
+                <input type="date" id="filtro-fecha-fin">
+            </div>
+            <button type="submit" class="boton" id="btn-filtrar-fechas">Filtrar</button>
+        </form>
+        <div id="mensaje-filtro" class="mensaje"></div>
+        <div class="envoltura-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Herramienta</th>
+                        <th>Fecha de inicio</th>
+                        <th>Fecha de fin</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-filtro-fechas">
+                    <tr><td colspan="5" style="text-align:center; padding:18px;">Seleccione un rango de fechas y presione "Filtrar".</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- SECCIÓN 1: RESERVAS Y DESPACHO -->
     <section class="tarjeta" style="margin-bottom:24px;">
         <div class="fila-encabezado">

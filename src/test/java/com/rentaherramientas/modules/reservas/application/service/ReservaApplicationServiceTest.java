@@ -166,4 +166,35 @@ class ReservaApplicationServiceTest {
         );
         verify(reservaRepositoryPort, never()).guardar(any());
     }
+
+    @Test
+    @DisplayName("Filtrar sin fechas devuelve todas las reservas")
+    void filtrarSinFechasDevuelveTodas() {
+        when(reservaRepositoryPort.buscarTodas()).thenReturn(List.of(new Reserva(), new Reserva()));
+
+        List<Reserva> resultado = reservaService.filtrarPorRangoFechas(null, null);
+
+        assertEquals(2, resultado.size());
+        verify(reservaRepositoryPort, never()).buscarPorRangoFechaInicio(any(), any());
+    }
+
+    @Test
+    @DisplayName("Filtrar con rango delega la búsqueda por fecha de inicio")
+    void filtrarConRangoDelegaAlRepositorio() {
+        LocalDate desde = LocalDate.of(2025, 8, 1);
+        LocalDate hasta = LocalDate.of(2025, 8, 15);
+        when(reservaRepositoryPort.buscarPorRangoFechaInicio(desde, hasta)).thenReturn(List.of(new Reserva()));
+
+        List<Reserva> resultado = reservaService.filtrarPorRangoFechas(desde, hasta);
+
+        assertEquals(1, resultado.size());
+        verify(reservaRepositoryPort).buscarPorRangoFechaInicio(desde, hasta);
+    }
+
+    @Test
+    @DisplayName("Filtrar con fecha inicio posterior a fecha fin lanza excepción")
+    void filtrarConRangoInvalidoLanzaExcepcion() {
+        assertThrows(IllegalArgumentException.class, () -> reservaService.filtrarPorRangoFechas(
+                LocalDate.of(2025, 8, 15), LocalDate.of(2025, 8, 1)));
+    }
 }

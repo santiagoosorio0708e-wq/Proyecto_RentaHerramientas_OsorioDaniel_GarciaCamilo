@@ -12,5 +12,6 @@ public interface ReservaRepositoryPort {
     Optional<Reserva> buscarPorCodigo(String codigo);
     List<Reserva> buscarPorCliente(Long idCliente);
     List<Reserva> buscarTodas();
+    List<Reserva> buscarPorRangoFechaInicio(LocalDate desde, LocalDate hasta);
     boolean existeConflictoFechas(Long idHerramienta, LocalDate inicio, LocalDate fin);
 }

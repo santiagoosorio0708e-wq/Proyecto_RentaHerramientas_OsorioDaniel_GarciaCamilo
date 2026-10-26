@@ -2,6 +2,7 @@ package com.rentaherramientas.modules.reservas.domain.ports.in;
 
 import com.rentaherramientas.modules.reservas.domain.model.Reserva;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -16,5 +17,8 @@ public interface ConsultarReservaUseCase {
     Reserva obtenerPorCodigo(String codigo);
     List<Reserva> listarPorCliente(Long idCliente);
     List<Reserva> listarTodas();
+
+    /** Reservas cuya fecha de inicio esté entre desde y hasta (ambos inclusive; null = sin límite). */
+    List<Reserva> filtrarPorRangoFechas(LocalDate desde, LocalDate hasta);
 }
 

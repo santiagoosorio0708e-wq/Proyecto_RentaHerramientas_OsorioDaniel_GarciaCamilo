@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -55,6 +57,32 @@ public class ReservaController {
         List<Reserva> lista = consultarReservaUseCase.listarTodas();
         List<ReservaResponseDto> dtos = lista.stream().map(ReservaDtoMapper::toResponseDto).toList();
         return ResponseEntity.ok(ApiResponseDto.ok("Reservas obtenidas exitosamente", dtos));
+    }
+
+    @GetMapping("/filtrar")
+    @Operation(summary = "Filtrar reservas por rango de fechas", description = "Devuelve las reservas cuya fecha de inicio esté entre fechaInicio y fechaFin (formato yyyy-MM-dd). Si no se envían fechas, devuelve todas las reservas.")
+    @ApiResponse(responseCode = "200", description = "Reservas filtradas (puede ser una lista vacía)")
+    @ApiResponse(responseCode = "400", description = "Formato de fecha inválido o rango incoherente")
+    public ResponseEntity<ApiResponseDto<List<ReservaResponseDto>>> filtrarPorFechas(
+            @Parameter(description = "Fecha inicial (yyyy-MM-dd)") @RequestParam(required = false) String fechaInicio,
+            @Parameter(description = "Fecha final (yyyy-MM-dd)") @RequestParam(required = false) String fechaFin
+    ) {
+        LocalDate desde = parsearFecha(fechaInicio, "fechaInicio");
+        LocalDate hasta = parsearFecha(fechaFin, "fechaFin");
+        List<ReservaResponseDto> dtos = consultarReservaUseCase.filtrarPorRangoFechas(desde, hasta)
+                .stream().map(ReservaDtoMapper::toResponseDto).toList();
+        return ResponseEntity.ok(ApiResponseDto.ok("Reservas filtradas exitosamente", dtos));
+    }
+
+    private LocalDate parsearFecha(String valor, String nombre) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(valor.trim());
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("El parámetro " + nombre + " debe tener el formato yyyy-MM-dd.");
+        }
     }
 
     @GetMapping("/{id}")

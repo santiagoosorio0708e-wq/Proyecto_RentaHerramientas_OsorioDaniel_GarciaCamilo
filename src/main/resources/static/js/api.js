@@ -412,6 +412,17 @@ const API = (() => {
         listar: () => peticion('/reservas', {
             fallback: () => MockStore.listarReservas()
         }),
+        filtrar: (fechaInicio, fechaFin) => {
+            const qs = [];
+            if (fechaInicio) qs.push('fechaInicio=' + encodeURIComponent(fechaInicio));
+            if (fechaFin) qs.push('fechaFin=' + encodeURIComponent(fechaFin));
+            return peticion('/reservas/filtrar' + (qs.length ? '?' + qs.join('&') : ''), {
+                fallback: () => MockStore.listarReservas().filter(r => {
+                    const ini = String(r.fechaInicio).slice(0, 10);
+                    return (!fechaInicio || ini >= fechaInicio) && (!fechaFin || ini <= fechaFin);
+                })
+            });
+        },
         obtener: (id) => peticion('/reservas/' + id, {
             fallback: () => MockStore.listarReservas().find(r => r.idReserva === Number(id))
         }),

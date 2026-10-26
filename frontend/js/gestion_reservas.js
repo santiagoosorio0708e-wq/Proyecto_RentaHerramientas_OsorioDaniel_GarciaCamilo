@@ -49,6 +49,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ------------------------------------------------------------------
+    // 0. Filtrado de reservas por rango de fechas
+    // ------------------------------------------------------------------
+
+    const formFiltroFechas  = document.getElementById('form-filtro-fechas');
+    const inputFiltroInicio = document.getElementById('filtro-fecha-inicio');
+    const inputFiltroFin    = document.getElementById('filtro-fecha-fin');
+    const tablaFiltroFechas = document.getElementById('tabla-filtro-fechas');
+
+    formFiltroFechas.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const inicio = inputFiltroInicio.value;
+        const fin = inputFiltroFin.value;
+
+        if (inicio && fin && inicio > fin) {
+            UI.mensaje('mensaje-filtro', 'La fecha de inicio no puede ser posterior a la fecha de fin.', 'error');
+            return;
+        }
+
+        UI.ocultarMensaje('mensaje-filtro');
+        UI.cargando(tablaFiltroFechas, 'Buscando reservas...');
+        try {
+            const resultado = await API.reservas.filtrar(inicio, fin);
+            const nombres = await obtenerNombresClientes();
+            pintarFiltroFechas(resultado || [], nombres);
+        } catch (error) {
+            tablaFiltroFechas.innerHTML = '';
+            UI.mensaje('mensaje-filtro', 'Error al filtrar reservas: ' + error.message, 'error');
+        }
+    });
+
+    async function obtenerNombresClientes() {
+        try {
+            const usuarios = await API.usuarios.listar();
+            return new Map((usuarios || []).map(u => [u.idUsuario, u.nombreCompleto]));
+        } catch (e) {
+            return new Map();
+        }
+    }
+
+    function pintarFiltroFechas(reservas, nombres = new Map()) {
+        if (reservas.length === 0) {
+            tablaFiltroFechas.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px;">No se encontraron reservas en el periodo seleccionado.</td></tr>`;
+            return;
+        }
+        tablaFiltroFechas.innerHTML = reservas.map(r => {
+            const herramientas = (r.detalles || []).map(d => d.nombreHerramienta).filter(Boolean).join(', ') || '-';
+            return `
+                <tr>
+                    <td><strong>${UI.esc(String(r.idReserva))}</strong></td>
+                    <td>${UI.esc(nombres.get(r.idCliente) || ('Cliente #' + r.idCliente))}</td>
+                    <td>${UI.esc(herramientas)}</td>
+                    <td>${UI.fecha(r.fechaInicio)}</td>
+                    <td>${UI.fecha(r.fechaFin)}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
     async function cargarTodo() {
         await Promise.all([cargarReservas(), cargarDevoluciones()]);
     }
