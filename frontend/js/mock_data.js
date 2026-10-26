@@ -991,26 +991,92 @@ const MockStore = (() => {
             return nuevoPago;
         },
 
+        obtenerPagosPorReserva: (idReserva) => {
+            inicializar();
+            const pagos = cargar(KEY_PAGOS, PAGOS_SEED);
+            const delReserva = pagos.filter(x => x.idReserva === Number(idReserva));
+            if (delReserva.length > 0) return delReserva;
+
+            // Si la reserva existe y está aprobada o finalizada, generar o retornar pago mock
+            const reservas = cargar(KEY_RESERVAS, RESERVAS_SEED);
+            const r = reservas.find(x => x.idReserva === Number(idReserva));
+            if (r && (r.estado === 'APROBADA' || r.estado === 'FINALIZADA' || r.estado === 'EN_CURSO')) {
+                const fac = MockStore.obtenerFacturaPorReserva(idReserva);
+                const nuevoPago = {
+                    idPago: 2000 + Number(idReserva),
+                    idReserva: Number(idReserva),
+                    monto: fac.total,
+                    metodoPago: 'TARJETA_CREDITO_VISA',
+                    estadoPago: 'APROBADO',
+                    fechaPago: fac.fechaEmision,
+                    numeroTransaccion: 'TRX-AUTO-' + idReserva,
+                    factura: fac
+                };
+                pagos.unshift(nuevoPago);
+                guardar(KEY_PAGOS, pagos);
+                return [nuevoPago];
+            }
+            return [];
+        },
+
+        obtenerFacturaPorPago: (idPago) => {
+            inicializar();
+            const pagos = cargar(KEY_PAGOS, PAGOS_SEED);
+            const p = pagos.find(x => x.idPago === Number(idPago));
+            if (p && p.factura) return p.factura;
+            return MockStore.obtenerFacturaPorReserva(p ? p.idReserva : 101);
+        },
+
         obtenerFacturaPorReserva: (idReserva) => {
             inicializar();
             const pagos = cargar(KEY_PAGOS, PAGOS_SEED);
             const p = pagos.find(x => x.idReserva === Number(idReserva));
-            if (p && p.factura) return p.factura;
+            if (p && p.factura) {
+                // Asegurar campos completos en la factura guardada
+                if (!p.factura.idPago) p.factura.idPago = p.idPago;
+                if (!p.factura.estado) p.factura.estado = 'PAGADA';
+                if (!p.factura.estadoFactura) p.factura.estadoFactura = 'PAGADA';
+                return p.factura;
+            }
 
-            // Si no habia factura simulada, generarla al vuelo
+            // Si no habia factura simulada, generarla al vuelo con metadatos completos
             const reservas = cargar(KEY_RESERVAS, RESERVAS_SEED);
             const r = reservas.find(x => x.idReserva === Number(idReserva));
             const total = r ? r.montoTotalEstimado : 350000;
             const subtotal = Math.round(total / 1.19);
-            return {
+            const iva = total - subtotal;
+            const idPago = 2000 + Number(idReserva);
+
+            const herramientas = cargar(KEY_HERRAMIENTAS, HERRAMIENTAS_SEED);
+            const h = r ? herramientas.find(x => x.idHerramienta === r.idHerramienta) : null;
+            const nombreItem = h ? `${h.nombre} (${h.marca} ${h.modelo})` : `Alquiler de maquinaria y herramientas - Reserva #${r ? r.codigoReserva : idReserva}`;
+
+            const nuevaFactura = {
                 idFactura: Date.now(),
                 numeroFactura: 'FAC-2026-00' + (r ? r.idReserva : '99'),
+                idPago: idPago,
+                idCliente: r ? r.idCliente : 8,
+                idReserva: Number(idReserva),
+                codigoReserva: r ? r.codigoReserva : ('RES-' + idReserva),
                 subtotal: subtotal,
-                iva: total - subtotal,
+                iva: iva,
                 total: total,
-                cufe: 'dian-cufe-auto-' + Date.now(),
-                fechaEmision: new Date().toISOString()
+                estado: 'PAGADA',
+                estadoFactura: 'PAGADA',
+                cufe: '404e635266556a586e3272357538782f413f4428472b4b6250645367566b5970' + (r ? r.idReserva : '01'),
+                fechaEmision: (r && r.fechaCreacion) ? r.fechaCreacion : new Date().toISOString(),
+                urlComprobantePdf: '/facturas/pdf/FAC-2026-00' + (r ? r.idReserva : '99') + '.pdf',
+                detalles: [
+                    {
+                        idDetalleFactura: 1,
+                        descripcionItem: nombreItem,
+                        cantidad: 1,
+                        precioUnitario: subtotal,
+                        subtotalLinea: subtotal
+                    }
+                ]
             };
+            return nuevaFactura;
         },
 
         // Devoluciones y Daños
@@ -1103,6 +1169,21 @@ const MockStore = (() => {
                 return usr;
             }
             throw new Error('Proveedor no encontrado');
+        },
+
+        actualizarPerfilUsuario: (idUsuario, datos) => {
+            inicializar();
+            const u = cargar(KEY_USUARIOS, USUARIOS_SEED);
+            const usr = u.find(x => x.idUsuario === Number(idUsuario) || (datos.email && x.email === datos.email));
+            if (usr) {
+                if (datos.nombreCompleto) usr.nombreCompleto = datos.nombreCompleto;
+                if (datos.email) usr.email = datos.email;
+                if (datos.telefono) usr.telefono = datos.telefono;
+                if (datos.direccion) usr.direccion = datos.direccion;
+                guardar(KEY_USUARIOS, u);
+                return usr;
+            }
+            return datos;
         },
 
         // Dashboard

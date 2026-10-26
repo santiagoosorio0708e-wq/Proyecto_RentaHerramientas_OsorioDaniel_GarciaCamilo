@@ -24,6 +24,14 @@ const API = (() => {
     const CLAVE_REFRESH = 'rh_refresh_token';
     const CLAVE_USUARIO = 'rh_usuario';
 
+    // Limpieza inicial: garantiza que la aplicación comience sin ninguna sesión activa por defecto
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('rh_sesion_limpia_v4') !== 'true') {
+        localStorage.removeItem(CLAVE_ACCESS);
+        localStorage.removeItem(CLAVE_REFRESH);
+        localStorage.removeItem(CLAVE_USUARIO);
+        localStorage.setItem('rh_sesion_limpia_v4', 'true');
+    }
+
     let _backendDisponible = null; // null: no verificado, true: online, false: offline
 
     // La primera peticion contra un Spring Boot recien arrancado puede tardar
@@ -108,13 +116,19 @@ const API = (() => {
      * peticion concreta tuvo exito.
      */
     async function verificarBackend() {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_SONDEO_MS);
-            const res = await fetch(URL_BASE + '/categorias', {
+            const timeoutId = setTimeout(() => controller.abort(), typeof TIMEOUT_SONDEO_MS !== 'undefined' ? TIMEOUT_SONDEO_MS : 3000);
+            let res = await fetch(URL_BASE + '/categorias', {
                 method: 'GET',
                 signal: controller.signal
             }).catch(() => null);
+
+            if (!res || (!res.ok && res.status !== 401 && res.status !== 403)) {
+                res = await fetch(URL_BASE + '/health', {
+                    method: 'GET',
+                    signal: controller.signal
+                }).catch(() => null);
+            }
+
             clearTimeout(timeoutId);
 
             _backendDisponible = !!res;
@@ -322,6 +336,41 @@ const API = (() => {
         miPerfil: () => peticion('/usuarios/me', {
             fallback: () => obtenerUsuario()
         }),
+        actualizarPerfil: async (datos) => {
+            return peticion('/usuarios/me', {
+                metodo: 'PUT',
+                cuerpo: datos,
+                fallback: () => {
+                    const actual = obtenerUsuario() || {};
+                    const act = {
+                        ...actual,
+                        nombreCompleto: datos.nombreCompleto || actual.nombreCompleto,
+                        email: datos.email || actual.email,
+                        telefono: datos.telefono || actual.telefono,
+                        direccion: datos.direccion || actual.direccion
+                    };
+                    guardarSesion(act);
+                    MockStore.actualizarPerfilUsuario(actual.idUsuario, act);
+                    return act;
+                }
+            }).then(resp => {
+                const actual = obtenerUsuario() || {};
+                const nuevo = {
+                    ...actual,
+                    nombreCompleto: (resp && resp.nombreCompleto) || datos.nombreCompleto || actual.nombreCompleto,
+                    email: (resp && resp.email) || datos.email || actual.email,
+                    telefono: (resp && resp.telefono) || datos.telefono || actual.telefono,
+                    direccion: (resp && resp.direccion) || datos.direccion || actual.direccion
+                };
+                guardarSesion(nuevo);
+                return nuevo;
+            });
+        },
+        cambiarPassword: (datos) => peticion('/usuarios/me/password', {
+            metodo: 'PATCH',
+            cuerpo: datos,
+            fallback: () => ({ mensaje: 'Contraseña actualizada correctamente' })
+        }),
         listar: (rol) => peticion('/usuarios' + (rol ? '?rol=' + encodeURIComponent(rol) : ''), {
             fallback: () => MockStore.listarUsuarios(rol)
         }),
@@ -455,10 +504,10 @@ const API = (() => {
             fallback: () => MockStore.procesarPago(cuerpo)
         }),
         obtener: (id) => peticion('/pagos/' + id, {
-            fallback: () => MockStore.obtenerFacturaPorReserva(id)
+            fallback: () => MockStore.obtenerFacturaPorPago(id)
         }),
         porReserva: (idReserva) => peticion('/pagos/reserva/' + idReserva, {
-            fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+            fallback: () => MockStore.obtenerPagosPorReserva(idReserva)
         })
     };
 
@@ -468,6 +517,9 @@ const API = (() => {
         }),
         porReserva: (idReserva) => peticion('/facturas/reserva/' + idReserva, {
             fallback: () => MockStore.obtenerFacturaPorReserva(idReserva)
+        }),
+        porPago: (idPago) => peticion('/facturas/pago/' + idPago, {
+            fallback: () => MockStore.obtenerFacturaPorPago(idPago)
         }),
         misFacturas: () => peticion('/facturas/mis-facturas', {
             fallback: () => [MockStore.obtenerFacturaPorReserva(101)]

@@ -5,5 +5,5 @@
  |_| \_\___|_| |_|\__\__,_|  |_|\___/ \___/|_|___/
                                                    
  Plataforma de Renta de Herramientas y Construccion
- Spring Boot 3.4.1 | Java 21 LTS | MySQL 8 (4FN)
+ Spring Boot 3.4.1 | Java 21 LTS | SQLite 3 (Portable / Permanencia 100%)
  DEV 1: Camilo Garcia  |  DEV 2: Daniel Osorio

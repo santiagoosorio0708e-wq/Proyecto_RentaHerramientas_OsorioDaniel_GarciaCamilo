@@ -134,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="boton boton-pequeno btn-alquilar-directo" data-id="${h.idHerramienta}">
                             Alquilar
                         </button>
+                        <button class="boton boton-secundario boton-pequeno btn-agregar-carrito" data-id="${h.idHerramienta}" title="Agregar al Carrito de alquileres">
+                            🛒
+                        </button>
                         <button class="boton boton-secundario boton-pequeno btn-detalle" data-id="${h.idHerramienta}">
                             Ver Ficha
                         </button>
@@ -145,6 +148,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         contenedor.querySelectorAll('.btn-detalle').forEach(boton => {
             boton.addEventListener('click', () => verDetalle(boton.dataset.id));
+        });
+
+        contenedor.querySelectorAll('.btn-agregar-carrito').forEach(boton => {
+            boton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const id = boton.dataset.id;
+                try {
+                    const h = await API.catalogo.detalle(id);
+                    UI.carrito.agregar(h);
+                    UI.toast(`¡"${h.nombre}" agregada al carrito de alquileres! 🛒`, 'exito');
+                } catch (err) {
+                    UI.toast('Error al agregar al carrito: ' + err.message, 'error');
+                }
+            });
         });
 
         contenedor.querySelectorAll('.btn-alquilar-directo').forEach(boton => {
@@ -235,9 +252,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnAbrirReserva.addEventListener('click', () => {
         if (!herramientaActual) return;
+        if (!API.haySesion()) {
+            UI.cerrarModal('modal-detalle');
+            UI.toast('Debes iniciar sesión para alquilar una herramienta.', 'info');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 700);
+            return;
+        }
         UI.cerrarModal('modal-detalle');
         abrirModalReservaConHerramienta(herramientaActual);
     });
+
+    const btnAgregarCarritoModal = document.getElementById('btn-agregar-carrito-modal');
+    if (btnAgregarCarritoModal) {
+        btnAgregarCarritoModal.addEventListener('click', () => {
+            if (!herramientaActual) return;
+            UI.carrito.agregar(herramientaActual);
+            UI.toast(`¡"${herramientaActual.nombre}" agregada al carrito de alquileres! 🛒`, 'exito');
+            UI.cerrarModal('modal-detalle');
+        });
+    }
 
     function abrirModalReservaConHerramienta(h) {
         herramientaActual = h;
@@ -293,7 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = '⏳ Procesando reserva...';
 
         try {
-            const usuario = API.obtenerUsuario() || { idUsuario: 9 };
+            if (!API.haySesion()) {
+                UI.mensaje('reserva-mensaje', 'Debes iniciar sesión para completar la reserva.', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                return;
+            }
+            const usuario = API.obtenerUsuario();
             const idHerramienta = Number(document.getElementById('reserva-id-herramienta').value);
             const fechaInicio = inputInicio.value;
             const fechaFin = inputFin.value;
